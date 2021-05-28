@@ -34,6 +34,7 @@ sonarcloud-check-orders-server:
     - mvn verify sonar:sonar
 
 sonarcloud-check-deliveries-webapp:
+  stage: sonarcloud-check
   image:
     name: sonarsource/sonar-scanner-cli:latest
     entrypoint: [""]
@@ -45,7 +46,3 @@ sonarcloud-check-deliveries-webapp:
     - export SONAR_TOKEN=$SONAR_TOKEN_DELIVERIES_WEBAPP
     - cd deliveries_webapp
     - sonar-scanner
-  only:
-    - merge_requests
-    - master
-    - develop
