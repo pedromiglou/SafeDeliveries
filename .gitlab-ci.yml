@@ -46,3 +46,17 @@ sonarcloud-check-deliveries-webapp:
     - export SONAR_TOKEN=$SONAR_TOKEN_DELIVERIES_WEBAPP
     - cd deliveries_webapp
     - sonar-scanner
+
+sonarcloud-check-orders-webapp:
+  stage: sonarcloud-check
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - export SONAR_TOKEN=$SONAR_TOKEN_ORDERS_WEBAPP
+    - cd orders_webapp
+    - sonar-scanner
