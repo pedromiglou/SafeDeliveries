@@ -15,14 +15,3 @@ sonarcloud-check-deliveries-server:
   script:
     - cd deliveries_server
     - mvn verify sonar:sonar
-
-sonarcloud-check-orders-server:
-  stage: sonarcloud-check
-  image: maven:3.6.3-jdk-11
-  cache:
-    key: "${CI_JOB_NAME}"
-    paths:
-      - .sonar/cache
-  script:
-    - cd orders_server
-    - mvn verify sonar:sonar

@@ -15,8 +15,6 @@
 	<description>Spring Boot Server for the Application Orders</description>
 	<properties>
 		<java.version>11</java.version>
-		<sonar.projectKey>Miglou_tqsproject</sonar.projectKey>
-  		<sonar.organization>miglou</sonar.organization>
 	</properties>
 	<dependencies>
 		<dependency>
