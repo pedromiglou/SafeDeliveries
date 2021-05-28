@@ -13,6 +13,6 @@ sonarcloud-check-deliveries-server:
     paths:
       - .sonar/cache
   script:
-    - export SONAR_TOKEN = $SONAR_TOKEN_DELIVERIES_SERVER
+    - export SONAR_TOKEN=$SONAR_TOKEN_DELIVERIES_SERVER
     - cd deliveries_server
     - mvn verify sonar:sonar
