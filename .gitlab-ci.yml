@@ -1,5 +1,6 @@
 stages:
     - sonarcloud-check
+    - build-webapps
 
 variables:
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
@@ -16,10 +17,6 @@ sonarcloud-check-deliveries-server:
     - export SONAR_TOKEN=$SONAR_TOKEN_DELIVERIES_SERVER
     - cd deliveries_server
     - mvn verify sonar:sonar
-
-variables:
-  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
-  GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
 
 sonarcloud-check-orders-server:
   stage: sonarcloud-check
@@ -60,3 +57,21 @@ sonarcloud-check-orders-webapp:
     - export SONAR_TOKEN=$SONAR_TOKEN_ORDERS_WEBAPP
     - cd orders_webapp
     - sonar-scanner
+
+build-deliveries-webapp:
+  stage: build-webapps
+  image: node:14
+  script:
+    - cd deliveries_webapp
+    - npm i npm@latest -g
+    - npm i
+    - npm run build
+
+build-orders-webapp:
+  stage: build-webapps
+  image: node:14
+  script:
+    - cd orders_webapp
+    - npm i npm@latest -g
+    - npm i
+    - npm run build
