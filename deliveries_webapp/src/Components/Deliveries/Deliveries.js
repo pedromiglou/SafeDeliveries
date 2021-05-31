@@ -27,7 +27,7 @@ function Deliveries() {
             </div>
         }
         { state === "waiting" && 
-            <div className="DeliveriesSection wait">
+            <div onClick={() => setState("delivering")} className="DeliveriesSection wait">
                 <div>
                     <div className="bouncer">
                         <div></div>
@@ -39,8 +39,6 @@ function Deliveries() {
                 
                 <div>
                     <h1>Waiting for a delivery</h1>
-
-                    <button onClick={() => setState("delivering")}>Test- Get a delivery</button>
                 </div>
                 
             </div>

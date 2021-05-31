@@ -34,7 +34,7 @@ function Login() {
                 <input type="password" placeholder="Confirm Password"></input>
                 <h3>Veiculo</h3>
                 <select>
-                  <option selected defaultValue>Escolha o veiculo</option>
+                  <option selected defaultValue>Choose vehicle</option>
                 </select>
                 <i onClick={() => setState("Login")}>Already have an account? Click here</i>
                 <button className="button-entrar">Create</button>
