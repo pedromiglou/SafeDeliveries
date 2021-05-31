@@ -1,0 +1,37 @@
+.list-group{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    border: 1px solid lightgrey;
+    padding: 2em;
+    margin-top: 2em;
+}
+
+.list-item{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1%;
+    font-size: 1.2rem;
+    padding: 1em;
+    border-bottom: 1px solid lightcoral;
+    
+}
+
+.list-item:nth-child(1){
+    font-size: 1.5rem;
+}
+
+.list-item > *{
+    flex-basis: 19%;
+}
+
+.list-item:hover{
+    background-color: rgb(231, 231, 231);
+    cursor: pointer;
+}
+
+.list-item:first-child:hover{
+    background-color: white;
+    cursor: default;
+}
