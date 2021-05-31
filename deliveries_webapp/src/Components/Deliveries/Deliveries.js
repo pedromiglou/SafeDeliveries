@@ -17,7 +17,7 @@ function Deliveries() {
         } else if (location.state.is_History){
             setState("delivering");
         }
-    }, []);
+    }, [location.state]);
     return (
       <>
         { state === "offline" && 

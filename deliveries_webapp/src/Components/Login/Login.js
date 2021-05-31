@@ -16,8 +16,7 @@ function Login() {
                 <input type="text" placeholder="Name"></input>
                 <h3>Password</h3>
                 <input type="password" placeholder="Password"></input>
-                <a onClick={() => setState("Register")} href="#">Don't have an account? Regist here</a>
-                <a href="#">Não sabe a sua password?</a>
+                <i onClick={() => setState("Register")}>Don't have an account? Regist here</i>
                 <button className="button-entrar">Enter</button>
             </div>
             }
@@ -33,7 +32,11 @@ function Login() {
                 <input type="password" placeholder="Password"></input>
                 <h3>Confirm Password</h3>
                 <input type="password" placeholder="Confirm Password"></input>
-                <a onClick={() => setState("Login")} href="#">Already have an account? Click here</a>
+                <h3>Veiculo</h3>
+                <select>
+                  <option selected defaultValue>Escolha o veiculo</option>
+                </select>
+                <i onClick={() => setState("Login")}>Already have an account? Click here</i>
                 <button className="button-entrar">Create</button>
             </div>
             }
