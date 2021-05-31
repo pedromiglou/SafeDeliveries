@@ -1,0 +1,29 @@
+.HomeSection{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.HomeSection > *:nth-child(1){
+    flex: 1 1 40%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.HomeSection > *:nth-child(2){
+    flex: 1 1 60%;
+}
+
+.HomeSection h1{
+    font-size: 3rem;
+    padding: 1em 0 0.5em 0;
+}
+
+.background-img{
+    width: 100%;
+    height: auto;
+    min-width: 420px;
+}
+

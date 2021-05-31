@@ -1,0 +1,75 @@
+stages:
+    - sonarcloud-check
+    - build-webapps
+
+variables:
+  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+  GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+
+sonarcloud-check-deliveries-server:
+  stage: sonarcloud-check
+  image: maven:3.6.3-jdk-11
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - export SONAR_TOKEN=$SONAR_TOKEN_DELIVERIES_SERVER
+    - cd deliveries_server
+    - mvn verify sonar:sonar
+
+sonarcloud-check-orders-server:
+  stage: sonarcloud-check
+  image: maven:3.6.3-jdk-11
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - export SONAR_TOKEN=$SONAR_TOKEN_ORDERS_SERVER
+    - cd orders_server
+    - mvn verify sonar:sonar
+
+sonarcloud-check-deliveries-webapp:
+  stage: sonarcloud-check
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - export SONAR_TOKEN=$SONAR_TOKEN_DELIVERIES_WEBAPP
+    - cd deliveries_webapp
+    - sonar-scanner
+
+sonarcloud-check-orders-webapp:
+  stage: sonarcloud-check
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - export SONAR_TOKEN=$SONAR_TOKEN_ORDERS_WEBAPP
+    - cd orders_webapp
+    - sonar-scanner
+
+build-deliveries-webapp:
+  stage: build-webapps
+  image: node:14
+  script:
+    - cd deliveries_webapp
+    - yarn install
+    - yarn build
+
+build-orders-webapp:
+  stage: build-webapps
+  image: node:14
+  script:
+    - cd orders_webapp
+    - yarn install
+    - yarn build
