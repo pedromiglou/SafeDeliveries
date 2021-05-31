@@ -63,15 +63,13 @@ build-deliveries-webapp:
   image: node:14
   script:
     - cd deliveries_webapp
-    - npm i npm@latest -g
-    - npm i
-    - npm run build
+    - yarn install
+    - yarn build
 
 build-orders-webapp:
   stage: build-webapps
   image: node:14
   script:
     - cd orders_webapp
-    - npm i npm@latest -g
-    - npm i
-    - npm run build
+    - yarn install
+    - yarn build
