@@ -1,1 +1,1 @@
-docker run --name mysql8_orders -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=demo -e MYSQL_USER=demo -e MYSQL_PASSWORD=password -p 3307:3306 -d mysql/mysql-server:8.0.23
+docker run --name mysql_orders -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=demo -e MYSQL_USER=demo -e MYSQL_PASSWORD=password -p 3307:3306 -d mysql/mysql-server:5.7
