@@ -11,30 +11,6 @@ variables:
   MYSQL_DATABASE: demo
   MYSQL_ROOT_PASSWORD: password
 
-sonarcloud-check-deliveries-server:
-  stage: sonarcloud-check
-  image: maven:3.6.3-jdk-11
-  cache:
-    key: "${CI_JOB_NAME}"
-    paths:
-      - .sonar/cache
-  script:
-    - export SONAR_TOKEN=$SONAR_TOKEN_DELIVERIES_SERVER
-    - cd deliveries_server
-    - mvn verify sonar:sonar
-
-sonarcloud-check-orders-server:
-  stage: sonarcloud-check
-  image: maven:3.6.3-jdk-11
-  cache:
-    key: "${CI_JOB_NAME}"
-    paths:
-      - .sonar/cache
-  script:
-    - export SONAR_TOKEN=$SONAR_TOKEN_ORDERS_SERVER
-    - cd orders_server
-    - mvn verify sonar:sonar
-
 sonarcloud-check-deliveries-webapp:
   stage: sonarcloud-check
   image:
