@@ -2,9 +2,14 @@ stages:
     - sonarcloud-check
     - build-webapps
 
+services:
+  - mysql
+
 variables:
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
   GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+  MYSQL_DATABASE: demo
+  MYSQL_ROOT_PASSWORD: password
 
 sonarcloud-check-deliveries-server:
   stage: sonarcloud-check
