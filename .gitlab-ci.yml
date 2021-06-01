@@ -22,7 +22,7 @@ sonarcloud-check-deliveries-server:
   script:
     - export SONAR_TOKEN=$SONAR_TOKEN_DELIVERIES_SERVER
     - cd deliveries_server
-    - mvn verify sonar:sonar
+    - mvn verify sonar:sonar -DargLine="-Dspring.profiles.active=ci"
 
 sonarcloud-check-orders-server:
   stage: sonarcloud-check
@@ -36,7 +36,7 @@ sonarcloud-check-orders-server:
   script:
     - export SONAR_TOKEN=$SONAR_TOKEN_ORDERS_SERVER
     - cd orders_server
-    - mvn verify sonar:sonar
+    - mvn verify sonar:sonar -DargLine="-Dspring.profiles.active=ci"
 
 sonarcloud-check-deliveries-webapp:
   stage: sonarcloud-check
