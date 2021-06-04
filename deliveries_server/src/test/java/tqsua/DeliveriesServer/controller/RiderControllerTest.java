@@ -1,5 +1,6 @@
 package tqsua.DeliveriesServer.controller;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +17,11 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 @WebMvcTest(RiderController.class)
@@ -30,11 +33,16 @@ class RiderControllerTest {
     @MockBean
     private RiderService service;
 
+    @AfterEach
+    void tearDown() {
+        reset(service);
+    }
+
     @Test
     void whenGetAllRiders_thenReturnResult() throws Exception {
         ArrayList<Rider> response = new ArrayList<>();
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9);
+        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
+        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, false);
         response.add(rider1);
         response.add(rider2);
         given(service.getAllRiders()).willReturn(response);
@@ -45,7 +53,37 @@ class RiderControllerTest {
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[*].id").isNotEmpty());
         verify(service, VerificationModeFactory.times(1)).getAllRiders();
-        reset(service);
     }
 
+    @Test
+    void whenGetRiderById_thenReturnRider() throws Exception {
+        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
+        given(service.getRiderById(response.getId())).willReturn(response);
+
+        mvc.perform(get("/api/rider?id="+String.valueOf(response.getId())).contentType(MediaType.APPLICATION_JSON)
+                .content(JsonUtil.toJson(response)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is((int) response.getId())));
+        verify(service, VerificationModeFactory.times(1)).getRiderById(response.getId());
+    }
+
+    @Test
+    void whenGetRiderByInvalidId_thenReturnRider() throws Exception {
+        given(service.getRiderById(-1L)).willReturn(null);
+
+        mvc.perform(get("/api/rider?id=-1").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+        verify(service, VerificationModeFactory.times(1)).getRiderById(-1);
+    }
+
+    @Test
+    void whenUpdateRider_thenCorrectlyCallService() throws Exception {
+        //with all arguments
+        mvc.perform(put("/api/rider?id=0&firstname=A&lastname=B&email=a@b.c&password=abcdefgh&status=true&rating=5")).andExpect(status().isOk());
+        verify(service, VerificationModeFactory.times(1)).updateRider(0,"A", "B", "a@b.c", "abcdefgh", 5.0, true);
+
+        //with less arguments
+        mvc.perform(put("/api/rider?id=0&lastname=B&email=a@b.c&status=true&rating=5")).andExpect(status().isOk());
+        verify(service, VerificationModeFactory.times(1)).updateRider(0,null, "B", "a@b.c", null, 5.0, true);
+    }
 }
