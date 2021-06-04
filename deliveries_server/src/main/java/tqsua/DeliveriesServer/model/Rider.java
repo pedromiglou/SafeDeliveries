@@ -33,6 +33,9 @@ public class Rider {
     @Column(name = "rating", nullable = false)
     private Double rating;
 
+    @Column(name = "status", nullable = false)
+    private Boolean status;
+
     // tem varios vehicles
     @OneToMany
     private Set<Vehicles> vehicles;
@@ -40,12 +43,13 @@ public class Rider {
     public Rider() {
     }
 
-    public Rider(String firstname, String lastname, String email, String password, Double rating) {
+    public Rider(String firstname, String lastname, String email, String password, Double rating, Boolean status) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
         this.password = password;
         this.rating = rating;
+        this.status = status;
     }
 
 
@@ -105,19 +109,26 @@ public class Rider {
         this.vehicles = vehicles;
     }
 
+    public Boolean getStatus() {
+        return status;
+    }
 
+    public void setStatus(Boolean status) {
+        this.status = status;
+    }
 
     @Override
     public String toString() {
-        return "{" +
-            " id='" + getId() + "'" +
-            ", firstname='" + getFirstname() + "'" +
-            ", lastname='" + getLastname() + "'" +
-            ", email='" + getEmail() + "'" +
-            ", password='" + getPassword() + "'" +
-            ", rating='" + getRating() + "'" +
-            "}";
+        return "Rider{" +
+                "id=" + id +
+                ", firstname='" + firstname + '\'' +
+                ", lastname='" + lastname + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", rating=" + rating +
+                ", status=" + status +
+                ", vehicles=" + vehicles +
+                '}';
     }
-
 
 }

@@ -19,4 +19,18 @@ public class RiderService {
         return this.riderRepository.findAll();
     }
 
+    public Rider getRiderById(long id) {
+        return this.riderRepository.findById(id);
+    }
+
+    public void updateRider(long id, String firstname, String lastname, String email, String password, Double rating, Boolean status) {
+        Rider rider = this.riderRepository.findById(id);
+        if (firstname!=null) rider.setFirstname(firstname);
+        if (lastname!=null) rider.setLastname(lastname);
+        if (email!=null) rider.setEmail(email);
+        if (password!=null) rider.setPassword(password);
+        if (rating!=null) rider.setRating(rating);
+        if (status!=null) rider.setStatus(status);
+        this.riderRepository.save(rider);
+    }
 }
