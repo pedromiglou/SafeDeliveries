@@ -5,10 +5,13 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.internal.verification.VerificationModeFactory;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import tqsua.DeliveriesServer.model.Rider;
@@ -25,17 +28,57 @@ class RiderServiceTest {
     @InjectMocks
     private RiderService service;
 
+    @AfterEach
+    void tearDown() {
+        reset(repository);
+    }
+
     @Test
     void whenGetAllRiders_thenReturnCorrectResults() throws Exception {
         ArrayList<Rider> response = new ArrayList<>();
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9);
+        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
+        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, false);
         response.add(rider1);
         response.add(rider2);
 
         when(repository.findAll()).thenReturn(response);
         assertThat(service.getAllRiders()).isEqualTo(response);
-        reset(repository);
+        Mockito.verify(repository, VerificationModeFactory.times(1)).findAll();
     }
 
+    @Test
+    void whenGetRiderById_thenReturnRider() {
+        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
+
+        when(repository.findById(response.getId())).thenReturn(response);
+        assertThat(service.getRiderById(response.getId())).isEqualTo(response);
+        Mockito.verify(repository, VerificationModeFactory.times(1)).findById(response.getId());
+    }
+
+    @Test
+    void whenGetRiderByInvalidId_thenReturnNull() {
+        when(repository.findById(-1)).thenReturn(null);
+        assertThat(service.getRiderById(-1)).isEqualTo(null);
+        Mockito.verify(repository, VerificationModeFactory.times(1)).findById(-1);
+    }
+
+    @Test
+    void whenUpdateRider_onlyUpdateNotNullParameters() {
+        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
+        when(repository.findById(response.getId())).thenReturn(response);
+
+        //check if status is updated while other parameter remains the same
+        service.updateRider(response.getId(), null, null, null, null, null, true);
+        assertThat(response.getStatus()).isTrue();
+        assertThat(response.getFirstname()).isEqualTo("Ricardo");
+
+        //check if all parameters are updated
+        service.updateRider(response.getId(), "Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, true);
+        assertThat(response.getFirstname()).isEqualTo("Diogo");
+        assertThat(response.getLastname()).isEqualTo("Carvalho");
+        assertThat(response.getEmail()).isEqualTo("diogo@gmail.com");
+        assertThat(response.getPassword()).isEqualTo("password1234");
+        assertThat(response.getRating()).isEqualTo(3.9);
+        assertThat(response.getStatus()).isTrue();
+    }
 }
