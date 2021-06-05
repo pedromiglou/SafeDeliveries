@@ -21,7 +21,7 @@ import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 function App() {
-  const [user, setUser] = useState({user_type: "logged", username: ""});
+  const [user, setUser] = useState({user_type: "not_logged", username: ""});
   const [state, setState] = useState("online");
 
   useEffect(() => {
@@ -62,12 +62,12 @@ function App() {
     <navbar>
         <ul className="nav-list">
           <li className="nav-item">
-            <Link to="/">
+            <Link to="/" id="logo">
               <FiIcons.FiPackage/><span>SafeDeliveries</span>
             </Link>
           </li>
           <li className="nav-item">
-            <Link to="/">
+            <Link to="/" id="home-tab">
               Home
             </Link>
           </li>
@@ -75,12 +75,12 @@ function App() {
           {user.user_type === "logged" && 
           <>
             <li className="nav-item">
-              <Link to="/deliveries">
-                My Deliveries
+              <Link to="/deliveries" id="search-tab">
+                Search Delivery
               </Link>
             </li>
             <li className="nav-item">
-              <Link to="/history">
+              <Link to="/history" id="history-tab">
                 Deliveries History
               </Link>
             </li>
@@ -88,16 +88,17 @@ function App() {
           }
           
           <li className="nav-item">
-            <Link to="/aboutus">
+            <Link to="/aboutus" id="aboutus-tab">
               About us
             </Link>
           </li>
 
           {user.user_type === "not_logged" && 
             <li className="nav-item">
-              <Link to="/login">
+              {/* <Link to="/login" id="login" >
                 Login
-              </Link>
+              </Link> */}
+              <button id="login" onClick={() => setUser({user_type: "logged", username: ""})}>Login</button>
             </li>
           }
 
