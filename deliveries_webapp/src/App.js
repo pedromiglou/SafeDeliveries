@@ -1,8 +1,12 @@
 /* css */
 import './App.css';
+import DropdownButton from 'react-bootstrap/DropdownButton';
+import Dropdown from 'react-bootstrap/Dropdown';
 
 /* icons */
 import * as FiIcons from 'react-icons/fi';
+import * as FaIcons from 'react-icons/fa';
+import * as BsIcons from 'react-icons/bs';
 
 /* router */
 import {Link, Route, Switch, withRouter, useHistory} from 'react-router-dom';
@@ -13,12 +17,8 @@ import Deliveries from './Components/Deliveries/Deliveries';
 import History from './Components/History/History';
 import Login from './Components/Login/Login';
 
+/* React */
 import { useEffect, useState } from 'react';
-
-import * as FaIcons from 'react-icons/fa';
-import * as BsIcons from 'react-icons/bs';
-import DropdownButton from 'react-bootstrap/DropdownButton';
-import Dropdown from 'react-bootstrap/Dropdown';
 
 function App() {
   const [user, setUser] = useState({user_type: "not_logged", username: ""});

@@ -153,6 +153,10 @@ a.modal-a:hover{
   color: black;
 }
 
+.modal-item{
+  padding: 0.5em;
+}
+
 .modal-item:hover{
   cursor: pointer;
   background-color: rgb(221, 221, 221);
