@@ -11,7 +11,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "Vehicles")
-public class Vehicles {
+public class Vehicle {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -30,21 +30,19 @@ public class Vehicles {
     private Double capacity;
 
     // pertence a um rider
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Rider rider;
 
-    public Vehicles() {
+    public Vehicle() {
     }
 
-
-    public Vehicles(String brand, String model, String category, Double capacity) {
+    public Vehicle(String brand, String model, String category, Double capacity) {
         this.brand = brand;
         this.model = model;
         this.category = category;
         this.capacity = capacity;
     }
-
-
+    
     public long getId() {
         return this.id;
     }

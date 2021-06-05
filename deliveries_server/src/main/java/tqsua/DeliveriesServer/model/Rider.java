@@ -38,7 +38,7 @@ public class Rider {
 
     // tem varios vehicles
     @OneToMany
-    private Set<Vehicles> vehicles;
+    private Set<Vehicle> vehicles;
 
     public Rider() {
     }
@@ -101,11 +101,11 @@ public class Rider {
         this.rating = rating;
     }
 
-    public Set<Vehicles> getVehicles() {
+    public Set<Vehicle> getVehicles() {
         return this.vehicles;
     }
 
-    public void setVehicles(Set<Vehicles> vehicles) {
+    public void setVehicles(Set<Vehicle> vehicles) {
         this.vehicles = vehicles;
     }
 
