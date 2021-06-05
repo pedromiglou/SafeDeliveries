@@ -34,6 +34,10 @@
   padding: 0.5rem;
 }
 
+.nav-item a:hover{
+  color: white;
+}
+
 .nav-item:nth-child(1){
   margin-right: auto;
   margin-left: 2rem;
