@@ -53,7 +53,6 @@
 			<version>8.0.22</version>
 		</dependency>
 
-<<<<<<< HEAD
 		
 
 		<dependency>
@@ -75,7 +74,8 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-config</artifactId>
 			<version>5.1.5.RELEASE</version>
-=======
+		</dependency>
+		
 		<!-- WebPage Dependencies -->
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
@@ -110,8 +110,8 @@
 			<artifactId>cucumber-junit-platform-engine</artifactId>
 			<version>${cucumber.version}</version>
 			<scope>test</scope>
->>>>>>> 99b6eb2d360ddc7ca46e09b6223da761182abdc8
 		</dependency>
+		
 	</dependencies>
 
 	<build>
