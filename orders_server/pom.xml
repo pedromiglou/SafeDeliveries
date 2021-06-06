@@ -17,6 +17,9 @@
 		<java.version>11</java.version>
 		<sonar.projectKey>Orders_Server</sonar.projectKey>
   		<sonar.organization>miglou</sonar.organization>
+		<cucumber.version>6.10.3</cucumber.version>
+		<selenium-java.version>3.141.59</selenium-java.version>
+		<webdrivermanager.version>4.4.0</webdrivermanager.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -50,6 +53,7 @@
 			<version>8.0.22</version>
 		</dependency>
 
+<<<<<<< HEAD
 		
 
 		<dependency>
@@ -71,6 +75,42 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-config</artifactId>
 			<version>5.1.5.RELEASE</version>
+=======
+		<!-- WebPage Dependencies -->
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<version>${selenium-java.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.github.bonigarcia</groupId>
+			<artifactId>selenium-jupiter</artifactId>
+			<version>3.4.0</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.github.bonigarcia</groupId>
+			<artifactId>webdrivermanager</artifactId>
+			<version>${webdrivermanager.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-java</artifactId>
+			<version>${cucumber.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-junit-platform-engine</artifactId>
+			<version>${cucumber.version}</version>
+			<scope>test</scope>
+>>>>>>> 99b6eb2d360ddc7ca46e09b6223da761182abdc8
 		</dependency>
 	</dependencies>
 
