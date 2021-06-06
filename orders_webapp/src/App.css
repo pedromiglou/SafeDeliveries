@@ -34,6 +34,10 @@
   padding: 0.5rem;
 }
 
+.nav-item a:hover{
+  color: white;
+}
+
 .nav-item:nth-child(1){
   margin-right: auto;
   margin-left: 2rem;
@@ -55,6 +59,52 @@
   font-size: 2rem;
   margin-left: 1rem;
 }
+
+/* Modal User */
+.dropdown-menu{
+  width: 230px;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: transparent !important;
+  border-color: transparent !important;
+  outline: transparent !important;
+  position: relative;
+}
+
+.btn-primary:not(:disabled):not(.disabled).active, .btn-primary:not(:disabled):not(.disabled):active, .show > .btn-primary.dropdown-toggle {
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+.btn-primary:not(:disabled):not(.disabled).active:focus, .btn-primary:not(:disabled):not(.disabled):active:focus, .show > .btn-primary.dropdown-toggle:focus {
+  box-shadow: 0 0 0 0 !important;
+}
+.btn-primary.focus, .btn-primary:focus {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: 0 0 0 0 !important;
+} 
+
+a.modal-a{
+  color: black;
+  padding: 0;
+}
+
+a.modal-a:hover{
+  color: black;
+}
+
+.modal-item{
+  padding: 0.5em;
+}
+
+.modal-item:hover{
+  cursor: pointer;
+  background-color: rgb(221, 221, 221);
+}
+
 
 /* Content */
 .content{

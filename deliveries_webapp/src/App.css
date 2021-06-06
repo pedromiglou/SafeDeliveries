@@ -34,6 +34,10 @@
   padding: 0.5rem;
 }
 
+.nav-item a:hover{
+  color: white;
+}
+
 .nav-item:nth-child(1){
   margin-right: auto;
   margin-left: 2rem;
@@ -54,6 +58,108 @@
   text-decoration: none;
   font-size: 2rem;
   margin-left: 1rem;
+}
+
+/* Modal User */
+.dropdown-menu{
+  width: 230px;
+}
+
+.Status-item{
+  font-size: 0.9rem;
+  font-family: Arial, Helvetica;
+  padding: 0.2em;
+  display: flex;
+  flex-direction: row;
+  gap: 5%;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.Status-item:hover{
+  background-color: rgb(221, 221, 221);
+  cursor: pointer;
+}
+
+.state-icon{
+  margin-left: 0.5em;
+}
+
+.off{
+  color: rgb(46, 46, 46);
+}
+
+.online{
+  color: rgb(2, 170, 16);
+}
+
+.delivering{
+  color: rgb(238, 182, 0);
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: transparent !important;
+  border-color: transparent !important;
+  outline: transparent !important;
+  position: relative;
+}
+
+.btn-primary:not(:disabled):not(.disabled).active, .btn-primary:not(:disabled):not(.disabled):active, .show > .btn-primary.dropdown-toggle {
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+.btn-primary:not(:disabled):not(.disabled).active:focus, .btn-primary:not(:disabled):not(.disabled):active:focus, .show > .btn-primary.dropdown-toggle:focus {
+  box-shadow: 0 0 0 0 !important;
+}
+.btn-primary.focus, .btn-primary:focus {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: 0 0 0 0 !important;
+} 
+
+.btn-primary::after{
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 5px;
+  height: 15px;
+  width: 15px;
+  border-radius: 50%;
+  border-top: 0 !important;
+  
+}
+
+.btn-primary.online::after{
+  background-color: rgb(2, 170, 16);
+}
+
+.btn-primary.delivering::after{
+  background-color: rgb(238, 182, 0);
+}
+
+.btn-primary.offline::after{
+  background-color: transparent;
+  box-shadow: 0 0 7px rgb(46, 46, 46);
+}
+
+a.modal-a{
+  color: black;
+  padding: 0;
+}
+
+a.modal-a:hover{
+  color: black;
+}
+
+.modal-item{
+  padding: 0.5em;
+}
+
+.modal-item:hover{
+  cursor: pointer;
+  background-color: rgb(221, 221, 221);
 }
 
 /* Content */

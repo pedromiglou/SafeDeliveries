@@ -30,7 +30,7 @@ class AuthService {
             password: password,
         }
         try {
-            var res = await fetch('http://localhost:8080/api/registo', {
+            var res = await fetch('http://localhost:8080/api/register', {
                 method:'POST',
                 headers:{'Content-type':'application/json'},
                 body: JSON.stringify(userInfo)

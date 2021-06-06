@@ -2,9 +2,10 @@ package tqsua.OrdersServer.service;
 
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.anyString;
 
 import java.util.ArrayList;
-import java.util.Date;
+
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +38,25 @@ class UserServiceTest {
         when(repository.findAll()).thenReturn(response);
         assertThat(service.getAllUsers()).isEqualTo(response);
         reset(repository);
+    }
+
+
+    @Test
+    void whenSearchUserExistsByEmail_ifUserExists_ReturnTrue() {
+        when(repository.existsUserByEmail(anyString())).thenReturn(true);
+
+        //check if service returns true when a user with that email already exists
+        service.existsUserByEmail(anyString());
+        assertThat(service.existsUserByEmail(anyString())).isTrue();
+    }
+
+    @Test
+    void whenSearchuserExistsByEmail_ifuserNotExists_ReturnFalse() {
+        when(repository.existsUserByEmail(anyString())).thenReturn(false);
+
+        //check if service returns false when a user with that email do not exists
+        service.existsUserByEmail(anyString());
+        assertThat(service.existsUserByEmail(anyString())).isFalse();
     }
 
 }

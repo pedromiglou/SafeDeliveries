@@ -1,6 +1,15 @@
 package tqsua.DeliveriesServer.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.io.Serializable;
+import java.util.Collection;
 import java.util.Set;
+import java.util.ArrayList;
+
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,9 +19,10 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name = "Riders")
-public class Rider {
+public class Rider implements Serializable, UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -33,6 +43,9 @@ public class Rider {
     @Column(name = "rating", nullable = false)
     private Double rating;
 
+    @Column(name = "status", nullable = false)
+    private Boolean status;
+
     // tem varios vehicles
     @OneToMany
     private Set<Vehicles> vehicles;
@@ -40,12 +53,13 @@ public class Rider {
     public Rider() {
     }
 
-    public Rider(String firstname, String lastname, String email, String password, Double rating) {
+    public Rider(String firstname, String lastname, String email, String password, Double rating, Boolean status) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
         this.password = password;
         this.rating = rating;
+        this.status = status;
     }
 
 
@@ -81,8 +95,38 @@ public class Rider {
         this.email = email;
     }
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return new ArrayList<>();
+    }
+
     public String getPassword() {
         return this.password;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 
     public void setPassword(String password) {
@@ -105,19 +149,26 @@ public class Rider {
         this.vehicles = vehicles;
     }
 
+    public Boolean getStatus() {
+        return status;
+    }
 
+    public void setStatus(Boolean status) {
+        this.status = status;
+    }
 
     @Override
     public String toString() {
-        return "{" +
-            " id='" + getId() + "'" +
-            ", firstname='" + getFirstname() + "'" +
-            ", lastname='" + getLastname() + "'" +
-            ", email='" + getEmail() + "'" +
-            ", password='" + getPassword() + "'" +
-            ", rating='" + getRating() + "'" +
-            "}";
+        return "Rider{" +
+                "id=" + id +
+                ", firstname='" + firstname + '\'' +
+                ", lastname='" + lastname + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", rating=" + rating +
+                ", status=" + status +
+                ", vehicles=" + vehicles +
+                '}';
     }
-
 
 }
