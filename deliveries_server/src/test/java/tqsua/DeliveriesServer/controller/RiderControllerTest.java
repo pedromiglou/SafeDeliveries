@@ -42,8 +42,8 @@ class RiderControllerTest {
     @Test
     void whenGetAllRiders_thenReturnResult() throws Exception {
         ArrayList<Rider> response = new ArrayList<>();
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, false);
+        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
         response.add(rider1);
         response.add(rider2);
         given(service.getAllRiders()).willReturn(response);
@@ -58,7 +58,7 @@ class RiderControllerTest {
 
     @Test
     void whenGetRiderById_thenReturnRider() throws Exception {
-        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
+        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
         given(service.getRiderById(response.getId())).willReturn(response);
 
         mvc.perform(get("/api/rider?id="+String.valueOf(response.getId())).contentType(MediaType.APPLICATION_JSON)
@@ -80,11 +80,11 @@ class RiderControllerTest {
     @Test
     void whenUpdateRider_thenCorrectlyCallService() throws Exception {
         //with all arguments
-        mvc.perform(put("/api/rider?id=0&firstname=A&lastname=B&email=a@b.c&password=abcdefgh&status=true&rating=5")).andExpect(status().isOk());
-        verify(service, VerificationModeFactory.times(1)).updateRider(0,"A", "B", "a@b.c", "abcdefgh", 5.0, true);
+        mvc.perform(put("/api/rider?id=0&firstname=A&lastname=B&email=a@b.c&password=abcdefgh&status=Offline&rating=5")).andExpect(status().isOk());
+        verify(service, VerificationModeFactory.times(1)).updateRider(0,"A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
 
         //with less arguments
-        mvc.perform(put("/api/rider?id=0&lastname=B&email=a@b.c&status=true&rating=5")).andExpect(status().isOk());
-        verify(service, VerificationModeFactory.times(1)).updateRider(0,null, "B", "a@b.c", null, 5.0, true);
+        mvc.perform(put("/api/rider?id=0&lastname=B&email=a@b.c&status=Offline&rating=5")).andExpect(status().isOk());
+        verify(service, VerificationModeFactory.times(1)).updateRider(0,null, "B", "a@b.c", null, 5.0, "Offline");
     }
 }
