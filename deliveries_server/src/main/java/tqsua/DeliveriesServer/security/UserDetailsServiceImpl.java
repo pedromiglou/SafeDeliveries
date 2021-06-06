@@ -1,4 +1,4 @@
-package tqsua.DeliveriesServer;
+package tqsua.DeliveriesServer.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
@@ -14,7 +14,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     private RiderRepository riderRepository;
 
-    public UserDetailsServiceImpl() {}
+    public UserDetailsServiceImpl() {
+        // Empty Constructor
+    }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

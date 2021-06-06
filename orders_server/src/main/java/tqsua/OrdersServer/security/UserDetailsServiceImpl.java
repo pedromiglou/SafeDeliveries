@@ -13,7 +13,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     private UserRepository userRepository;
 
-    public UserDetailsServiceImpl() {}
+    public UserDetailsServiceImpl() {
+        // Empty Constructor
+    }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

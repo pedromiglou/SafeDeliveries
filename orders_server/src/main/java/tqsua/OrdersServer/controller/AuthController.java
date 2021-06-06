@@ -31,7 +31,7 @@ public class AuthController {
     private UserService userService;
 
     @PostMapping(path="/register")
-    public ResponseEntity registo(HttpServletRequest req, HttpServletResponse res) throws JsonParseException, JsonMappingException, IOException, InterruptedException {
+    public ResponseEntity<HashMap<String, String>> registo(HttpServletRequest req, HttpServletResponse res) throws JsonParseException, JsonMappingException, IOException, InterruptedException {
         
         // Create new rider
         User user = new ObjectMapper().readValue(req.getInputStream(), User.class);

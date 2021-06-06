@@ -1,4 +1,4 @@
-package tqsua.DeliveriesServer;
+package tqsua.DeliveriesServer.security;
 
 import java.util.List;
 

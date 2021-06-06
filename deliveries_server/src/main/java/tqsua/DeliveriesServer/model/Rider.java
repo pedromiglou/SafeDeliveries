@@ -8,6 +8,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
+import java.util.ArrayList;
+
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -95,7 +97,7 @@ public class Rider implements Serializable, UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return new ArrayList<>();
     }
 
     public String getPassword() {

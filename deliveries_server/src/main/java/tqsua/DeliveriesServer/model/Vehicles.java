@@ -1,5 +1,7 @@
 package tqsua.DeliveriesServer.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,7 +13,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "Vehicles")
-public class Vehicles {
+public class Vehicles implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
