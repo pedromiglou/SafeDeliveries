@@ -35,7 +35,7 @@ class AuthControllerTest {
 
     @Test
     void whenRegistWithValidData_thenRegistWithSucess() throws Exception {
-        Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 0.0, false);
+        Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 0.0, "Offline");
 
         given(riderService.existsRiderByEmail(anyString())).willReturn(false);
 
@@ -49,7 +49,7 @@ class AuthControllerTest {
 
     @Test
     void whenRegistWithInvalidEmail_thenReturnErrorMessage() throws Exception {
-        Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 0.0, false);
+        Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 0.0, "Offline");
 
         given(riderService.existsRiderByEmail(anyString())).willReturn(true);
 

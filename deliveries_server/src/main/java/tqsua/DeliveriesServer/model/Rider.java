@@ -44,7 +44,7 @@ public class Rider implements Serializable, UserDetails {
     private Double rating;
 
     @Column(name = "status", nullable = false)
-    private Boolean status;
+    private String status;
 
     // tem varios vehicles
     @OneToMany
@@ -53,7 +53,7 @@ public class Rider implements Serializable, UserDetails {
     public Rider() {
     }
 
-    public Rider(String firstname, String lastname, String email, String password, Double rating, Boolean status) {
+    public Rider(String firstname, String lastname, String email, String password, Double rating, String status) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
@@ -95,13 +95,41 @@ public class Rider implements Serializable, UserDetails {
         this.email = email;
     }
 
+    public String getPassword() {
+        return this.password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Double getRating() {
+        return this.rating;
+    }
+
+    public void setRating(Double rating) {
+        this.rating = rating;
+    }
+
+    public Set<Vehicles> getVehicles() {
+        return this.vehicles;
+    }
+
+    public void setVehicles(Set<Vehicles> vehicles) {
+        this.vehicles = vehicles;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return new ArrayList<>();
-    }
-
-    public String getPassword() {
-        return this.password;
     }
 
     @Override
@@ -129,33 +157,6 @@ public class Rider implements Serializable, UserDetails {
         return true;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Double getRating() {
-        return this.rating;
-    }
-
-    public void setRating(Double rating) {
-        this.rating = rating;
-    }
-
-    public Set<Vehicles> getVehicles() {
-        return this.vehicles;
-    }
-
-    public void setVehicles(Set<Vehicles> vehicles) {
-        this.vehicles = vehicles;
-    }
-
-    public Boolean getStatus() {
-        return status;
-    }
-
-    public void setStatus(Boolean status) {
-        this.status = status;
-    }
 
     @Override
     public String toString() {

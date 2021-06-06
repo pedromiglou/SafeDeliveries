@@ -32,14 +32,14 @@ class AuthControllerIT {
 
     @BeforeEach 
     public void setUp() {
-        Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 0.0, false);
+        Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 0.0, "Offline");
         riderService.saveRider(rider);
     }
 
     @Test
     void whenRegistWithValidData_thenRegistWithSucess() throws Exception {
 
-        Rider rider = new Rider("Filipe", "Carvalho", "filipe@gmail.com", "filipe123", 0.0, false);
+        Rider rider = new Rider("Filipe", "Carvalho", "filipe@gmail.com", "filipe123", 0.0, "Offline");
 
         mvc.perform(post("/api/register").contentType(MediaType.APPLICATION_JSON)
         .content(JsonUtil.toJson(rider)))
@@ -53,7 +53,7 @@ class AuthControllerIT {
     @Test
     void whenRegistWithInvalidEmail_thenReturnErrorMessage() throws Exception {
 
-        Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 0.0, false);
+        Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 0.0, "Offline");
 
         mvc.perform(post("/api/register").contentType(MediaType.APPLICATION_JSON)
         .content(JsonUtil.toJson(rider)))
