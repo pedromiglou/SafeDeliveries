@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import tqsua.DeliveriesServer.service.RiderService;
 import tqsua.DeliveriesServer.model.Rider;
+import tqsua.DeliveriesServer.JsonUtil;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;

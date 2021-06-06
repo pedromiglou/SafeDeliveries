@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import tqsua.OrdersServer.service.OrderService;
+import tqsua.OrdersServer.JsonUtil;
 import tqsua.OrdersServer.model.Order;
 
 import static org.hamcrest.Matchers.*;

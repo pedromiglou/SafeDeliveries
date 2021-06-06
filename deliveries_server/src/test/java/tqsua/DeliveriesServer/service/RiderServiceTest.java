@@ -2,6 +2,7 @@ package tqsua.DeliveriesServer.service;
 
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.anyString;
 
 import java.util.ArrayList;
 
@@ -80,5 +81,24 @@ class RiderServiceTest {
         assertThat(response.getPassword()).isEqualTo("password1234");
         assertThat(response.getRating()).isEqualTo(3.9);
         assertThat(response.getStatus()).isTrue();
+    }
+
+
+    @Test
+    void whenSearchRiderExistsByEmail_ifRiderExists_ReturnTrue() {
+        when(repository.existsRiderByEmail(anyString())).thenReturn(true);
+
+        //check if service returns true when a rider with that email already exists
+        service.existsRiderByEmail(anyString());
+        assertThat(service.existsRiderByEmail(anyString())).isTrue();
+    }
+
+    @Test
+    void whenSearchRiderExistsByEmail_ifRiderNotExists_ReturnFalse() {
+        when(repository.existsRiderByEmail(anyString())).thenReturn(false);
+
+        //check if service returns false when a rider with that email do not exists
+        service.existsRiderByEmail(anyString());
+        assertThat(service.existsRiderByEmail(anyString())).isFalse();
     }
 }
