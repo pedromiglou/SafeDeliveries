@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import tqsua.DeliveriesServer.repository.RiderRepository;
+import tqsua.DeliveriesServer.security.UserDetailsServiceImpl;
 
 @SpringBootApplication
 public class DeliveriesServerApplication {
