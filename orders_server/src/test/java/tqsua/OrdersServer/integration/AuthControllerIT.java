@@ -1,62 +1,66 @@
-package tqsua.OrdersServer.controller;
+package tqsua.OrdersServer.integration;
 
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.internal.verification.VerificationModeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.mockito.Matchers.anyString;
 
-import tqsua.OrdersServer.service.UserService;
+import tqsua.OrdersServer.OrdersServerApplication;
 import tqsua.OrdersServer.JsonUtil;
 import tqsua.OrdersServer.model.User;
+import tqsua.OrdersServer.service.UserService;
 
-import static org.hamcrest.Matchers.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
+import org.springframework.http.MediaType;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.hamcrest.Matchers.*;
 
-
-@WebMvcTest(AuthController.class)
-class AuthControllerTest {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = OrdersServerApplication.class)
+@AutoConfigureMockMvc
+class AuthControllerIT {
     
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @Autowired
     private UserService userService;
+
+
+    @BeforeEach 
+    public void setUp() {
+        User user = new User("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", "U");
+        userService.saveUser(user);
+    }
 
     @Test
     void whenRegistWithValidData_thenRegistWithSucess() throws Exception {
-        User user = new User("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", "U");
 
-        given(userService.existsUserByEmail(anyString())).willReturn(false);
+        User user = new User("Filipe", "Carvalho", "filipe@gmail.com", "filipe123", "U");
 
         mvc.perform(post("/api/register").contentType(MediaType.APPLICATION_JSON)
         .content(JsonUtil.toJson(user)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.message", is("User was registed with sucess!")));
-        verify(userService, VerificationModeFactory.times(1)).existsUserByEmail(anyString());
-        reset(userService);
+
+
     }
+
 
     @Test
     void whenRegistWithInvalidEmail_thenReturnErrorMessage() throws Exception {
-        User user = new User("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", "U");
 
-        given(userService.existsUserByEmail(anyString())).willReturn(true);
+        User user = new User("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", "U");
 
         mvc.perform(post("/api/register").contentType(MediaType.APPLICATION_JSON)
         .content(JsonUtil.toJson(user)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", is("Email is already in use!")));
-        verify(userService, VerificationModeFactory.times(1)).existsUserByEmail(anyString());
-        reset(userService);
+
+
     }
 
 }

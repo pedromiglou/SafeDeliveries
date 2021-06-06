@@ -1,4 +1,4 @@
-package tqsua.DeliveriesServer.controller;
+package tqsua.DeliveriesServer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
