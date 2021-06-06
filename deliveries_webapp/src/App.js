@@ -128,7 +128,7 @@ function App() {
                 </Dropdown.ItemText>
                 <Dropdown.Divider/>
                 <Dropdown.ItemText>
-                  <div onClick={() => routeChange("profile")} className="modal-item">
+                  <div onClick={() => routeChange("profile")} className="modal-item" id="profile-div">
                     <h5>Profile</h5>
                   </div>
                   
@@ -141,7 +141,7 @@ function App() {
                 </Dropdown.ItemText> */}
                 <Dropdown.Divider/>
                 <Dropdown.ItemText>
-                  <div onClick={() => logout()} className="modal-item">
+                  <div onClick={() => logout()} className="modal-item" id="logout-div">
                     <h5>Logout</h5>
                   </div>
                 </Dropdown.ItemText>
