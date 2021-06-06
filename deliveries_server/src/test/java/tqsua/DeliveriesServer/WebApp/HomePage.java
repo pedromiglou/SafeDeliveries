@@ -27,6 +27,15 @@ public class HomePage {
     @FindBy(id = "login")
     private WebElement login;
 
+    @FindBy(id = "perfil-dropdown")
+    private WebElement profile_logo;
+
+    @FindBy(id = "profile-div")
+    private WebElement profile;
+
+    @FindBy(id = "logout")
+    private WebElement logout;
+
     //Constructor
     public HomePage(WebDriver driver, String page_url){
         this.driver = driver;
@@ -67,5 +76,13 @@ public class HomePage {
 
     public void clickLogin(){
         this.login.click();
+    }
+
+    public void clickLogo(){
+        this.profile_logo.click();
+    }
+
+    public void  clickProfile(){
+        this.profile.click();
     }
 }
