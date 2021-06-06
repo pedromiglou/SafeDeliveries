@@ -106,17 +106,17 @@ class VehicleServiceTest {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
         Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0);
         response.setRider(rider);
-        when(repository.findById(response.getId())).thenReturn(response);
+        when(repository.existsById(response.getId())).thenReturn(true);
 
-        this.repository.deleteById(response.getId());
-        Mockito.verify(repository, VerificationModeFactory.times(1)).deleteById(rider.getId());
+        assertThat(this.service.deleteVehicle(response.getId())).isNotNull();
+        Mockito.verify(repository, VerificationModeFactory.times(1)).deleteById(response.getId());
     }
 
     @Test
-    void whenDeleteNotExistentVehicle_ignoreRequest() {
-        when(repository.findById(-1L)).thenReturn(null);
+    void whenDeleteNotExistentVehicle_returnNull() {
+        when(repository.existsById(-1L)).thenReturn(false);
 
-        this.repository.deleteById(-1L);
-        Mockito.verify(repository, VerificationModeFactory.times(1)).deleteById(-1L);
+        assertThat(this.service.deleteVehicle(-1L)).isNull();
+        Mockito.verify(repository, VerificationModeFactory.times(0)).deleteById(-1L);
     }
 }

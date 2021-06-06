@@ -6,6 +6,7 @@ import tqsua.DeliveriesServer.model.Vehicle;
 import tqsua.DeliveriesServer.repository.VehicleRepository;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,8 +44,9 @@ public class VehicleService {
         return this.vehicleRepository.save(vehicle);
     }
 
-    public void deleteVehicle(long id) {
-        if (this.vehicleRepository.getById(id)==null) return;
+    public Long deleteVehicle(long id) {
+        if (!this.vehicleRepository.existsById(id)) return null;
         this.vehicleRepository.deleteById(id);
+        return id;
     }
 }

@@ -7,6 +7,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.util.Objects;
 
 
 @Entity
@@ -101,5 +102,28 @@ public class Vehicle {
             ", capacity='" + getCapacity() + "'" +
             "}";
     }
-    
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Vehicle vehicle = (Vehicle) o;
+
+        if (id != vehicle.id) return false;
+        if (!Objects.equals(brand, vehicle.brand)) return false;
+        if (!Objects.equals(model, vehicle.model)) return false;
+        if (!Objects.equals(category, vehicle.category)) return false;
+        return Objects.equals(capacity, vehicle.capacity);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (id ^ (id >>> 32));
+        result = 31 * result + (brand != null ? brand.hashCode() : 0);
+        result = 31 * result + (model != null ? model.hashCode() : 0);
+        result = 31 * result + (category != null ? category.hashCode() : 0);
+        result = 31 * result + (capacity != null ? capacity.hashCode() : 0);
+        return result;
+    }
 }
