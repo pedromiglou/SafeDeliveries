@@ -13,4 +13,8 @@ public interface RiderRepository extends JpaRepository<Rider, Long>{
 	ArrayList<Rider> findAll();
 
 	Rider findById(long id);
+
+	Rider findByEmail(String email);
+
+	boolean existsRiderByEmail(String email);
 }

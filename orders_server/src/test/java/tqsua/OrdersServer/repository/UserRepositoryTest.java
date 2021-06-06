@@ -33,5 +33,19 @@ class UserRepositoryTest {
         assertThat(found.get(1)).isEqualTo(user2);
     }
 
+    @Test
+    void whenSearchUserExistsByEmail_ifuserExists_thenReturnTrue() {
+        User user1 = new User("Diogo", "Carvalho", "diogo@gmail.com", "password1234", "U");
+        entityManager.persistAndFlush(user1);
 
+        assertThat(repository.existsUserByEmail("diogo@gmail.com")).isTrue();
+    }
+
+    @Test
+    void whenSearchUserExistsByEmail_ifuserNotExists_thenReturnFalse() {
+        User user1 = new User("Diogo", "Carvalho", "diogo@gmail.com", "password1234", "U");
+        entityManager.persistAndFlush(user1);
+
+        assertThat(repository.existsUserByEmail("ricardo@gmail.com")).isFalse();
+    }
 }
