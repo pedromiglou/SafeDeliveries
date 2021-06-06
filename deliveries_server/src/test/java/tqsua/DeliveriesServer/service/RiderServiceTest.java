@@ -15,6 +15,7 @@ import org.mockito.Mockito;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+
 import tqsua.DeliveriesServer.model.Rider;
 import tqsua.DeliveriesServer.repository.RiderRepository;
 
@@ -37,8 +38,8 @@ class RiderServiceTest {
     @Test
     void whenGetAllRiders_thenReturnCorrectResults() throws Exception {
         ArrayList<Rider> response = new ArrayList<>();
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, false);
+        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
         response.add(rider1);
         response.add(rider2);
 
@@ -49,7 +50,7 @@ class RiderServiceTest {
 
     @Test
     void whenGetRiderById_thenReturnRider() {
-        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
+        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
 
         when(repository.findById(response.getId())).thenReturn(response);
         assertThat(service.getRiderById(response.getId())).isEqualTo(response);
@@ -65,22 +66,22 @@ class RiderServiceTest {
 
     @Test
     void whenUpdateRider_onlyUpdateNotNullParameters() {
-        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
+        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
         when(repository.findById(response.getId())).thenReturn(response);
 
         //check if status is updated while other parameter remains the same
-        service.updateRider(response.getId(), null, null, null, null, null, true);
-        assertThat(response.getStatus()).isTrue();
+        service.updateRider(response.getId(), null, null, null, null, null, "Online");
+        assertThat(response.getStatus()).isEqualTo("Online");
         assertThat(response.getFirstname()).isEqualTo("Ricardo");
 
         //check if all parameters are updated
-        service.updateRider(response.getId(), "Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, true);
+        service.updateRider(response.getId(), "Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
         assertThat(response.getFirstname()).isEqualTo("Diogo");
         assertThat(response.getLastname()).isEqualTo("Carvalho");
         assertThat(response.getEmail()).isEqualTo("diogo@gmail.com");
         assertThat(response.getPassword()).isEqualTo("password1234");
         assertThat(response.getRating()).isEqualTo(3.9);
-        assertThat(response.getStatus()).isTrue();
+        assertThat(response.getStatus()).isEqualTo("Offline");
     }
 
 

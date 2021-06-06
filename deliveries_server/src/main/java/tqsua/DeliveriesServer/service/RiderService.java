@@ -37,7 +37,7 @@ public class RiderService {
         return this.riderRepository.save(rider);
     }
 
-    public void updateRider(long id, String firstname, String lastname, String email, String password, Double rating, Boolean status) {
+    public void updateRider(long id, String firstname, String lastname, String email, String password, Double rating, String status) {
         Rider rider = this.riderRepository.findById(id);
         if (firstname!=null) rider.setFirstname(firstname);
         if (lastname!=null) rider.setLastname(lastname);
