@@ -8,11 +8,10 @@ class RiderService {
     }
 */
 
-    changeStatus(rider, newStatus) {
-
+    async changeStatus(rider, newStatus) {
         var url =  'http://localhost:8080/api/rider?id=' +rider + '&status=' + newStatus;
-        console.log(url)
-        fetch(url, {
+
+        await fetch(url, {
             method:'PUT',
             headers:{'Content-type':'application/json'}
         });

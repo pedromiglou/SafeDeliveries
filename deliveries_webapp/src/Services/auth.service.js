@@ -17,7 +17,7 @@ class AuthService {
         var json = await res.json()
         
         if(json.token) {
-            RiderService.changeStatus(json.id, "Online");
+            await RiderService.changeStatus(json.id, "Online");
             json.status = "Online"
             sessionStorage.setItem("user", JSON.stringify(json));
         } 

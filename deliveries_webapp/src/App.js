@@ -57,7 +57,8 @@ function App() {
       history.push(new_url);
   }
 
-  function logout(){
+  async function logout(){
+    await RiderService.changeStatus(current_user.id, "Offline")
     sessionStorage.removeItem("user");
     window.location.assign("http://localhost:3000/");
   }
