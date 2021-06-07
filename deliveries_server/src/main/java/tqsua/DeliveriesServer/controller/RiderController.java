@@ -35,7 +35,6 @@ public class RiderController {
                             @RequestParam(name="lastname", required = false) String lastname, @RequestParam(name="email", required = false) String email,
                             @RequestParam(name="password", required = false) String password, @RequestParam(name="rating", required = false) Double rating,
                             @RequestParam(name="status", required = false) String status) {
-        System.out.println("TOU UPDATE");
         riderService.updateRider(id, firstname, lastname, email, password, rating, status);
     }
 }

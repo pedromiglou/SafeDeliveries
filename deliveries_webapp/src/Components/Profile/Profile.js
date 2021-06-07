@@ -19,30 +19,30 @@ import VehicleService from '../../Services/vehicle.service';
 function Profile() {
     const [carEditable, setCarEditable] = useState({key: -2, car: "", editable: false})
     const [newVehicle, setNewVehicle] = useState(false);
+    const [updated, setUpdated] = useState(false);
 
     var current_user = AuthService.getCurrentUser();
 
     if (current_user === null) {
         window.location.assign("/")
     } else {
-        updateSessionStorageData()
+        if (!updated)
+            updateSessionStorageData()
     }
-
-    const user_vehicles = [{registration:"GC-27-39", brand:"BMW", model:"M4", category:"car", capacity:"20"},
-                           {registration:"XC-22-01", brand:"Toyota", model:"Supra", category:"car", capacity:"10"},
-                           {registration:"25-LM-39", brand:"Honda", model:"PCX", category:"motorcycle", capacity:"5"}
-                          ]
     
+                          
     async function updateSessionStorageData() {
-        console.log("tou aqui")
         var response = await RiderService.getRiderById(current_user.id)
+        var vehicles = await VehicleService.getVehiclesByRiderId(current_user.id)
         current_user.firstname = response.firstname;
         current_user.lastname = response.lastname;
         current_user.email = response.email;
         current_user.rating = response.rating;
         current_user.status = response.status;
-        console.log(current_user);
+        current_user.vehicles = vehicles
         sessionStorage.setItem("user", JSON.stringify(current_user));
+        current_user = AuthService.getCurrentUser();
+        setUpdated(true);
     }
     
 
@@ -156,7 +156,27 @@ function Profile() {
         var category = document.getElementById("n_category").value;
         var capacity = document.getElementById("n_capacity").value;
         await VehicleService.createVehicle(registration, brand, model, category, capacity, current_user.id)
+        window.location.reload()
+    }
 
+    async function editVehicle(id, key){
+        var registration = document.getElementById("registration_"+key).value;
+        var brand = document.getElementById("brand_"+key).value;
+        var model = document.getElementById("model_"+key).value;
+        var category = document.getElementById("category_"+key).value;
+        var capacity = document.getElementById("capacity_"+key).value;
+        if (registration === "") registration = document.getElementById("registration_"+key).placeholder;
+        if (brand === "") brand = document.getElementById("brand_"+key).placeholder;
+        if (model === "") model = document.getElementById("model_"+key).placeholder;
+        if (category === "") category = document.getElementById("category_"+key).placeholder;
+        if (capacity === "") capacity = current_user.vehicles[key]["capacity"];
+        await VehicleService.editVehicle(id, registration, brand, model, category, capacity)
+        window.location.reload()
+    }
+
+    async function removeVehicle(id) {
+        await VehicleService.removeVehicle(id)
+        window.location.reload()
     }
 
     return (
@@ -235,7 +255,11 @@ function Profile() {
                             </div>
                         </li>
 
-                        {Object.entries(user_vehicles).map(([key,value]) => (
+                        {  ( (current_user.vehicles === null) || (current_user.vehicles && current_user.vehicles.length === 0) ) && 
+                            <p>Do not own any vehicle</p>
+                        }
+                        
+                        { current_user.vehicles && current_user.vehicles.length > 0 && Object.entries(current_user.vehicles).map(([key,value]) => (
                             <li key={value["registration"]} className="listP-item" id={"id_" + value["registration"]}>
                                 <div>
                                     <input type="text" id={"registration_" + key}  readOnly placeholder={value["registration"]}></input>
@@ -261,12 +285,12 @@ function Profile() {
                                     
                                     <div id={"icons_ed" + key}>
                                         <MdIcons.MdModeEdit size={20} title="edit" onClick={() => setCarEditable({key: key, car: value["registration"], editable: true})} />
-                                        <MdIcons.MdDelete size={20} title="delete"/>
+                                        <MdIcons.MdDelete size={20} title="delete" onClick={() => removeVehicle(value["id"])}/>
                                     </div>
                                         
                                     
                                     <div id={"icons_cc" + key} style={{display:"none"}}>
-                                        <GiIcons.GiConfirmed size={20} title="confirm" color={"green"} onClick={() => setCarEditable({key: key, car: value["registration"], editable: false})}/>
+                                        <GiIcons.GiConfirmed size={20} title="confirm" color={"green"} onClick={() => {setCarEditable({key: key, car: value["registration"], editable: false}); editVehicle(value["id"], key)}}/>
                                         <GiIcons.GiCancel size={20} title="cancel" color={"red"} onClick={() => setCarEditable({key: key, car: value["registration"], editable: false})}/>
                                     </div>
                                         
@@ -291,7 +315,7 @@ function Profile() {
                         <button className="button-add" id="button-add" onClick={() => setNewVehicle(true)}>Add <RiIcons.RiAddFill/></button>
 
                         <div className="both-buttons" id="both_buttons" style={{display:"none"}}>
-                            <button onClick={() => {addVehicle(); setNewVehicle(false); }} type="button" className="button-details">Confirm</button>
+                            <button onClick={() => {setNewVehicle(false); addVehicle(); }} type="button" className="button-details">Confirm</button>
                             <button onClick={() => setNewVehicle(false)} className="button-details cancelar">Cancel</button>
                         </div>
                     </div>

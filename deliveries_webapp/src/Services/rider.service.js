@@ -6,6 +6,7 @@ class RiderService {
             return res.json();
         }
 
+
         async changeStatus(rider, newStatus) {
             var url =  'http://localhost:8080/api/rider?id=' +rider + '&status=' + newStatus;
     
