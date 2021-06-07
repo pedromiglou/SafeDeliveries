@@ -7,19 +7,31 @@ function Login() {
     const [state, setState] = useState("Login");
     const [sucessRegister, setSucessRegister] = useState(false);
     const [errorRegister, setErrorRegister] = useState(false);
+    const [errorLogin, setErrorLogin] = useState(false);
 
     async function login() {
+      setSucessRegister(false);
+      setErrorRegister(false);
       var response = await AuthService.login(
         document.getElementById("login_email_input").value,
         document.getElementById("login_password_input").value
       )   
 
-      console.log(response);
+      if (response.error !== true) {
+        window.location.assign("http://localhost:3000/");
+      } else {
+        setErrorLogin(true);
+      }
     }
 
     async function registerFunction(event) {
       event.preventDefault();
       await register();
+    }
+
+    async function loginFunction(event) {
+      event.preventDefault();
+      await login();
     }
 
     async function register() {
@@ -29,7 +41,8 @@ function Login() {
         document.getElementById("register_email_input").value,
         document.getElementById("register_password_input").value
       )   
-      if (!response.error) {
+
+      if (response.error !== true) {
         setSucessRegister(true);
         setState("Login")
       } else {
@@ -55,17 +68,22 @@ function Login() {
 
         {sucessRegister === true 
           ? <div className="alert alert-success" role="alert" style={{margin:"10px auto", width: "90%", textAlign:"center", fontSize:"22px"}}>
-          A sua conta foi criada com sucesso! 
+          Your account has been created successfully! 
           </div> : null}
 
         {errorRegister === true 
           ? <div className="alert alert-alert" role="alert" style={{margin:"10px auto", width: "90%", textAlign:"center", fontSize:"22px"}}>
-          Ocorreu um erro ao criar a sua conta.
+          There was an error creating your account.
+          </div> : null}
+
+        {errorLogin === true 
+          ? <div className="alert alert-alert" role="alert" style={{margin:"10px auto", width: "90%", textAlign:"center", fontSize:"22px"}}>
+          Invalid credentials.
           </div> : null}
 
         <div className="LoginSection">
             { state === "Login" && 
-            <form onSubmit={login}>
+            <form onSubmit={loginFunction}>
               <div className="Login_Register">
                   <h2>Login</h2>
                   <hr></hr>

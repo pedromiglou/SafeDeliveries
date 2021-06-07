@@ -28,6 +28,8 @@ class AuthService {
             lastname: lastname,
             email: email,
             password: password,
+            rating: 0.0,
+            status: "Offline"
         }
         try {
             var res = await fetch('http://localhost:8080/api/register', {
@@ -39,7 +41,7 @@ class AuthService {
             return {error: true};
         }
 
-        if (res.status !== 200) {
+        if (res.status !== 201) {
             return {error: true};
         }
         var json = await res.json()
@@ -47,6 +49,11 @@ class AuthService {
         return json
 
     }
+
+    getCurrentUser() {
+        return JSON.parse(sessionStorage.getItem("user"))
+    }
+
 
 }
 

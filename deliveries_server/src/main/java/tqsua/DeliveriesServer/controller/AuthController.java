@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 import tqsua.DeliveriesServer.service.RiderService;
 import tqsua.DeliveriesServer.model.Rider;
 
-@CrossOrigin("http://localhost:3000")
 @RestController
 @RequestMapping("/api")
 public class AuthController {
@@ -36,6 +35,8 @@ public class AuthController {
         
         // Create new rider
         Rider rider = new ObjectMapper().readValue(req.getInputStream(), Rider.class);
+        rider.setRating(0.0);
+        rider.setStatus("Offline");
 
         // Verify if email is already in use
         if (Boolean.TRUE == riderService.existsRiderByEmail(rider.getEmail())) {

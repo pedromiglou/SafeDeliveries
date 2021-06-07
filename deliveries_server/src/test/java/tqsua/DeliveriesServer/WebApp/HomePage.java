@@ -68,4 +68,9 @@ public class HomePage {
     public void clickLogin(){
         this.login.click();
     }
+
+    public boolean isLogin() {
+        return driver.findElement(By.cssSelector("h2")).getText().equals("Login");
+    }
+
 }
