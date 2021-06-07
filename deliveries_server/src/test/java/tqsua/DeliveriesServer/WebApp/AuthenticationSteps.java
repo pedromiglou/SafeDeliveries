@@ -17,45 +17,66 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 @ExtendWith(SeleniumJupiter.class)
 public class AuthenticationSteps {
 
-    private WebDriver webDriver;
+    private WebDriver driver = new FirefoxDriver();;
 
-    @Given("I navigate to {string}")
-    public void i_navigate_to(String url) {
-        WebDriverManager.firefoxdriver().setup();
-        webDriver = new FirefoxDriver();
-        webDriver.get(url);
+    private HomePage home;
+
+    //Background
+    @Given("I access {string}")
+    public void i_access(String url) {
+        home = new HomePage(driver, url);
+        //assertThat(home.pageLoaded(), is(true));
     }
 
-    @When("I am not logged in my account")
-    public void i_am_not_logged_in_my_account() {
-
+    @And("I click in login tab")
+    public void i_click_login_button() {
+        home.clickLogin();
     }
 
-    @And("I click in {string} button")
-    public void i_click_button(String button) {
-        webDriver.findElement(By.xpath("//input[@value=\'" + button + "\']")).click();
+    //Create an account
+    @When("I click on create account")
+    public void iClickOnCreateAccount() {
+        driver.findElement(By.cssSelector("i")).click();
+        assertThat(driver.findElement(By.cssSelector("h2")).getText(), is("Register"));
     }
 
-    @And("I submit the register form")
-    public void i_submit_form() {
-        webDriver.findElement(By.cssSelector("i")).click();
-        assertThat(webDriver.findElement(By.cssSelector("h2")).getText(), is("Register"));
-        webDriver.findElement(By.id("register_firstname_input")).click();
-        webDriver.findElement(By.id("register_firstname_input")).sendKeys("rafael");
-        webDriver.findElement(By.id("register_lastname_input")).sendKeys("baptista");
-        webDriver.findElement(By.id("register_email_input")).sendKeys("rafael@gmail.com");
-        webDriver.findElement(By.id("register_password_input")).sendKeys("rafael123");
-        webDriver.findElement(By.id("register_confirmpass_input")).sendKeys("rafael123");
-        webDriver.findElement(By.cssSelector(".button-entrar")).click();
+    @And("I fill all the details asked")
+    public void iFillAllTheDetailsAsked() {
+        driver.findElement(By.id("register_firstname_input")).click();
+        driver.findElement(By.id("register_firstname_input")).sendKeys("rafael");
+        driver.findElement(By.id("register_lastname_input")).sendKeys("baptista");
+        driver.findElement(By.id("register_email_input")).sendKeys("rafael@gmail.com");
+        driver.findElement(By.id("register_password_input")).sendKeys("rafael123");
+        driver.findElement(By.id("register_confirmpass_input")).sendKeys("rafael123");
+    }
+
+    @And("I click on create")
+    public void iClickOnCreate() {
+        driver.findElement(By.cssSelector(".button-entrar")).click();
     }
 
     @Then("It should have the message {string}")
     public void it_should_not_have_the_functionalities_and(String message) {
         {
-            WebDriverWait wait = new WebDriverWait(webDriver, 30);
+            WebDriverWait wait = new WebDriverWait(driver, 30);
             wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".alert")));
           }
-          assertThat(webDriver.findElement(By.cssSelector(".alert")).getText(), is(message));
+          assertThat(driver.findElement(By.cssSelector(".alert")).getText(), is(message));
     }
 
+
+    //Login
+    @When("I fill my credentials")
+    public void iFillMyCredentials() {
+    }
+
+    @And("I click in enter button")
+    public void iClickInEnterButton() {
+
+    }
+
+    @Then("I should be redirected to the main page")
+    public void iShouldBeRedirectedToTheMainPage() {
+
+    }
 }

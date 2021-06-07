@@ -29,12 +29,13 @@ public class HomePage {
 
     //Constructor
     public HomePage(WebDriver driver, String page_url){
+        System.out.println(page_url);
         this.driver = driver;
-        driver.get(page_url);
         //Initialise Elements
         PageFactory.initElements(driver, this);
         driver.manage().window().maximize();
     }
+
 
     public boolean pageLoaded() {
         return driver.getTitle().equals("tqs");
