@@ -34,7 +34,7 @@ public class RiderController {
     public void updateRider(@RequestParam(name="id") long id, @RequestParam(name="firstname", required = false) String firstname,
                             @RequestParam(name="lastname", required = false) String lastname, @RequestParam(name="email", required = false) String email,
                             @RequestParam(name="password", required = false) String password, @RequestParam(name="rating", required = false) Double rating,
-                            @RequestParam(name="status", required = false) Boolean status) {
+                            @RequestParam(name="status", required = false) String status) {
         riderService.updateRider(id, firstname, lastname, email, password, rating, status);
     }
 }

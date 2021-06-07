@@ -43,8 +43,8 @@ public class VehicleControllerIT {
 
     @Test
     void whenGetAllVehicles_thenReturnResult() throws Exception {
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, false);
+        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
         riderRepository.save(rider1);
         riderRepository.save(rider2);
 
@@ -63,7 +63,7 @@ public class VehicleControllerIT {
 
     @Test
     void whenGetVehicleById_thenReturnVehicle() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
         riderRepository.save(rider);
         Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         vehicle.setRider(rider);
@@ -82,7 +82,7 @@ public class VehicleControllerIT {
 
     @Test
     void whenPostNewVehicle_thenCreateIt() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
         riderRepository.save(rider);
         VehicleDTO vehicle = new VehicleDTO("Audi", "A5", "Carro", 365.0, rider.getId(), "AAAAAA");
 
@@ -103,7 +103,7 @@ public class VehicleControllerIT {
 
     @Test
     void whenUpdateVehicle_thenUpdateIt() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
         riderRepository.save(rider);
 
         Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
@@ -127,7 +127,7 @@ public class VehicleControllerIT {
 
     @Test
     void whenDeletingVehicle_thenDeleteIt() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
         riderRepository.save(rider);
 
         Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAAA");

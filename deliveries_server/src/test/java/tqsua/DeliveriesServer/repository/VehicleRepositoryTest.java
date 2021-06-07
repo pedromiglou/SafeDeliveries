@@ -23,8 +23,8 @@ class VehicleRepositoryTest {
 
     @Test
     void whenGetAllVehicles_thenReturnCorrectResults() throws IOException, InterruptedException {
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, false);
+        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
         Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         Vehicle v2 = new Vehicle("BMW", "420", "Carro", 350.9, "BBBBBB");
         v1.setRider(rider1);
@@ -41,8 +41,8 @@ class VehicleRepositoryTest {
 
     @Test
     void whenGetVehicleById_thenReturnVehicle() {
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, false);
+        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
         Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         Vehicle v2 = new Vehicle("BMW", "420", "Carro", 350.9, "BBBBBB");
         v1.setRider(rider1);

@@ -46,8 +46,8 @@ public class VehicleControllerTest {
     @Test
     void whenGetAllVehicles_thenReturnResult() throws Exception {
         ArrayList<Vehicle> response = new ArrayList<>();
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, false);
+        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
 
         Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 320.0, "BBBBBB");
@@ -66,7 +66,7 @@ public class VehicleControllerTest {
 
     @Test
     void whenGetVehicleById_thenReturnVehicle() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
         Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         response.setRider(rider);
         given(service.getVehicleById(response.getId())).willReturn(response);
@@ -88,7 +88,7 @@ public class VehicleControllerTest {
 
     @Test
     void whenPostNewVehicle_thenCreateIt() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
         VehicleDTO vehicle = new VehicleDTO("Audi", "A5", "Carro", 365.0, 0L, "AAAAAA");
         Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         response.setRider(rider);

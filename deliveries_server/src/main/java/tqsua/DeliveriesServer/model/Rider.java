@@ -44,7 +44,7 @@ public class Rider implements Serializable, UserDetails {
     private Double rating;
 
     @Column(name = "status", nullable = false)
-    private Boolean status;
+    private String status;
 
     // tem varios vehicles
     @OneToMany
@@ -53,7 +53,7 @@ public class Rider implements Serializable, UserDetails {
     public Rider() {
     }
 
-    public Rider(String firstname, String lastname, String email, String password, Double rating, Boolean status) {
+    public Rider(String firstname, String lastname, String email, String password, Double rating, String status) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
@@ -62,9 +62,8 @@ public class Rider implements Serializable, UserDetails {
         this.status = status;
     }
 
-
     public long getId() {
-        return this.id;
+        return id;
     }
 
     public void setId(long id) {
@@ -72,7 +71,7 @@ public class Rider implements Serializable, UserDetails {
     }
 
     public String getFirstname() {
-        return this.firstname;
+        return firstname;
     }
 
     public void setFirstname(String firstname) {
@@ -80,7 +79,7 @@ public class Rider implements Serializable, UserDetails {
     }
 
     public String getLastname() {
-        return this.lastname;
+        return lastname;
     }
 
     public void setLastname(String lastname) {
@@ -88,7 +87,7 @@ public class Rider implements Serializable, UserDetails {
     }
 
     public String getEmail() {
-        return this.email;
+        return email;
     }
 
     public void setEmail(String email) {
@@ -96,12 +95,41 @@ public class Rider implements Serializable, UserDetails {
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return new ArrayList<>();
+    public String getPassword() {
+        return password;
     }
 
-    public String getPassword() {
-        return this.password;
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Double getRating() {
+        return rating;
+    }
+
+    public void setRating(Double rating) {
+        this.rating = rating;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Set<Vehicle> getVehicles() {
+        return vehicles;
+    }
+
+    public void setVehicles(Set<Vehicle> vehicles) {
+        this.vehicles = vehicles;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return new ArrayList<>();
     }
 
     @Override
@@ -129,34 +157,6 @@ public class Rider implements Serializable, UserDetails {
         return true;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Double getRating() {
-        return this.rating;
-    }
-
-    public void setRating(Double rating) {
-        this.rating = rating;
-    }
-
-    public Set<Vehicle> getVehicles() {
-        return this.vehicles;
-    }
-
-    public void setVehicles(Set<Vehicle> vehicles) {
-        this.vehicles = vehicles;
-    }
-
-    public Boolean getStatus() {
-        return status;
-    }
-
-    public void setStatus(Boolean status) {
-        this.status = status;
-    }
-
     @Override
     public String toString() {
         return "Rider{" +
@@ -166,9 +166,8 @@ public class Rider implements Serializable, UserDetails {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", rating=" + rating +
-                ", status=" + status +
+                ", status='" + status + '\'' +
                 ", vehicles=" + vehicles +
                 '}';
     }
-
 }
