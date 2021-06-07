@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,6 +34,8 @@ public class AuthController {
         
         // Create new rider
         Rider rider = new ObjectMapper().readValue(req.getInputStream(), Rider.class);
+        rider.setRating(0.0);
+        rider.setStatus("Offline");
 
         // Verify if email is already in use
         if (Boolean.TRUE == riderService.existsRiderByEmail(rider.getEmail())) {

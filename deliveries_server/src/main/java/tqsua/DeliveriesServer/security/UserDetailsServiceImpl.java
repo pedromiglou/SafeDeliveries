@@ -12,6 +12,7 @@ import tqsua.DeliveriesServer.repository.RiderRepository;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
+    @Autowired
     private RiderRepository riderRepository;
 
     public UserDetailsServiceImpl() {
