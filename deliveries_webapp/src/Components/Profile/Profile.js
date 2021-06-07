@@ -11,42 +11,68 @@ import * as BsIcons from 'react-icons/bs';
 
 import { useEffect, useState } from 'react';
 
+/* Services */
+import AuthService from '../../Services/auth.service';
+import RiderService from '../../Services/rider.service';
+import VehicleService from '../../Services/vehicle.service';
 
 function Profile() {
-    const [editable, setEditable] = useState(false);
     const [carEditable, setCarEditable] = useState({key: -2, car: "", editable: false})
     const [newVehicle, setNewVehicle] = useState(false);
 
-    const user_vehicles = [{registration:"GC-27-39", maker:"BMW", model:"M4", type:"car", capacity:"20"},
-                           {registration:"XC-22-01", maker:"Toyota", model:"Supra", type:"car", capacity:"10"},
-                           {registration:"25-LM-39", maker:"Honda", model:"PCX", type:"motorcycle", capacity:"5"},
-                           {registration:"25-LM-39", maker:"Honda", model:"PCX", type:"motorcycle", capacity:"5"},
-                           {registration:"25-LM-39", maker:"Honda", model:"PCX", type:"motorcycle", capacity:"5"},
-                           {registration:"25-LM-39", maker:"Honda", model:"PCX", type:"motorcycle", capacity:"5"},
-                           {registration:"25-LM-39", maker:"Honda", model:"PCX", type:"motorcycle", capacity:"5"},
-                           {registration:"25-LM-39", maker:"Honda", model:"PCX", type:"motorcycle", capacity:"5"}
+    var current_user = AuthService.getCurrentUser();
+
+    if (current_user === null) {
+        window.location.assign("/")
+    } else {
+        updateSessionStorageData()
+    }
+
+    const user_vehicles = [{registration:"GC-27-39", brand:"BMW", model:"M4", category:"car", capacity:"20"},
+                           {registration:"XC-22-01", brand:"Toyota", model:"Supra", category:"car", capacity:"10"},
+                           {registration:"25-LM-39", brand:"Honda", model:"PCX", category:"motorcycle", capacity:"5"}
                           ]
     
-    useEffect(() => {
+    async function updateSessionStorageData() {
+        console.log("tou aqui")
+        var response = await RiderService.getRiderById(current_user.id)
+        current_user.firstname = response.firstname;
+        current_user.lastname = response.lastname;
+        current_user.email = response.email;
+        current_user.rating = response.rating;
+        current_user.status = response.status;
+        console.log(current_user);
+        sessionStorage.setItem("user", JSON.stringify(current_user));
+    }
     
+
+    function make_fields_editable() {
         let email_inp = document.getElementById("email");
         let fname_inp = document.getElementById("fname");
         let lname_inp = document.getElementById("lname");
 
-        if(editable){
-            email_inp.readOnly = false;
-            fname_inp.readOnly = false;
-            lname_inp.readOnly = false;
+        email_inp.readOnly = false;
+        fname_inp.readOnly = false;
+        lname_inp.readOnly = false;
 
-            email_inp.style.borderBottom = "1px solid green"
-            fname_inp.style.borderBottom = "1px solid green"
-            lname_inp.style.borderBottom = "1px solid green"
-        } else {
-            email_inp.style.borderBottom = "1px solid lightcoral"
-            fname_inp.style.borderBottom = "1px solid lightcoral"
-            lname_inp.style.borderBottom = "1px solid lightcoral"
-        }
-    }, [editable]);
+        email_inp.style.borderBottom = "1px solid green"
+        fname_inp.style.borderBottom = "1px solid green"
+        lname_inp.style.borderBottom = "1px solid green"
+    }
+
+    function make_fields_uneditable() {
+        let email_inp = document.getElementById("email");
+        let fname_inp = document.getElementById("fname");
+        let lname_inp = document.getElementById("lname");
+
+        email_inp.readOnly = true;
+        fname_inp.readOnly = true;
+        lname_inp.readOnly = true;
+
+        email_inp.style.borderBottom = "1px solid lightcoral"
+        fname_inp.style.borderBottom = "1px solid lightcoral"
+        lname_inp.style.borderBottom = "1px solid lightcoral"
+    }
 
     useEffect(() => {
     
@@ -56,8 +82,8 @@ function Profile() {
 
         let reg_inp = document.getElementById("registration_" + carEditable["key"]);
         let model_inp = document.getElementById("model_" + carEditable["key"]);
-        let maker_inp = document.getElementById("maker_" + carEditable["key"]);
-        let type_inp = document.getElementById("type_" + carEditable["key"]);
+        let brand_inp = document.getElementById("brand_" + carEditable["key"]);
+        let category_inp = document.getElementById("category_" + carEditable["key"]);
         let capacity_inp = document.getElementById("capacity_" + carEditable["key"]);
 
         let icons_ed = document.getElementById("icons_ed" + carEditable["key"]);
@@ -66,14 +92,14 @@ function Profile() {
         if(carEditable["editable"]){
             reg_inp.readOnly = false;
             model_inp.readOnly = false;
-            maker_inp.readOnly = false;
-            type_inp.readOnly = false;
+            brand_inp.readOnly = false;
+            category_inp.readOnly = false;
             capacity_inp.readOnly = false;
 
             reg_inp.classList.add("editable");
             model_inp.classList.add("editable");
-            maker_inp.classList.add("editable");
-            type_inp.classList.add("editable");
+            brand_inp.classList.add("editable");
+            category_inp.classList.add("editable");
             capacity_inp.classList.add("editable");
 
             icons_ed.style.display = "none";
@@ -81,14 +107,14 @@ function Profile() {
         } else {
             reg_inp.readOnly = true;
             model_inp.readOnly = true;
-            maker_inp.readOnly = true;
-            type_inp.readOnly = true;
+            brand_inp.readOnly = true;
+            category_inp.readOnly = true;
             capacity_inp.readOnly = true;
 
             reg_inp.classList.remove("editable");
             model_inp.classList.remove("editable");
-            maker_inp.classList.remove("editable");
-            type_inp.classList.remove("editable");
+            brand_inp.classList.remove("editable");
+            category_inp.classList.remove("editable");
             capacity_inp.classList.remove("editable");
 
             icons_ed.style.display = "flex";
@@ -113,7 +139,23 @@ function Profile() {
         }
     }, [newVehicle]);
 
-    function submitFunction(){
+    async function submitFunction(){
+        var email = document.getElementById("email").value;
+        var firstname = document.getElementById("fname").value;
+        var lastname = document.getElementById("lname").value;
+        await RiderService.changeRider(current_user.id, firstname, lastname, email)
+        window.location.reload()
+
+    }
+
+
+    async function addVehicle(){
+        var registration = document.getElementById("n_registration").value;
+        var brand = document.getElementById("n_brand").value;
+        var model = document.getElementById("n_model").value;
+        var category = document.getElementById("n_category").value;
+        var capacity = document.getElementById("n_capacity").value;
+        await VehicleService.createVehicle(registration, brand, model, category, capacity, current_user.id)
 
     }
 
@@ -128,39 +170,39 @@ function Profile() {
                     <div className="below-pic"> 
                         <div className="rating-section">
                             <BsIcons.BsStarFill className="user-rating"/>
-                            <span>3.4/5.0</span>
+                            <span>{current_user.rating}/5.0</span>
                         </div>
                         
                         {/* <BiIcons.BiImageAdd className="user-change-pic"/> */}
                     </div>
                 </div> 
-                <h3>Nome Utilizador</h3>
+                <h3>{current_user.firstname} {current_user.lastname}</h3>
             </div>
             <div className="form-area">
                 <div className="details-edit">
                     <h2>Profile Details</h2>
-                    <MdIcons.MdModeEdit size={35} className="edit-icon" title="edit" onClick={() => setEditable(true)}/>
+                    <MdIcons.MdModeEdit size={35} className="edit-icon" title="edit" onClick={() => make_fields_editable()}/>
                 </div>
                 
-                <form onSubmit={() => submitFunction()}>
+                <form>
                     <div className="form-details">
                         <div className="email-div">
                             <label for="email">Email</label>
-                            <input type="email" readOnly id="email"></input>
+                            <input type="email" readOnly id="email" placeholder={current_user.email}></input>
                         </div>
                         <div className="fname-div">
-                            <label for="name">First name</label>
-                            <input type="text" readOnly id="fname"></input>
+                            <label for="name">FirstName</label>
+                            <input type="text" readOnly id="fname" placeholder={current_user.firstname}></input>
                         </div>
                         <div className="lname-div">
-                            <label for="name">Last name</label>
-                            <input type="text" readOnly id="lname"></input>
+                            <label for="name">LastName</label>
+                            <input type="text" readOnly id="lname" placeholder={current_user.lastname}></input>
                         </div>
                     </div>
                     <div className="button-div">
                         <div className="both-buttons">
-                            <button onClick={() => setEditable(false)} type="button" className="button-details">Confirm</button>
-                            <button onClick={() => setEditable(false)} className="button-details cancelar">Cancel</button>
+                            <button onClick={() => {make_fields_uneditable(); submitFunction();}} type="button" className="button-details">Confirm</button>
+                            <button onClick={() => make_fields_uneditable()} type="button" className="button-details cancelar">Cancel</button>
                         </div>
                     </div>
                     
@@ -173,7 +215,7 @@ function Profile() {
                                 Registration
                             </div>
                             <div>
-                                Maker
+                                Brand
                             </div>
 
                             <div>
@@ -181,7 +223,7 @@ function Profile() {
                             </div>
                             
                             <div>
-                                Type
+                                Category
                             </div>
 
                             <div>
@@ -194,13 +236,13 @@ function Profile() {
                         </li>
 
                         {Object.entries(user_vehicles).map(([key,value]) => (
-                            <li className="listP-item" id={"id_" + value["registration"]}>
+                            <li key={value["registration"]} className="listP-item" id={"id_" + value["registration"]}>
                                 <div>
                                     <input type="text" id={"registration_" + key}  readOnly placeholder={value["registration"]}></input>
                                 </div>
 
                                 <div>
-                                    <input type="text" id={"maker_" + key} readOnly placeholder={value["maker"]}></input>
+                                    <input type="text" id={"brand_" + key} readOnly placeholder={value["brand"]}></input>
                                 </div>
                                 
                                 <div>
@@ -208,7 +250,7 @@ function Profile() {
                                 </div>
 
                                 <div>
-                                    <input type="text" id={"type_" + key} readOnly placeholder={value["type"]}></input>
+                                    <input type="text" id={"category_" + key} readOnly placeholder={value["category"]}></input>
                                 </div>
 
                                 <div>
@@ -238,9 +280,9 @@ function Profile() {
                         <h6>New Vehicle Details</h6>
                         <div className="new-vehicle">
                             <input type="text" id="n_registration" placeholder="registration"></input>
-                            <input type="text" id="n_maker" placeholder="maker"></input>
+                            <input type="text" id="n_brand" placeholder="brand"></input>
                             <input type="text" id="n_model" placeholder="model"></input>
-                            <input type="text" id="n_type" placeholder="type"></input>
+                            <input type="text" id="n_category" placeholder="category"></input>
                             <input type="text" id="n_capacity" placeholder="capacity..kg"></input>
                         </div>
                     </div>
@@ -249,7 +291,7 @@ function Profile() {
                         <button className="button-add" id="button-add" onClick={() => setNewVehicle(true)}>Add <RiIcons.RiAddFill/></button>
 
                         <div className="both-buttons" id="both_buttons" style={{display:"none"}}>
-                            <button onClick={() => setNewVehicle(false)} type="button" className="button-details">Confirm</button>
+                            <button onClick={() => {addVehicle(); setNewVehicle(false); }} type="button" className="button-details">Confirm</button>
                             <button onClick={() => setNewVehicle(false)} className="button-details cancelar">Cancel</button>
                         </div>
                     </div>

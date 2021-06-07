@@ -1,6 +1,16 @@
 package tqsua.DeliveriesServer.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.io.Serializable;
+import java.util.Collection;
 import java.util.Set;
+import java.util.HashSet;
+import java.util.ArrayList;
+
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,9 +20,10 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name = "Riders")
-public class Rider {
+public class Rider implements Serializable, UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -34,16 +45,16 @@ public class Rider {
     private Double rating;
 
     @Column(name = "status", nullable = false)
-    private Boolean status;
+    private String status;
 
-    // tem varios vehicles
+/*    // tem varios vehicles
     @OneToMany
-    private Set<Vehicles> vehicles;
+    private Set<Vehicle> vehicles = new HashSet<>();*/
 
     public Rider() {
     }
 
-    public Rider(String firstname, String lastname, String email, String password, Double rating, Boolean status) {
+    public Rider(String firstname, String lastname, String email, String password, Double rating, String status) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
@@ -52,9 +63,8 @@ public class Rider {
         this.status = status;
     }
 
-
     public long getId() {
-        return this.id;
+        return id;
     }
 
     public void setId(long id) {
@@ -62,7 +72,7 @@ public class Rider {
     }
 
     public String getFirstname() {
-        return this.firstname;
+        return firstname;
     }
 
     public void setFirstname(String firstname) {
@@ -70,7 +80,7 @@ public class Rider {
     }
 
     public String getLastname() {
-        return this.lastname;
+        return lastname;
     }
 
     public void setLastname(String lastname) {
@@ -78,15 +88,16 @@ public class Rider {
     }
 
     public String getEmail() {
-        return this.email;
+        return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
     }
 
+    @Override
     public String getPassword() {
-        return this.password;
+        return password;
     }
 
     public void setPassword(String password) {
@@ -94,27 +105,65 @@ public class Rider {
     }
 
     public Double getRating() {
-        return this.rating;
+        return rating;
     }
 
     public void setRating(Double rating) {
         this.rating = rating;
     }
 
-    public Set<Vehicles> getVehicles() {
-        return this.vehicles;
-    }
-
-    public void setVehicles(Set<Vehicles> vehicles) {
-        this.vehicles = vehicles;
-    }
-
-    public Boolean getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(Boolean status) {
+    public void setStatus(String status) {
         this.status = status;
+    }
+/*
+    public Set<Vehicle> getVehicles() {
+        return vehicles;
+    }
+
+    public void setVehicles(Set<Vehicle> vehicles) {
+        this.vehicles = vehicles;
+    }
+
+    public void addVehicle(Vehicle vehicle) {
+        this.vehicles.add(vehicle);
+    }
+
+    public void removeVehicle(Vehicle vehicle) {
+        this.vehicles.remove(vehicle);
+    }
+*/
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 
     @Override
@@ -126,9 +175,7 @@ public class Rider {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", rating=" + rating +
-                ", status=" + status +
-                ", vehicles=" + vehicles +
+                ", status='" + status + '\'' +
                 '}';
     }
-
 }

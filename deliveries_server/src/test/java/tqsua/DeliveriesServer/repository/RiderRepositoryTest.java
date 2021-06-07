@@ -33,8 +33,8 @@ class RiderRepositoryTest {
 
     @Test
     void whenGetAllRiders_thenReturnCorrectResults() throws IOException, InterruptedException {
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, false);
+        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
         entityManager.persistAndFlush(rider1);
         entityManager.persistAndFlush(rider2);
 
@@ -45,8 +45,8 @@ class RiderRepositoryTest {
 
     @Test
     void whenGetRiderById_thenReturnRider() {
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, false);
+        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
         entityManager.persistAndFlush(rider1);
         entityManager.persistAndFlush(rider2);
 
@@ -56,13 +56,29 @@ class RiderRepositoryTest {
 
     @Test
     void whenGetRiderByInvalidId_thenReturnNull() {
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, false);
+        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
         entityManager.persistAndFlush(rider1);
         entityManager.persistAndFlush(rider2);
 
         Rider found = repository.findById(-1);
         assertThat(found).isNull();
+    }
+
+    @Test
+    void whenSearchRiderExistsByEmail_ifRiderExists_thenReturnTrue() {
+        Rider rider1 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
+        entityManager.persistAndFlush(rider1);
+
+        assertThat(repository.existsRiderByEmail("diogo@gmail.com")).isTrue();
+    }
+
+    @Test
+    void whenSearchRiderExistsByEmail_ifRiderNotExists_thenReturnFalse() {
+        Rider rider1 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
+        entityManager.persistAndFlush(rider1);
+
+        assertThat(repository.existsRiderByEmail("ricardo@gmail.com")).isFalse();
     }
 
 }

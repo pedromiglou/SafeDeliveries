@@ -5,10 +5,17 @@ import './Deliveries.css';
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
 
+//import MapSection from '../map/Map.js'
+import Map from '../map/Map.js'
+
+import { withScriptjs } from "react-google-maps";
+
 function Deliveries() {
     const [state, setState] = useState("");
-
+    
     const location = useLocation();
+
+    const MapLoader = withScriptjs(Map);
 
     useEffect(() => {
         console.log(location.state);
@@ -46,7 +53,12 @@ function Deliveries() {
         { state === "delivering" && 
             <div className="DeliveriesSection del">
                 <div>
-                    <img src={process.env.PUBLIC_URL + "/images/mapexample.png"} alt="map"></img>
+                    {/*<img src={process.env.PUBLIC_URL + "/images/mapexample.png"} alt="map"></img>*/}
+                    {<MapLoader 
+                    googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco"
+                    loadingElement={<div style={{ height: "100%"}}/>}
+                    />
+                    }
                 </div>
                 <div className="DeliveryDetails">
                     <h1>Delivery Details</h1>

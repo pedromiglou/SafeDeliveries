@@ -4,7 +4,10 @@ package tqsua.DeliveriesServer.controller;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.actuate.metrics.AutoConfigureMetrics;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -12,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import tqsua.DeliveriesServer.service.OrderService;
 import tqsua.DeliveriesServer.model.CompositeKey;
 import tqsua.DeliveriesServer.model.Order;
+import tqsua.DeliveriesServer.JsonUtil;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
@@ -23,7 +27,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 
-@WebMvcTest(OrderController.class)
+//@WebMvcTest(OrderController.class)
+@AutoConfigureMockMvc
+@SpringBootTest
 class OrderControllerTest {
     
     @Autowired

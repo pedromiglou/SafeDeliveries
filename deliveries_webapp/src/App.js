@@ -21,30 +21,34 @@ import Profile from './Components/Profile/Profile';
 /* React */
 import { useEffect, useState } from 'react';
 
+/* Services */
+import AuthService from './Services/auth.service';
+
 function App() {
-  const [user, setUser] = useState({user_type: "not_logged", username: ""});
   const [state, setState] = useState("online");
+  var current_user = AuthService.getCurrentUser();
 
   useEffect(() => {
-    if (user.user_type === "not_logged"){
-      return
-    }
-    let perfil = document.getElementById("perfil-dropdown");
 
-    if (state === "online"){
-      perfil.classList.add("online");
-      perfil.classList.remove("offline");
-      perfil.classList.remove("delivering");
-    } else if (state === "offline"){
-      perfil.classList.add("offline");
-      perfil.classList.remove("online");
-      perfil.classList.remove("delivering");
-    } else if (state === "delivering"){
-      perfil.classList.add("delivering");
-      perfil.classList.remove("offline");
-      perfil.classList.remove("online");
-    }
-  }, [state, user.user_type]);
+    if (current_user !== null) {
+
+      let perfil = document.getElementById("perfil-dropdown");
+
+      if (state === "online"){
+        perfil.classList.add("online");
+        perfil.classList.remove("offline");
+        perfil.classList.remove("delivering");
+      } else if (state === "offline"){
+        perfil.classList.add("offline");
+        perfil.classList.remove("online");
+        perfil.classList.remove("delivering");
+      } else if (state === "delivering"){
+        perfil.classList.add("delivering");
+        perfil.classList.remove("offline");
+        perfil.classList.remove("online");
+      }
+    } 
+  }, [state, current_user]);
 
   const history = useHistory();
 
@@ -54,7 +58,8 @@ function App() {
   }
 
   function logout(){
-    setUser({user_type: "not_logged", username: ""});
+    sessionStorage.removeItem("user");
+    window.location.assign("http://localhost:3000/");
   }
 
   return (
@@ -73,7 +78,7 @@ function App() {
             </Link>
           </li>
 
-          {user.user_type === "logged" && 
+          {current_user !== null && 
           <>
             <li className="nav-item">
               <Link to="/deliveries" id="search-tab">
@@ -94,16 +99,16 @@ function App() {
             </Link>
           </li>
 
-          {user.user_type === "not_logged" && 
+          {current_user === null && 
             <li className="nav-item">
-              {/* <Link to="/login" id="login" >
+              <Link to="/login" id="login" >
                 Login
-              </Link> */}
-              <button id="login" onClick={() => setUser({user_type: "logged", username: ""})}>Login</button>
+              </Link> 
+              {/*<button id="login" onClick={() => setUser({user_type: "logged", username: ""})}>Login</button>*/}
             </li>
           }
 
-          {user.user_type === "logged" && 
+          {current_user !== null && 
             <li className="nav-item">
               <DropdownButton title={<FaIcons.FaUserCircle size="60"/>} id="perfil-dropdown" className="navbar-dropdown">
                 <Dropdown.ItemText>
