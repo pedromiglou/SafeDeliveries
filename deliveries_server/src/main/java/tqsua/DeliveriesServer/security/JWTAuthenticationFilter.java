@@ -58,7 +58,12 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
 
         HashMap<String, String> map = new HashMap<>();
+        map.put("id", String.valueOf(((Rider) auth.getPrincipal()).getId()));
+        map.put("firstname", ((Rider) auth.getPrincipal()).getFirstname());
+        map.put("lastname", ((Rider) auth.getPrincipal()).getLastname());
         map.put("email", ((Rider) auth.getPrincipal()).getEmail());
+        map.put("status", ((Rider) auth.getPrincipal()).getStatus());
+        map.put("rating", String.valueOf(((Rider) auth.getPrincipal()).getRating()));
         map.put("token", token);
         String json = new ObjectMapper().writeValueAsString(map);
         res.getWriter().write(json);

@@ -1,6 +1,7 @@
 package tqsua.DeliveriesServer.integration;
 
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import tqsua.DeliveriesServer.DeliveriesServerApplication;
 import tqsua.DeliveriesServer.JsonUtil;
 import tqsua.DeliveriesServer.model.Rider;
+import tqsua.DeliveriesServer.repository.RiderRepository;
 import tqsua.DeliveriesServer.service.RiderService;
 
 import org.springframework.http.MediaType;
@@ -29,11 +31,19 @@ class AuthControllerIT {
     @Autowired
     private RiderService riderService;
 
+    @Autowired
+    private RiderRepository riderRepository;
+
 
     @BeforeEach 
     public void setUp() {
         Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 0.0, "Offline");
         riderService.saveRider(rider);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        riderRepository.deleteAll();
     }
 
     @Test
@@ -48,7 +58,6 @@ class AuthControllerIT {
 
 
     }
-
 
     @Test
     void whenRegistWithInvalidEmail_thenReturnErrorMessage() throws Exception {
