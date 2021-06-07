@@ -14,8 +14,8 @@ public class ProfileFunctionalitiesSteps {
     private HomePage home;
 
     // Background
-    @Given("I navigate to {string}")
-    public void i_navigate_to(String url) {
+    @Given("I access {string}")
+    public void i_access(String url) {
         home = new HomePage(driver, url);
         assertThat(home.pageLoaded(), is(true));
     }

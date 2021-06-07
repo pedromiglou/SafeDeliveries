@@ -1,7 +1,7 @@
 Feature: Profile Area
 
   Background:
-    Given I navigate to "http://localhost:3000/"
+    Given I access "http://localhost:3000/"
     And I am logged into my account
     When I click on the logo
     And I click on Profile
