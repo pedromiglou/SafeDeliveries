@@ -16,6 +16,7 @@ import Home from './Components/Home/Home';
 import Deliveries from './Components/Deliveries/Deliveries';
 import History from './Components/History/History';
 import Login from './Components/Login/Login';
+import Profile from './Components/Profile/Profile';
 
 /* React */
 import { useEffect, useState } from 'react';
@@ -160,6 +161,7 @@ function App() {
             <Route exact path='/history' component={withRouter(History)} />
             {/* <Route exact path='/aboutus' component={withRouter(AboutUs)} /> */}
             <Route exact path='/login' component={withRouter(Login)} />
+            <Route exact path='/profile' component={withRouter(Profile)} />
         </Switch>
     </div>
 
