@@ -11,9 +11,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import tqsua.DeliveriesServer.JsonUtil;
 import tqsua.DeliveriesServer.model.Rider;
 import tqsua.DeliveriesServer.model.Vehicle;
+import tqsua.DeliveriesServer.model.VehicleDTO;
+import tqsua.DeliveriesServer.service.RiderService;
 import tqsua.DeliveriesServer.service.VehicleService;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -34,6 +35,9 @@ public class VehicleControllerTest {
     @MockBean
     private VehicleService service;
 
+    @MockBean
+    private RiderService riderService;
+
     @AfterEach
     void tearDown() {
         reset(service);
@@ -45,8 +49,8 @@ public class VehicleControllerTest {
         Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
         Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, false);
 
-        Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0);
-        Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 320.0);
+        Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
+        Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 320.0, "BBBBBB");
         v1.setRider(rider1);
         v2.setRider(rider2);
         response.add(v1);
@@ -63,7 +67,7 @@ public class VehicleControllerTest {
     @Test
     void whenGetVehicleById_thenReturnVehicle() throws Exception {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
-        Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0);
+        Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         response.setRider(rider);
         given(service.getVehicleById(response.getId())).willReturn(response);
 
@@ -85,9 +89,11 @@ public class VehicleControllerTest {
     @Test
     void whenPostNewVehicle_thenCreateIt() throws Exception {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
-        Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0);
-        vehicle.setRider(rider);
-        given(service.saveVehicle(vehicle)).willReturn(vehicle);
+        VehicleDTO vehicle = new VehicleDTO("Audi", "A5", "Carro", 365.0, 0L, "AAAAAA");
+        Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
+        response.setRider(rider);
+
+        given(service.saveVehicle(vehicle)).willReturn(response);
 
         mvc.perform(post("/api/vehicle").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(vehicle)))
                 .andExpect(status().isCreated());
@@ -97,7 +103,7 @@ public class VehicleControllerTest {
     @Test
     void whenPostNewInvalidVehicle_thenReturnBadRequest() throws Exception {
         //missing rider
-        Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0);
+        VehicleDTO vehicle = new VehicleDTO("Audi", "A5", "Carro", 365.0, null,"AAAAAAA");
 
         given(service.saveVehicle(vehicle)).willReturn(null);
         mvc.perform(post("/api/vehicle").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(vehicle)))
@@ -107,11 +113,9 @@ public class VehicleControllerTest {
 
     @Test
     void whenUpdateVehicle_thenUpdateIt() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
-        Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0);
-        vehicle.setRider(rider);
+        Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
 
-        Vehicle newDetails = new Vehicle("BMW", null, null, null);
+        VehicleDTO newDetails = new VehicleDTO("BMW", null, null, null, 0L, "AAAAAA");
         given(service.updateVehicle(vehicle.getId(), newDetails)).willReturn(vehicle);
 
         mvc.perform(put("/api/vehicle/"+String.valueOf(vehicle.getId())).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
@@ -121,7 +125,7 @@ public class VehicleControllerTest {
 
     @Test
     void whenUpdateNonExistentVehicle_thenReturnNotFound() throws Exception {
-        Vehicle newDetails = new Vehicle("BMW", null, null, null);
+        VehicleDTO newDetails = new VehicleDTO("BMW", null, null, null, 0L, "AAAAAA");
         given(service.updateVehicle(-1, newDetails)).willReturn(null);
 
         mvc.perform(put("/api/vehicle/"+String.valueOf(-1)).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))

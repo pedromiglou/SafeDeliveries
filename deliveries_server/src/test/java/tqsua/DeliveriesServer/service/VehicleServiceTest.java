@@ -1,5 +1,6 @@
 package tqsua.DeliveriesServer.service;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
@@ -16,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import tqsua.DeliveriesServer.model.Rider;
 import tqsua.DeliveriesServer.model.Vehicle;
+import tqsua.DeliveriesServer.model.VehicleDTO;
 import tqsua.DeliveriesServer.repository.VehicleRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,19 +28,23 @@ class VehicleServiceTest {
     @Mock
     private VehicleRepository repository;
 
+    @Mock
+    private RiderService riderService;
+
     @InjectMocks
     private VehicleService service;
 
     @AfterEach
     void tearDown() {
         reset(repository);
+        reset(riderService);
     }
 
     @Test
     void whenGetAllVehicles_thenReturnCorrectResults() throws Exception {
         ArrayList<Vehicle> response = new ArrayList<>();
-        Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0);
-        Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 320.0);
+        Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
+        Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 320.0, "BBBBBB");
         response.add(v1);
         response.add(v2);
         when(repository.findAll()).thenReturn(response);
@@ -47,7 +53,7 @@ class VehicleServiceTest {
 
     @Test
     void whenGetVehicleById_thenReturnTheVehicle() {
-        Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0);
+        Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
 
         when(repository.findById(response.getId())).thenReturn(response);
         assertThat(service.getVehicleById(response.getId())).isEqualTo(response);
@@ -56,60 +62,64 @@ class VehicleServiceTest {
     @Test
     void whenCreateVehicle_thenSaveIt() {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
-        Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0);
-        vehicle.setRider(rider);
+        when(riderService.getRiderById(0L)).thenReturn(rider);
 
-        service.saveVehicle(vehicle);
-        Mockito.verify(repository, VerificationModeFactory.times(1)).save(vehicle);
+        VehicleDTO vehicle = new VehicleDTO("Audi", "A5", "Carro", 365.0, 0L, "AAAAAA");
+
+        this.service.saveVehicle(vehicle);
+        Mockito.verify(repository, VerificationModeFactory.times(1)).save(any());
     }
 
     @Test
     void whenCreateVehicleWithoutTheNeededParameters_thenDoNotSaveIt() {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
-        Vehicle vehicle = new Vehicle(null, "A5", "Carro", 365.0);
-        vehicle.setRider(rider);
+        when(riderService.getRiderById(0L)).thenReturn(rider);
+
+        VehicleDTO vehicle = new VehicleDTO(null, "A5", "Carro", 365.0, 0L, "BBBBBB");
 
         assertThat(service.saveVehicle(vehicle)).isNull();
-        Mockito.verify(repository, VerificationModeFactory.times(0)).save(vehicle);
+        Mockito.verify(repository, VerificationModeFactory.times(0)).save(any());
     }
 
     @Test
     void whenUpdateVehicle_onlyUpdateNotNullParameters() {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
-        Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0);
-        response.setRider(rider);
+        when(riderService.getRiderById(0L)).thenReturn(rider);
+        Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
+
         when(repository.findById(response.getId())).thenReturn(response);
 
         //check if status is updated while other parameter remains the same
-        Vehicle newDetails = new Vehicle("BMW", null, null, null);
+        VehicleDTO newDetails = new VehicleDTO(null, "A5", "Carro", 365.0, 0L, "BBBBBB");
         service.updateVehicle(response.getId(), newDetails);
-        assertThat(response.getBrand()).isEqualTo("BMW");
+        assertThat(response.getBrand()).isEqualTo("Audi");
         assertThat(response.getModel()).isEqualTo("A5");
 
         //check if all parameters are updated
-        newDetails = new Vehicle("BMW", "M4", "Carro", 320.0);
+        newDetails = new VehicleDTO("BMW", "M4", "Carro", 320.0, 0L, "CCCCCC");
         service.updateVehicle(response.getId(), newDetails);
         assertThat(response.getBrand()).isEqualTo("BMW");
         assertThat(response.getModel()).isEqualTo("M4");
         assertThat(response.getCategory()).isEqualTo("Carro");
         assertThat(response.getCapacity()).isEqualTo(320.0);
+        assertThat(response.getRegistration()).isEqualTo("CCCCCC");
     }
 
     @Test
     void whenUpdateNotExistentVehicle_returnNull() {
-        Vehicle newDetails = new Vehicle("BMW", "M4", "Carro", 320.0);
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
+        when(riderService.getRiderById(0L)).thenReturn(rider);
+
+        VehicleDTO newDetails = new VehicleDTO("BMW", "M4", "Carro", 320.0, 0L,"CCCCCC");
         assertThat(service.updateVehicle(-1, newDetails)).isNull();
     }
 
     @Test
     void whenDeleteVehicle_deleteTheVehicle() {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
-        Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0);
-        response.setRider(rider);
-        when(repository.existsById(response.getId())).thenReturn(true);
+        when(repository.existsById(0L)).thenReturn(true);
 
-        assertThat(this.service.deleteVehicle(response.getId())).isNotNull();
-        Mockito.verify(repository, VerificationModeFactory.times(1)).deleteById(response.getId());
+        assertThat(this.service.deleteVehicle(0L)).isNotNull();
+        Mockito.verify(repository, VerificationModeFactory.times(1)).deleteById(0L);
     }
 
     @Test

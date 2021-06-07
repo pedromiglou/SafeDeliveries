@@ -32,6 +32,9 @@ public class Vehicle implements Serializable {
     @Column(name = "capacity", nullable = false)
     private Double capacity;
 
+    @Column(name= "registration", nullable = false, unique = true)
+    private String registration;
+
     // pertence a um rider
     @ManyToOne(optional = false)
     private Rider rider;
@@ -39,11 +42,12 @@ public class Vehicle implements Serializable {
     public Vehicle() {
     }
 
-    public Vehicle(String brand, String model, String category, Double capacity) {
+    public Vehicle(String brand, String model, String category, Double capacity, String registration) {
         this.brand = brand;
         this.model = model;
         this.category = category;
         this.capacity = capacity;
+        this.registration = registration;
     }
     
     public long getId() {
@@ -86,6 +90,14 @@ public class Vehicle implements Serializable {
         this.capacity = capacity;
     }
 
+    public String getRegistration() {
+        return registration;
+    }
+
+    public void setRegistration(String registration) {
+        this.registration = registration;
+    }
+
     public Rider getRider() {
         return this.rider;
     }
@@ -96,13 +108,15 @@ public class Vehicle implements Serializable {
 
     @Override
     public String toString() {
-        return "{" +
-            " id='" + getId() + "'" +
-            ", brand='" + getBrand() + "'" +
-            ", model='" + getModel() + "'" +
-            ", category='" + getCategory() + "'" +
-            ", capacity='" + getCapacity() + "'" +
-            "}";
+        return "Vehicle{" +
+                "id=" + id +
+                ", brand='" + brand + '\'' +
+                ", model='" + model + '\'' +
+                ", category='" + category + '\'' +
+                ", capacity=" + capacity +
+                ", registration='" + registration + '\'' +
+                ", rider=" + rider +
+                '}';
     }
 
     @Override
@@ -116,7 +130,8 @@ public class Vehicle implements Serializable {
         if (!Objects.equals(brand, vehicle.brand)) return false;
         if (!Objects.equals(model, vehicle.model)) return false;
         if (!Objects.equals(category, vehicle.category)) return false;
-        return Objects.equals(capacity, vehicle.capacity);
+        if (!Objects.equals(capacity, vehicle.capacity)) return false;
+        return Objects.equals(registration, vehicle.registration);
     }
 
     @Override
@@ -126,6 +141,7 @@ public class Vehicle implements Serializable {
         result = 31 * result + (model != null ? model.hashCode() : 0);
         result = 31 * result + (category != null ? category.hashCode() : 0);
         result = 31 * result + (capacity != null ? capacity.hashCode() : 0);
+        result = 31 * result + (registration != null ? registration.hashCode() : 0);
         return result;
     }
 }

@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import tqsua.DeliveriesServer.model.Vehicle;
+import tqsua.DeliveriesServer.model.VehicleDTO;
+import tqsua.DeliveriesServer.service.RiderService;
 import tqsua.DeliveriesServer.service.VehicleService;
 
 import javax.validation.Valid;
@@ -15,8 +17,12 @@ import java.util.ArrayList;
 @RestController
 @RequestMapping("/api")
 public class VehicleController {
+
     @Autowired
     private VehicleService vehicleService;
+
+    @Autowired
+    private RiderService riderService;
 
     @GetMapping(path="/vehicles")
     public ArrayList<Vehicle> getVehicles() throws IOException, InterruptedException {
@@ -32,14 +38,14 @@ public class VehicleController {
 
     @PostMapping(path = "/vehicle")
     @ResponseStatus(HttpStatus.CREATED)
-    public Vehicle createVehicle(@Valid @RequestBody Vehicle v) {
+    public Vehicle createVehicle(@Valid @RequestBody VehicleDTO v) {
         Vehicle vehicle = this.vehicleService.saveVehicle(v);
         if (vehicle==null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         return vehicle;
     }
 
     @PutMapping(path="/vehicle/{id}")
-    public ResponseEntity<Vehicle> updateVehicle(@PathVariable(value="id") Long id, @Valid @RequestBody Vehicle v) {
+    public ResponseEntity<Vehicle> updateVehicle(@PathVariable(value="id") Long id, @Valid @RequestBody VehicleDTO v) {
         Vehicle vehicle = this.vehicleService.updateVehicle(id, v);
         if (vehicle==null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         return ResponseEntity.ok(vehicle);

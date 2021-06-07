@@ -1,9 +1,7 @@
 package tqsua.DeliveriesServer.integration;
 
-import io.cucumber.java.After;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.internal.verification.VerificationModeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,14 +11,13 @@ import tqsua.DeliveriesServer.DeliveriesServerApplication;
 import tqsua.DeliveriesServer.JsonUtil;
 import tqsua.DeliveriesServer.model.Rider;
 import tqsua.DeliveriesServer.model.Vehicle;
+import tqsua.DeliveriesServer.model.VehicleDTO;
 import tqsua.DeliveriesServer.repository.RiderRepository;
 import tqsua.DeliveriesServer.repository.VehicleRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -51,8 +48,8 @@ public class VehicleControllerIT {
         riderRepository.save(rider1);
         riderRepository.save(rider2);
 
-        Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0);
-        Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 320.0);
+        Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
+        Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 320.0, "BBBBBB");
         v1.setRider(rider1);
         v2.setRider(rider2);
         repository.save(v1);
@@ -68,7 +65,7 @@ public class VehicleControllerIT {
     void whenGetVehicleById_thenReturnVehicle() throws Exception {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
         riderRepository.save(rider);
-        Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0);
+        Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         vehicle.setRider(rider);
         repository.save(vehicle);
 
@@ -87,22 +84,21 @@ public class VehicleControllerIT {
     void whenPostNewVehicle_thenCreateIt() throws Exception {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
         riderRepository.save(rider);
-        Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0);
-        vehicle.setRider(rider);
-        repository.save(vehicle);
+        VehicleDTO vehicle = new VehicleDTO("Audi", "A5", "Carro", 365.0, rider.getId(), "AAAAAA");
 
         mvc.perform(post("/api/vehicle").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(vehicle)))
                 .andExpect(status().isCreated());
-        assertThat(repository.existsById(vehicle.getId()));
+        assertThat(repository.findAll().size()).isEqualTo(1);
     }
 
     @Test
     void whenPostNewInvalidVehicle_thenReturnBadRequest() throws Exception {
         //missing rider
-        Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0);
+        VehicleDTO vehicle = new VehicleDTO("Audi", "A5", "Carro", 365.0, null, "AAAAAA");
 
         mvc.perform(post("/api/vehicle").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(vehicle)))
                 .andExpect(status().isBadRequest());
+        assertThat(repository.findAll().size()).isEqualTo(0);
     }
 
     @Test
@@ -110,11 +106,11 @@ public class VehicleControllerIT {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
         riderRepository.save(rider);
 
-        Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0);
+        Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         vehicle.setRider(rider);
         repository.save(vehicle);
 
-        Vehicle newDetails = new Vehicle("BMW", null, null, null);
+        VehicleDTO newDetails = new VehicleDTO("BMW", null, null, null, null, null);
 
         mvc.perform(put("/api/vehicle/"+String.valueOf(vehicle.getId())).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
                 .andExpect(status().isOk());
@@ -123,7 +119,7 @@ public class VehicleControllerIT {
 
     @Test
     void whenUpdateNonExistentVehicle_thenReturnNotFound() throws Exception {
-        Vehicle newDetails = new Vehicle("BMW", null, null, null);
+        VehicleDTO newDetails = new VehicleDTO("BMW", null, null, null, null, null);
 
         mvc.perform(put("/api/vehicle/"+String.valueOf(-1)).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
                 .andExpect(status().isNotFound());
@@ -134,7 +130,7 @@ public class VehicleControllerIT {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, false);
         riderRepository.save(rider);
 
-        Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0);
+        Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAAA");
         vehicle.setRider(rider);
         repository.save(vehicle);
 
