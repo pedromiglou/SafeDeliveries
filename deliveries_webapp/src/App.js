@@ -116,17 +116,17 @@ function App() {
                   <h5>Status</h5>
                   <hr></hr>
                   <div className="Status">
-                    <div className="Status-item" onClick={() => {RiderService.changeStatus(current_user.id, "Online"); setState("Online")}}>
+                    <div id="state-online" className="Status-item" onClick={() => {RiderService.changeStatus(current_user.id, "Online"); setState("Online")}}>
                       <BsIcons.BsCircleFill className="state-icon online"/>
                       <span>Online</span>
                       
                     </div>
-                    <div className="Status-item" onClick={() => {RiderService.changeStatus(current_user.id, "Delivering"); setState("Delivering")}}>
+                    <div id="state-delivering" className="Status-item" onClick={() => {RiderService.changeStatus(current_user.id, "Delivering"); setState("Delivering")}}>
                       <BsIcons.BsCircleFill className="state-icon delivering"/>
                       <span>Delivering</span>
                       
                     </div>
-                    <div className="Status-item" onClick={() => {RiderService.changeStatus(current_user.id, "Offline"); setState("Offline")}}>
+                    <div id="state-off" className="Status-item" onClick={() => {RiderService.changeStatus(current_user.id, "Offline"); setState("Offline")}}>
                       <BsIcons.BsCircle className="state-icon off"/>
                       <span>Offline</span>
                       

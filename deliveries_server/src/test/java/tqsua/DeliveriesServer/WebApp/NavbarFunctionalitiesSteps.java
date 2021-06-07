@@ -7,6 +7,9 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
+import java.io.IOException;
+
+import org.apache.http.client.ClientProtocolException;
 import org.json.JSONException;
 import org.junit.jupiter.api.extension.ExtendWith;
 import io.github.bonigarcia.seljup.SeleniumJupiter;
@@ -41,8 +44,8 @@ public class NavbarFunctionalitiesSteps {
     }
 
     @When("I am logged in my account")
-    public void i_am_logged_in_my_account() throws JSONException {
-        home.login_auto();
+    public void i_am_logged_in_my_account() throws JSONException, ClientProtocolException, IOException, InterruptedException {
+        home.login();
     }
 
     @Then("It should have the functionalities {string} and {string}")
@@ -50,5 +53,20 @@ public class NavbarFunctionalitiesSteps {
         assertThat(home.getSearchDeliveryTab(), is(functionality1));
         assertThat(home.getHistoryTab(), is(functionality2));
         driver.quit();
+    }
+
+    @Then("It should have status {string}")
+    public void it_should_have_status(String status) {
+        assertThat(home.checkStatus(status), is(true));
+        if (status.equals("Offline")) {
+            System.out.println("entrei aqui");
+            driver.quit();
+        }
+    }
+
+    
+    @When("I change status to {string}")
+    public void change_status(String status) {
+        home.changeStatus(status);
     }
 }
