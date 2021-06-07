@@ -48,7 +48,7 @@ public class Rider implements Serializable, UserDetails {
 
     // tem varios vehicles
     @OneToMany
-    private Set<Vehicles> vehicles;
+    private Set<Vehicle> vehicles;
 
     public Rider() {
     }
@@ -62,9 +62,8 @@ public class Rider implements Serializable, UserDetails {
         this.status = status;
     }
 
-
     public long getId() {
-        return this.id;
+        return id;
     }
 
     public void setId(long id) {
@@ -72,7 +71,7 @@ public class Rider implements Serializable, UserDetails {
     }
 
     public String getFirstname() {
-        return this.firstname;
+        return firstname;
     }
 
     public void setFirstname(String firstname) {
@@ -80,7 +79,7 @@ public class Rider implements Serializable, UserDetails {
     }
 
     public String getLastname() {
-        return this.lastname;
+        return lastname;
     }
 
     public void setLastname(String lastname) {
@@ -88,15 +87,16 @@ public class Rider implements Serializable, UserDetails {
     }
 
     public String getEmail() {
-        return this.email;
+        return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
     }
 
+    @Override
     public String getPassword() {
-        return this.password;
+        return password;
     }
 
     public void setPassword(String password) {
@@ -104,19 +104,11 @@ public class Rider implements Serializable, UserDetails {
     }
 
     public Double getRating() {
-        return this.rating;
+        return rating;
     }
 
     public void setRating(Double rating) {
         this.rating = rating;
-    }
-
-    public Set<Vehicles> getVehicles() {
-        return this.vehicles;
-    }
-
-    public void setVehicles(Set<Vehicles> vehicles) {
-        this.vehicles = vehicles;
     }
 
     public String getStatus() {
@@ -125,6 +117,14 @@ public class Rider implements Serializable, UserDetails {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Set<Vehicle> getVehicles() {
+        return vehicles;
+    }
+
+    public void setVehicles(Set<Vehicle> vehicles) {
+        this.vehicles = vehicles;
     }
 
     @Override
@@ -157,7 +157,6 @@ public class Rider implements Serializable, UserDetails {
         return true;
     }
 
-
     @Override
     public String toString() {
         return "Rider{" +
@@ -167,9 +166,8 @@ public class Rider implements Serializable, UserDetails {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", rating=" + rating +
-                ", status=" + status +
+                ", status='" + status + '\'' +
                 ", vehicles=" + vehicles +
                 '}';
     }
-
 }
