@@ -20,9 +20,11 @@ import Login from './Components/Login/Login';
 /* React */
 import { useEffect, useState } from 'react';
 
+import RiderService from './Services/rider.service';
+
 function App() {
   const [user, setUser] = useState({user_type: "not_logged", username: ""});
-  const [state, setState] = useState("online");
+  const [state, setState] = useState("Online");
 
   useEffect(() => {
     if (user.user_type === "not_logged"){
@@ -30,15 +32,15 @@ function App() {
     }
     let perfil = document.getElementById("perfil-dropdown");
 
-    if (state === "online"){
+    if (state === "Online"){
       perfil.classList.add("online");
       perfil.classList.remove("offline");
       perfil.classList.remove("delivering");
-    } else if (state === "offline"){
+    } else if (state === "Offline"){
       perfil.classList.add("offline");
       perfil.classList.remove("online");
       perfil.classList.remove("delivering");
-    } else if (state === "delivering"){
+    } else if (state === "Delivering"){
       perfil.classList.add("delivering");
       perfil.classList.remove("offline");
       perfil.classList.remove("online");
@@ -109,17 +111,17 @@ function App() {
                   <h5>Status</h5>
                   <hr></hr>
                   <div className="Status">
-                    <div className="Status-item" onClick={() => setState("online")}>
+                    <div className="Status-item" onClick={() => {RiderService.changeStatus(1, "Online"); setState("Online")}}>
                       <BsIcons.BsCircleFill className="state-icon online"/>
                       <span>Online</span>
                       
                     </div>
-                    <div className="Status-item" onClick={() => setState("delivering")}>
+                    <div className="Status-item" onClick={() => {RiderService.changeStatus(1, "Delivering"); setState("Delivering")}}>
                       <BsIcons.BsCircleFill className="state-icon delivering"/>
                       <span>Delivering</span>
                       
                     </div>
-                    <div className="Status-item" onClick={() => setState("offline")}>
+                    <div className="Status-item" onClick={() => {RiderService.changeStatus(1, "Offline"); setState("Offline")}}>
                       <BsIcons.BsCircle className="state-icon off"/>
                       <span>Offline</span>
                       

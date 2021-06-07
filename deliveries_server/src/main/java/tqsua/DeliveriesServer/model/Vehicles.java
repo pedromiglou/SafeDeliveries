@@ -19,6 +19,7 @@ public class Vehicles implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
+
     @Column(name = "brand", nullable = false)
     private String brand;
 
