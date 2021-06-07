@@ -34,10 +34,53 @@
 
 .profile-picture{
     width: 80%;
-    height: auto;
     min-width: 150px;
     max-width: 300px;
     padding: 3em 0;
+}
+
+.user-img{
+    width: 100%;
+    height: auto;
+}
+
+
+.below-pic{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 70%;
+    margin: 0 auto;
+}
+
+.rating-section{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.user-rating{
+    width: 60px;
+    height: auto;
+    color: rgb(255, 175, 2);
+    background-color: rgb(245, 245, 245);
+    border-radius: 50%;
+    padding: 0.3em;
+    margin-top: 1em;
+}
+
+
+
+.user-change-pic{
+    width: 30px;
+    height: auto;
+    margin-left: auto;
+    color: rgb(2, 120, 255);
+    background-color: rgb(245, 245, 245);
+    border-radius: 50%;
+    padding: 0.3em;
 }
 
 .form-area{

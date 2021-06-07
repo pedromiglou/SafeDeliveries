@@ -3,9 +3,10 @@ import './Profile.css';
 
 import * as FaIcons from 'react-icons/fa';
 import * as MdIcons from 'react-icons/md';
-import * as BiIcons from 'react-icons/bi';
+// import * as BiIcons from 'react-icons/bi';
 import * as RiIcons from 'react-icons/ri';
 import * as GiIcons from 'react-icons/gi';
+import * as BsIcons from 'react-icons/bs';
 
 
 import { useEffect, useState } from 'react';
@@ -121,8 +122,18 @@ function Profile() {
       <div className="profile-container">
         <div className="profile-section">
             <div className="image-area">
-                <FaIcons.FaUserCircle className="profile-picture"/>
-                <BiIcons.BiImageAdd/>
+                
+                <div className="profile-picture">
+                    <FaIcons.FaUserCircle className="user-img"/>
+                    <div className="below-pic"> 
+                        <div className="rating-section">
+                            <BsIcons.BsStarFill className="user-rating"/>
+                            <span>3.4/5.0</span>
+                        </div>
+                        
+                        {/* <BiIcons.BiImageAdd className="user-change-pic"/> */}
+                    </div>
+                </div> 
                 <h3>Nome Utilizador</h3>
             </div>
             <div className="form-area">
