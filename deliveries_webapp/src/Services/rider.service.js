@@ -45,4 +45,4 @@ class RiderService {
      
     }
     
-    export default new RiderService();
+export default new RiderService();

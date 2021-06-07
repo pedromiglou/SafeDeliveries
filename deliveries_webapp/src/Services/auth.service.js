@@ -1,3 +1,4 @@
+import RiderService from "./rider.service";
 
 class AuthService {
 
@@ -16,6 +17,8 @@ class AuthService {
         var json = await res.json()
         
         if(json.token) {
+            await RiderService.changeStatus(json.id, "Online");
+            json.status = "Online"
             sessionStorage.setItem("user", JSON.stringify(json));
         } 
         return json

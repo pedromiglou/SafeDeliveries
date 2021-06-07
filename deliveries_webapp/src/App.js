@@ -23,10 +23,11 @@ import { useEffect, useState } from 'react';
 
 /* Services */
 import AuthService from './Services/auth.service';
+import RiderService from './Services/rider.service';
 
 function App() {
-  const [state, setState] = useState("online");
-  var current_user = AuthService.getCurrentUser();
+  const [state, setState] = useState("Online");
+  const current_user = AuthService.getCurrentUser();
 
   useEffect(() => {
 
@@ -34,15 +35,15 @@ function App() {
 
       let perfil = document.getElementById("perfil-dropdown");
 
-      if (state === "online"){
+      if (state === "Online"){
         perfil.classList.add("online");
         perfil.classList.remove("offline");
         perfil.classList.remove("delivering");
-      } else if (state === "offline"){
+      } else if (state === "Offline"){
         perfil.classList.add("offline");
         perfil.classList.remove("online");
         perfil.classList.remove("delivering");
-      } else if (state === "delivering"){
+      } else if (state === "Delivering"){
         perfil.classList.add("delivering");
         perfil.classList.remove("offline");
         perfil.classList.remove("online");
@@ -57,7 +58,8 @@ function App() {
       history.push(new_url);
   }
 
-  function logout(){
+  async function logout(){
+    await RiderService.changeStatus(current_user.id, "Offline")
     sessionStorage.removeItem("user");
     window.location.assign("http://localhost:3000/");
   }
@@ -115,17 +117,17 @@ function App() {
                   <h5>Status</h5>
                   <hr></hr>
                   <div className="Status">
-                    <div className="Status-item" onClick={() => setState("online")}>
+                    <div id="state-online" className="Status-item" onClick={() => {RiderService.changeStatus(current_user.id, "Online"); setState("Online")}}>
                       <BsIcons.BsCircleFill className="state-icon online"/>
                       <span>Online</span>
                       
                     </div>
-                    <div className="Status-item" onClick={() => setState("delivering")}>
+                    <div id="state-delivering" className="Status-item" onClick={() => {RiderService.changeStatus(current_user.id, "Delivering"); setState("Delivering")}}>
                       <BsIcons.BsCircleFill className="state-icon delivering"/>
                       <span>Delivering</span>
                       
                     </div>
-                    <div className="Status-item" onClick={() => setState("offline")}>
+                    <div id="state-off" className="Status-item" onClick={() => {RiderService.changeStatus(current_user.id, "Offline"); setState("Offline")}}>
                       <BsIcons.BsCircle className="state-icon off"/>
                       <span>Offline</span>
                       
