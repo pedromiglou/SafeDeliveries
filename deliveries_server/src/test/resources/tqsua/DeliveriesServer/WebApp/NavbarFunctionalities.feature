@@ -12,7 +12,12 @@ Feature: Riders navbar
     When I am logged in my account
     Then It should have the functionalities "Search Delivery" and "Deliveries History"
 
-
-
+  Scenario: Status change
+    When I am logged in my account
+    Then It should have status "Online"
+    When I change status to "Delivering"
+    Then It should have status "Delivering"
+    When I change status to "Offline"
+    Then It should have status "Offline"
 
 

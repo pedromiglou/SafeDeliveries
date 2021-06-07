@@ -9,7 +9,21 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
 import org.openqa.selenium.JavascriptExecutor;
+
+import java.io.IOException;
+import java.util.Arrays;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class HomePage {
     private WebDriver driver;
@@ -32,6 +46,10 @@ public class HomePage {
 
     @FindBy(id = "login")
     private WebElement login;
+
+    private final HttpClient httpClient = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_2)
+            .build();
 
     //Constructor
     public HomePage(WebDriver driver, String page_url){
@@ -90,6 +108,31 @@ public class HomePage {
         driver.navigate().refresh();
     }
 
+    public void login() throws IOException, InterruptedException, JSONException {
+        // form parameters
+        Map<Object, Object> data = new HashMap<>();
+        data.put("email", "rafael2@gmail.com");
+        data.put("password", "rafael123");
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestBody = objectMapper
+            .writerWithDefaultPrettyPrinter()
+            .writeValueAsString(data);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .POST(BodyPublishers.ofString(requestBody))
+                .uri(URI.create("http://localhost:8080/api/login"))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        JSONObject json = new JSONObject(response.body());
+
+        js.executeScript(String.format(
+        "window.sessionStorage.setItem('%s','%s');", "user", json));
+        driver.navigate().refresh();
+    }
+
     public Boolean check_home_page() {
         {
             WebDriverWait wait = new WebDriverWait(driver, 30);
@@ -98,4 +141,32 @@ public class HomePage {
         return this.pageLoaded();
     }
 
+    public Boolean checkStatus(String status) {
+        WebElement perfil = driver.findElement(By.id("perfil-dropdown"));
+        switch (status) {
+            case "Online":
+                return Arrays.asList(perfil.getAttribute("class").split(" ")).contains("online");
+            case "Delivering":
+                return Arrays.asList(perfil.getAttribute("class").split(" ")).contains("delivering");
+            case "Offline":
+                return Arrays.asList(perfil.getAttribute("class").split(" ")).contains("offline");
+        }
+        return null;
+    }
+
+    public void changeStatus(String status) {
+        driver.findElement(By.id("perfil-dropdown")).click();
+        switch (status) {
+            case "Online":
+                driver.findElement(By.id("state-online")).click();
+                break;
+            case "Delivering":
+                driver.findElement(By.id("state-delivering")).click();
+                break;
+            case "Offline":
+                driver.findElement(By.id("state-off")).click();
+                break;
+        }
+        driver.findElement(By.id("perfil-dropdown")).click();
+    }
 }
