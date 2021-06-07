@@ -91,7 +91,7 @@ function Login() {
                   <input type="text" id="login_email_input" placeholder="Email"></input>
                   <h3>Password</h3>
                   <input type="password" id="login_password_input" placeholder="Password"></input>
-                  <i onClick={() => setState("Register") }>Don't have an account? Regist here</i>
+                  <i id="register_icon" onClick={() => setState("Register") }>Don't have an account? Regist here</i>
                   <button type="submit" className="button-entrar">Enter</button>
               </div>
             </form>
