@@ -1,5 +1,3 @@
-import RiderService from "./rider.service";
-
 class AuthService {
 
     async login(email, password) {
@@ -9,7 +7,7 @@ class AuthService {
         }
 
         try {
-            var res = await fetch('http://localhost:8080/api/login', {
+            var res = await fetch('http://localhost:8081/api/login', {
                 method:'POST',
                 headers:{'Content-type':'application/json'},
                 body: JSON.stringify(userInfo)
@@ -21,13 +19,10 @@ class AuthService {
         if (res.status !== 200) {
             return {error: true};
         }
-
         var json = await res.json()
         
         if(json.token) {
-            await RiderService.changeStatus(json.id, "Online");
-            json.status = "Online"
-            sessionStorage.setItem("user", JSON.stringify(json));
+            sessionStorage.setItem("user_orders", JSON.stringify(json));
         } 
         return json
 
@@ -39,11 +34,10 @@ class AuthService {
             lastname: lastname,
             email: email,
             password: password,
-            rating: 0.0,
-            status: "Offline"
+            account_type: "U"
         }
         try {
-            var res = await fetch('http://localhost:8080/api/register', {
+            var res = await fetch('http://localhost:8081/api/register', {
                 method:'POST',
                 headers:{'Content-type':'application/json'},
                 body: JSON.stringify(userInfo)
@@ -62,7 +56,7 @@ class AuthService {
     }
 
     getCurrentUser() {
-        return JSON.parse(sessionStorage.getItem("user"))
+        return JSON.parse(sessionStorage.getItem("user_orders"))
     }
 
 
