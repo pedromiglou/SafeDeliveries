@@ -95,7 +95,7 @@ build-orders-webapp:
     - yarn build
 
 #######################################################################################################
-publish-WEB:
+publish-WEB-DELIVERIES:
   image: docker:18.09
   stage: publish
   services:
@@ -107,3 +107,133 @@ publish-WEB:
     - docker push $TAG_COMMIT_WEB_DELIVERIES
     - docker push $TAG_LATEST_WEB_DELIVERIES
 
+publish-API-DELIVERIES:
+  image: docker:18.09
+  stage: publish
+  services:
+    - docker:18.09-dind
+  script:
+    - cd deliveries_server
+    - docker build -t $TAG_COMMIT_API_DELIVERIES -t $TAG_LATEST_API_DELIVERIES .
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - docker push $TAG_COMMIT_API_DELIVERIES
+    - docker push $TAG_LATEST_API_DELIVERIES
+
+publish-WEB-ORDERS:
+  image: docker:18.09
+  stage: publish
+  services:
+    - docker:18.09-dind
+  script:
+    - cd deliveries_webapp
+    - docker build -t $TAG_COMMIT_WEB_ORDERS -t $TAG_LATEST_WEB_ORDERS .
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - docker push $TAG_COMMIT_WEB_ORDERS
+    - docker push $TAG_LATEST_WEB_ORDERS
+
+publish-API-ORDERS:
+  image: docker:18.09
+  stage: publish
+  services:
+    - docker:18.09-dind
+  script:
+    - cd deliveries_server
+    - docker build -t $TAG_COMMIT_API_ORDERS -t $TAG_LATEST_API_ORDERS .
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - docker push $TAG_COMMIT_API_ORDERS
+    - docker push $TAG_LATEST_API_ORDERS
+
+#######################################################################################################
+deploy-DB-DELIVERIES:
+  image: alpine:latest
+  stage: deploy
+  tags:
+    - deployment
+  script:
+    - chmod og= $ID_RSA
+    - apk update && apk add openssh-client
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker container rm -f mysql_deliveries || true"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run --name mysql_deliveries -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=demo -e MYSQL_USER=demo -e MYSQL_PASSWORD=password -p 3306:3306 -d mysql/mysql-server:5.7"
+    - sleep 30
+  environment:
+    name: production
+    url: http://$SERVER_IP
+
+deploy-DB-ORDERS:
+  image: alpine:latest
+  stage: deploy
+  tags:
+    - deployment
+  script:
+    - chmod og= $ID_RSA
+    - apk update && apk add openssh-client
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker container rm -f mysql_orders || true"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run --name mysql_orders -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=demo -e MYSQL_USER=demo -e MYSQL_PASSWORD=password -p 3307:3306 -d mysql/mysql-server:5.7"
+    - sleep 30
+  environment:
+    name: production
+    url: http://$SERVER_IP
+
+deploy-WEB-DELIVERIES:
+  image: alpine:latest
+  stage: deploy
+  tags:
+    - deployment
+  script:
+    - chmod og= $ID_RSA
+    - apk update && apk add openssh-client
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker pull $TAG_COMMIT_WEB_DELIVERIES"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker container rm -f deliveries_webapp || true"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run -d -p 80:80 --name deliveries_webapp $TAG_COMMIT_WEB_DELIVERIES"
+  environment:
+    name: production
+    url: http://$SERVER_IP
+
+deploy-WEB-ORDERS:
+  image: alpine:latest
+  stage: deploy
+  tags:
+    - deployment
+  script:
+    - chmod og= $ID_RSA
+    - apk update && apk add openssh-client
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker pull $TAG_COMMIT_WEB_ORDERS"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker container rm -f orders_webapp || true"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run -d -p 81:80 --name orders_webapp $TAG_COMMIT_WEB_ORDERS"
+  environment:
+    name: production
+    url: http://$SERVER_IP
+
+deploy-API-DELIVERIES:
+  image: alpine:latest
+  stage: deploy
+  tags:
+    - deployment
+  script:
+    - chmod og= $ID_RSA
+    - apk update && apk add openssh-client
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker pull $TAG_COMMIT_API_DELIVERIES"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker container rm -f deliveries_api || true"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run --network host -d -p 8080:8080 --name deliveries_api $TAG_COMMIT_API_DELIVERIES"
+  environment:
+    name: production
+    url: http://$SERVER_IP
+
+deploy-API-ORDERS:
+  image: alpine:latest
+  stage: deploy
+  tags:
+    - deployment
+  script:
+    - chmod og= $ID_RSA
+    - apk update && apk add openssh-client
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker pull $TAG_COMMIT_API_ORDERS"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker container rm -f orders_api || true"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run --network host -d -p 8080:8080 --name orders_api $TAG_COMMIT_API_ORDERS"
+  environment:
+    name: production
+    url: http://$SERVER_IP
