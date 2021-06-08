@@ -2,6 +2,7 @@ package tqsua.DeliveriesServer.integration;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.internal.verification.VerificationModeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +16,8 @@ import tqsua.DeliveriesServer.repository.RiderRepository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -66,16 +69,27 @@ public class RiderControllerIT {
                 .andExpect(status().isNotFound());
     }
 
-    /*
     @Test
-    void whenUpdateRider_thenCorrectlyCallService() throws Exception {
+    void whenUpdateRider_thenReturnOk() throws Exception {
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        riderRepository.save(rider);
+        Rider newDetails = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
+
         //with all arguments
-        mvc.perform(put("/api/rider?id=0&firstname=A&lastname=B&email=a@b.c&password=abcdefgh&status=Offline&rating=5"))
-            .andExpect(status().isOk());
+        mvc.perform(put("/api/rider/"+String.valueOf(rider.getId())).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
+                .andExpect(status().isOk());
 
         //with less arguments
-        mvc.perform(put("/api/rider?id=0&lastname=B&email=a@b.c&status=Offline&rating=5"))
-            .andExpect(status().isOk());
+        newDetails = new Rider(null, "B", "a@b.c", null, 5.0, "Offline");
+        mvc.perform(put("/api/rider/"+String.valueOf(rider.getId())).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
+                .andExpect(status().isOk());
     }
-    */
+
+    @Test
+    void whenUpdateNotExistentRider_thenReturnNotFound() throws Exception {
+        Rider newDetails = new Rider("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
+
+        mvc.perform(put("/api/rider/0").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
+                .andExpect(status().isNotFound());
+    }
 }

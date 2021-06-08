@@ -37,14 +37,15 @@ public class RiderService {
         return this.riderRepository.save(rider);
     }
 
-    public void updateRider(long id, String firstname, String lastname, String email, String password, Double rating, String status) {
+    public Rider updateRider(long id, Rider newDetails) {
         Rider rider = this.riderRepository.findById(id);
-        if (firstname!=null) rider.setFirstname(firstname);
-        if (lastname!=null) rider.setLastname(lastname);
-        if (email!=null) rider.setEmail(email);
-        if (password!=null) rider.setPassword(password);
-        if (rating!=null) rider.setRating(rating);
-        if (status!=null) rider.setStatus(status);
-        this.riderRepository.save(rider);
+        if (rider==null) return null;
+        if (newDetails.getFirstname()!=null) rider.setFirstname(newDetails.getFirstname());
+        if (newDetails.getLastname()!=null) rider.setLastname(newDetails.getLastname());
+        if (newDetails.getEmail()!=null) rider.setEmail(newDetails.getEmail());
+        if (newDetails.getPassword()!=null) rider.setPassword(newDetails.getPassword());
+        if (newDetails.getRating()!=null) rider.setRating(newDetails.getRating());
+        if (newDetails.getStatus()!=null) rider.setStatus(newDetails.getStatus());
+        return this.riderRepository.save(rider);
     }
 }

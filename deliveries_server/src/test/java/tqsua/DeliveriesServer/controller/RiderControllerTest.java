@@ -82,13 +82,29 @@ class RiderControllerTest {
     }
 
     @Test
-    void whenUpdateRider_thenCorrectlyCallService() throws Exception {
+    void whenUpdateRider_thenReturnOk() throws Exception {
+        Rider newDetails = new Rider("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
+        given(service.updateRider(0L, newDetails)).willReturn(newDetails);
         //with all arguments
-        mvc.perform(put("/api/rider?id=0&firstname=A&lastname=B&email=a@b.c&password=abcdefgh&status=Offline&rating=5")).andExpect(status().isOk());
-        verify(service, VerificationModeFactory.times(1)).updateRider(0,"A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
+        mvc.perform(put("/api/rider/0").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
+                .andExpect(status().isOk());
+        verify(service, VerificationModeFactory.times(1)).updateRider(0, newDetails);
 
         //with less arguments
-        mvc.perform(put("/api/rider?id=0&lastname=B&email=a@b.c&status=Offline&rating=5")).andExpect(status().isOk());
-        verify(service, VerificationModeFactory.times(1)).updateRider(0,null, "B", "a@b.c", null, 5.0, "Offline");
+        newDetails = new Rider(null, "B", "a@b.c", null, 5.0, "Offline");
+        given(service.updateRider(0L, newDetails)).willReturn(newDetails);
+        mvc.perform(put("/api/rider/0").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
+                .andExpect(status().isOk());
+        verify(service, VerificationModeFactory.times(1)).updateRider(0, newDetails);
+    }
+
+    @Test
+    void whenUpdateNotExistentRider_thenReturnNotFound() throws Exception {
+        Rider newDetails = new Rider("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
+        given(service.updateRider(0L, newDetails)).willReturn(null);
+
+        mvc.perform(put("/api/rider/0").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
+                .andExpect(status().isNotFound());
+        verify(service, VerificationModeFactory.times(1)).updateRider(0, newDetails);
     }
 }

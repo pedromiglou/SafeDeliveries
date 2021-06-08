@@ -81,20 +81,6 @@ function App() {
             {current_user !== null && 
             <li className="nav-item">
               <DropdownButton title={<FaIcons.FaUserCircle size="60"/>} id="perfil-dropdown" className="navbar-dropdown">
-                <Dropdown.Divider/>
-                <Dropdown.ItemText>
-                  <div onClick={() => routeChange("profile")} className="modal-item">
-                    <h5>Profile</h5>
-                  </div>
-                  
-                </Dropdown.ItemText>
-                
-                {/* <Dropdown.ItemText>
-                  <div onClick={() => routeChange("settings")} className="modal-item">
-                    <h5>Settings</h5>
-                  </div>
-                </Dropdown.ItemText> */}
-                <Dropdown.Divider/>
                 <Dropdown.ItemText>
                   <div onClick={() => logout()} className="modal-item">
                     <h5>Logout</h5>
