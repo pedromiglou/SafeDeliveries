@@ -22,6 +22,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import tqsua.DeliveriesServer.model.Rider;
+import tqsua.DeliveriesServer.model.RiderDTO;
 import tqsua.DeliveriesServer.service.RiderService;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -67,8 +68,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         HashMap<String, String> map = new HashMap<>();
         
         Rider updatedRider = (Rider) auth.getPrincipal();
-        updatedRider.setStatus("Online");
-        riderService.updateRider(updatedRider.getId(), updatedRider);
+        RiderDTO r = new RiderDTO(null, null, null, null, null, "Online"); 
+        riderService.updateRider(updatedRider.getId(), r);
 
         map.put("id", String.valueOf(updatedRider.getId()));
         map.put("firstname", updatedRider.getFirstname());
