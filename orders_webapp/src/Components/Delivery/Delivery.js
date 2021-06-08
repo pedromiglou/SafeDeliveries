@@ -113,11 +113,17 @@ function Delivery() {
         {state === "Requesting" && 
             <div className="DeliveriesSection req">
                 <div className="DeliveryDetails">
-                    <h1>Fill the Details</h1>
-                    <h2>Pick Up Address</h2>
-                    <input id="pickup" type="text" placeholder="Pickup Address"/>
-                    <h2>Destiny Address</h2>
-                    <input id="destiny" type="text" placeholder="Destiny Address"/>
+                    <h1>Delivery Details</h1>
+                    <div className="div-addresses">
+                        <div>
+                            <label for="pickup">Pick Up Address</label>
+                            <input id="pickup" type="text" placeholder="Ex:Rua dos Clérigos"/>
+                        </div>
+                        <div>
+                            <label for="destiny">Destiny Address</label>
+                            <input id="destiny" type="text" placeholder="Ex:Rua Manuel Boa Ventura"/>
+                        </div>
+                    </div>
                     
                     <div className="item-Table">
                         <h4>Items</h4>
@@ -137,9 +143,9 @@ function Delivery() {
                                 </div>
                             </li>
 
-                            {/* {  ( (current_user.vehicles === null) || (current_user.vehicles && current_user.vehicles.length === 0) ) && 
+                            {  ( (items === null) || (items && items === 0) ) && 
                                 <p>Do not own any vehicle</p>
-                            } */}
+                            }
                             
                             {Object.entries(items).map(([key,value]) => (
                                 <li key={key} className="listP-item" id={"id_" + value["name"]}>
