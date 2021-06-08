@@ -114,7 +114,6 @@ function App() {
               <Link to="/login" id="login" >
                 Login
               </Link> 
-              {/*<button id="login" onClick={() => setUser({user_type: "logged", username: ""})}>Login</button>*/}
             </li>
           }
 
