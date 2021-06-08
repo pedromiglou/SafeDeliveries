@@ -80,6 +80,25 @@ public class VehicleControllerIT {
                 .andExpect(status().isNotFound());
     }
 
+
+    @Test
+    void whenGetVehiclesByRiderId_thenReturnVehicles() throws Exception {
+        Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 4.0, "Offline");
+        riderRepository.save(rider);
+        Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
+        Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 365.0, "BBBBBB");
+        v1.setRider(rider);
+        v2.setRider(rider);
+        repository.save(v1);
+        repository.save(v2);
+
+
+        mvc.perform(get("/api/vehiclesbyrider?id="+rider.getId()).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)));
+    }
+
+
     @Test
     void whenPostNewVehicle_thenCreateIt() throws Exception {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");

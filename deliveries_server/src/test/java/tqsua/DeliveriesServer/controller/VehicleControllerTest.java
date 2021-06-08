@@ -21,6 +21,7 @@ import java.util.ArrayList;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -89,6 +90,26 @@ public class VehicleControllerTest {
                 .andExpect(status().isNotFound());
         verify(service, VerificationModeFactory.times(1)).getVehicleById(-1);
     }
+
+    @Test
+    void whenGetVehiclesByRiderId_thenReturnVehicles() throws Exception {
+        Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 4.0, "Offline");
+        Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
+        Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 365.0, "AAAAAA");
+        v1.setRider(rider);
+        v2.setRider(rider);
+        ArrayList<Vehicle> vehicles = new ArrayList<>();
+        vehicles.add(v1);
+        vehicles.add(v2);
+
+        given(service.getVehiclesByRiderId(rider.getId())).willReturn(vehicles);
+
+        mvc.perform(get("/api/vehiclesbyrider?id="+rider.getId()).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)));
+        verify(service, VerificationModeFactory.times(1)).getVehiclesByRiderId(anyLong());
+    }
+
 
     @Test
     void whenPostNewVehicle_thenCreateIt() throws Exception {

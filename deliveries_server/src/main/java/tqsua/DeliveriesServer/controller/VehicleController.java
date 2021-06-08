@@ -40,7 +40,7 @@ public class VehicleController {
     }
 
     @GetMapping(path="/vehiclesbyrider")
-    public ArrayList<VehicleDTO> getVehicleByRiderId(@RequestParam(name="id") long id) {
+    public ArrayList<VehicleDTO> getVehiclesByRiderId(@RequestParam(name="id") long id) {
         ArrayList<Vehicle> vehicleList = this.vehicleService.getVehiclesByRiderId(id);
         ArrayList<VehicleDTO> response = new ArrayList<>();
         for (Vehicle vehicle: vehicleList) {
