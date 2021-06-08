@@ -6,10 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.ArrayList;
+import java.util.*;
 
 
 import javax.persistence.Column;
@@ -177,5 +174,31 @@ public class Rider implements Serializable, UserDetails {
                 ", rating=" + rating +
                 ", status='" + status + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Rider rider = (Rider) o;
+
+        if (!Objects.equals(firstname, rider.firstname)) return false;
+        if (!Objects.equals(lastname, rider.lastname)) return false;
+        if (!Objects.equals(email, rider.email)) return false;
+        if (!Objects.equals(password, rider.password)) return false;
+        if (!Objects.equals(rating, rider.rating)) return false;
+        return Objects.equals(status, rider.status);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = firstname != null ? firstname.hashCode() : 0;
+        result = 31 * result + (lastname != null ? lastname.hashCode() : 0);
+        result = 31 * result + (email != null ? email.hashCode() : 0);
+        result = 31 * result + (password != null ? password.hashCode() : 0);
+        result = 31 * result + (rating != null ? rating.hashCode() : 0);
+        result = 31 * result + (status != null ? status.hashCode() : 0);
+        return result;
     }
 }
