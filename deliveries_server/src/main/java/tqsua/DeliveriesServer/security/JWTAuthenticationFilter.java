@@ -13,21 +13,29 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
 import tqsua.DeliveriesServer.model.Rider;
+import tqsua.DeliveriesServer.model.RiderDTO;
+import tqsua.DeliveriesServer.service.RiderService;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private AuthenticationManager authenticationManager;
 
-    public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
+    @Autowired
+    private RiderService riderService;
 
-        setFilterProcessesUrl("/api/login");
+    public JWTAuthenticationFilter(AuthenticationManager authenticationManager, ApplicationContext ctx) {
+        this.authenticationManager = authenticationManager;
+        this.riderService= ctx.getBean(RiderService.class);
+        setFilterProcessesUrl("/api/login"); 
     }
 
     @Override
@@ -58,12 +66,17 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
 
         HashMap<String, String> map = new HashMap<>();
-        map.put("id", String.valueOf(((Rider) auth.getPrincipal()).getId()));
-        map.put("firstname", ((Rider) auth.getPrincipal()).getFirstname());
-        map.put("lastname", ((Rider) auth.getPrincipal()).getLastname());
-        map.put("email", ((Rider) auth.getPrincipal()).getEmail());
-        map.put("status", ((Rider) auth.getPrincipal()).getStatus());
-        map.put("rating", String.valueOf(((Rider) auth.getPrincipal()).getRating()));
+        
+        Rider updatedRider = (Rider) auth.getPrincipal();
+        RiderDTO r = new RiderDTO(null, null, null, null, null, "Online"); 
+        riderService.updateRider(updatedRider.getId(), r);
+
+        map.put("id", String.valueOf(updatedRider.getId()));
+        map.put("firstname", updatedRider.getFirstname());
+        map.put("lastname", updatedRider.getLastname());
+        map.put("email", updatedRider.getEmail());
+        map.put("status", updatedRider.getStatus());
+        map.put("rating", String.valueOf(updatedRider.getRating()));
         map.put("token", token);
         String json = new ObjectMapper().writeValueAsString(map);
         res.getWriter().write(json);

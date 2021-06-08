@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
 import tqsua.DeliveriesServer.model.Rider;
+import tqsua.DeliveriesServer.model.RiderDTO;
 import tqsua.DeliveriesServer.repository.RiderRepository;
 
 @Service
@@ -37,7 +38,7 @@ public class RiderService {
         return this.riderRepository.save(rider);
     }
 
-    public Rider updateRider(long id, Rider newDetails) {
+    public Rider updateRider(long id, RiderDTO newDetails) {
         Rider rider = this.riderRepository.findById(id);
         if (rider==null) return null;
         if (newDetails.getFirstname()!=null) rider.setFirstname(newDetails.getFirstname());

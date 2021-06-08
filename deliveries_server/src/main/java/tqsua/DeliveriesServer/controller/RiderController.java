@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.server.ResponseStatusException;
 import tqsua.DeliveriesServer.model.Rider;
+import tqsua.DeliveriesServer.model.RiderDTO;
 import tqsua.DeliveriesServer.service.RiderService;
 
 import javax.validation.Valid;
@@ -33,9 +34,9 @@ public class RiderController {
     }
 
     @PutMapping(path="/rider/{id}")
-    public Rider updateRider(@PathVariable(value="id") Long id, @Valid @RequestBody Rider rider) {
-        rider = riderService.updateRider(id, rider);
-        if (rider==null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        return rider;
+    public Rider updateRider(@PathVariable(value="id") Long id, @Valid @RequestBody RiderDTO rider) {
+        Rider r = riderService.updateRider(id, rider);
+        if (r==null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return r;
     }
 }

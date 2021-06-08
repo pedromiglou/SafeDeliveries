@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import tqsua.DeliveriesServer.DeliveriesServerApplication;
 import tqsua.DeliveriesServer.JsonUtil;
 import tqsua.DeliveriesServer.model.Rider;
+import tqsua.DeliveriesServer.model.RiderDTO;
 import tqsua.DeliveriesServer.repository.RiderRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,21 +74,21 @@ public class RiderControllerIT {
     void whenUpdateRider_thenReturnOk() throws Exception {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
         riderRepository.save(rider);
-        Rider newDetails = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
+        RiderDTO newDetails = new RiderDTO("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
 
         //with all arguments
         mvc.perform(put("/api/rider/"+String.valueOf(rider.getId())).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
                 .andExpect(status().isOk());
 
         //with less arguments
-        newDetails = new Rider(null, "B", "a@b.c", null, 5.0, "Offline");
+        newDetails = new RiderDTO(null, "B", "a@b.c", null, 5.0, "Offline");
         mvc.perform(put("/api/rider/"+String.valueOf(rider.getId())).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
                 .andExpect(status().isOk());
     }
 
     @Test
     void whenUpdateNotExistentRider_thenReturnNotFound() throws Exception {
-        Rider newDetails = new Rider("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
+        RiderDTO newDetails = new RiderDTO("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
 
         mvc.perform(put("/api/rider/0").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
                 .andExpect(status().isNotFound());

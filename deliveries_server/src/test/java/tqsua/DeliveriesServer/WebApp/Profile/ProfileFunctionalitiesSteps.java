@@ -20,7 +20,7 @@ public class ProfileFunctionalitiesSteps {
     private HomePage home;
 
     // Background
-    @Given("I access {string}")
+    @Given("I go to {string}")
     public void i_access(String url) {
         home = new HomePage(driver, url);
         assertThat(home.pageLoaded(), is(true));
