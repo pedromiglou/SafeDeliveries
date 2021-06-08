@@ -26,8 +26,10 @@ import AuthService from './Services/auth.service';
 import RiderService from './Services/rider.service';
 
 function App() {
-  const [state, setState] = useState("Online");
-  const current_user = AuthService.getCurrentUser();
+    
+  var current_user = AuthService.getCurrentUser();
+
+  var [state, setState] = useState(current_user === null ? "Online": current_user.status);
 
   useEffect(() => {
 
@@ -56,6 +58,12 @@ function App() {
   function routeChange(path){ 
       let new_url = '/' + path; 
       history.push(new_url);
+  }
+
+  async function changeStatus(id, status) {
+    await RiderService.changeStatus(id, status);
+    current_user.status = status
+    sessionStorage.setItem("user", JSON.stringify(current_user));
   }
 
   async function logout(){
@@ -117,17 +125,17 @@ function App() {
                   <h5>Status</h5>
                   <hr></hr>
                   <div className="Status">
-                    <div id="state-online" className="Status-item" onClick={() => {RiderService.changeStatus(current_user.id, "Online"); setState("Online")}}>
+                    <div id="state-online" className="Status-item" onClick={() => {changeStatus(current_user.id, "Online"); setState("Online")}}>
                       <BsIcons.BsCircleFill className="state-icon online"/>
                       <span>Online</span>
                       
                     </div>
-                    <div id="state-delivering" className="Status-item" onClick={() => {RiderService.changeStatus(current_user.id, "Delivering"); setState("Delivering")}}>
+                    <div id="state-delivering" className="Status-item" onClick={() => {changeStatus(current_user.id, "Delivering"); setState("Delivering")}}>
                       <BsIcons.BsCircleFill className="state-icon delivering"/>
                       <span>Delivering</span>
                       
                     </div>
-                    <div id="state-off" className="Status-item" onClick={() => {RiderService.changeStatus(current_user.id, "Offline"); setState("Offline")}}>
+                    <div id="state-off" className="Status-item" onClick={() => {changeStatus(current_user.id, "Offline"); setState("Offline")}}>
                       <BsIcons.BsCircle className="state-icon off"/>
                       <span>Offline</span>
                       
