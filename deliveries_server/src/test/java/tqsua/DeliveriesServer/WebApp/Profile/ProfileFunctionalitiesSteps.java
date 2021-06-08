@@ -1,8 +1,10 @@
-package tqsua.DeliveriesServer.WebApp;
+package tqsua.DeliveriesServer.WebApp.Profile;
 
 import io.cucumber.java.en.*;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import tqsua.DeliveriesServer.WebApp.HomePage;
+import tqsua.DeliveriesServer.WebApp.ProfilePage;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
