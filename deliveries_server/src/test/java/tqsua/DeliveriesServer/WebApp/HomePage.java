@@ -102,13 +102,10 @@ public class HomePage {
         this.login.click();
     }
 
-    public void clickLogo(){
-        this.profile_logo.click();
-    }
-
     public void  clickProfile(){
         this.profile.click();
     }
+
     public boolean isLogin() {
         return driver.findElement(By.cssSelector("h2")).getText().equals("Login");
     }
@@ -169,8 +166,11 @@ public class HomePage {
         return null;
     }
 
+    public void clickLogo(){
+        this.profile_logo.click();
+    }
+
     public void changeStatus(String status) {
-        driver.findElement(By.id("perfil-dropdown")).click();
         switch (status) {
             case "Online":
                 driver.findElement(By.id("state-online")).click();

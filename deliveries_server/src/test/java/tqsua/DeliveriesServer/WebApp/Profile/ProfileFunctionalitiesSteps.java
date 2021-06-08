@@ -1,8 +1,14 @@
-package tqsua.DeliveriesServer.WebApp;
+package tqsua.DeliveriesServer.WebApp.Profile;
 
 import io.cucumber.java.en.*;
+import org.apache.http.client.ClientProtocolException;
+import org.json.JSONException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import tqsua.DeliveriesServer.WebApp.HomePage;
+import tqsua.DeliveriesServer.WebApp.ProfilePage;
+
+import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -14,19 +20,22 @@ public class ProfileFunctionalitiesSteps {
     private HomePage home;
 
     // Background
-    @Given("I access {string}")
+    @Given("I go to {string}")
     public void i_access(String url) {
         home = new HomePage(driver, url);
         assertThat(home.pageLoaded(), is(true));
     }
+
     @And("I am logged into my account")
-    public void i_logged_into_account(){
-        home.clickLogin();
+    public void i_logged_into_account() throws JSONException, ClientProtocolException, IOException, InterruptedException{
+        home.login();
     }
-    @When("I click on the logo")
+
+    @When("I click on the user-logo")
     public void click_on_logo(){
         home.clickLogo();
     }
+
     @And("I click on Profile")
     public void click_on_profile(){
         home.clickProfile();
@@ -35,22 +44,27 @@ public class ProfileFunctionalitiesSteps {
     //Scenario: Add vehicle
     @When("I want to add a new vehicle, I have to click on button add")
     public void i_click_on_button_add() {
-
+        profile = new ProfilePage(driver);
+        profile.clickAdd();
     }
 
-    @Then("I have to fill the maker\\({string}), model\\({string}), capacity\\({string}) and type\\({string}) fields")
-    public void it_should_not_have_the_functionalities_and(String maker, String model, String capacity, String type) {
-
+    @Then("I have to fill the registration\\({string}), maker\\({string}), model\\({string}), capacity\\({string}) and type\\({string}) fields")
+    public void i_fill_fields(String registration, String maker, String model, String capacity, String type) {
+        profile.setInputs("registration", registration);
+        profile.setInputs("maker", maker);
+        profile.setInputs("model", model);
+        profile.setInputs("capacity", capacity);
+        profile.setInputs("type", type);
     }
 
     @Then("I have to click on button confirm")
-    public void i_click_on_button_confirm(String functionality) {
-
+    public void i_click_on_button_confirm() {
+        profile.clickConfirm();
     }
 
-    @And("Check that the vehicle added is in the table")
-    public void check_vehicle_added_is_in_table(){
-
+    @And("Check that the vehicle with registration \\({string}) is in the table")
+    public void check_vehicle_added_is_in_table(String registration){
+        assertThat(profile.checkAdded(registration), is(registration));
     }
 
     //Scenario: Edit vehicle

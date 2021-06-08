@@ -1,4 +1,4 @@
-package tqsua.DeliveriesServer.WebApp;
+package tqsua.DeliveriesServer.WebApp.Navbar;
 
 import io.cucumber.java.en.*;
 import org.openqa.selenium.WebDriver;
@@ -13,6 +13,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.json.JSONException;
 import org.junit.jupiter.api.extension.ExtendWith;
 import io.github.bonigarcia.seljup.SeleniumJupiter;
+import tqsua.DeliveriesServer.WebApp.HomePage;
 
 @ExtendWith(SeleniumJupiter.class)
 public class NavbarFunctionalitiesSteps {
@@ -67,6 +68,7 @@ public class NavbarFunctionalitiesSteps {
     
     @When("I change status to {string}")
     public void change_status(String status) {
+        home.clickLogo();
         home.changeStatus(status);
     }
 }

@@ -29,7 +29,7 @@ class VehicleService {
 
     }
 
-    async editVehicle(id, registration, brand,  model, category, capacity, idRider) {
+    async editVehicle(id, registration, brand,  model, category, capacity) {
 
         let vehicle= {
             registration: registration,

@@ -262,7 +262,7 @@ function Profile() {
                         { current_user.vehicles && current_user.vehicles.length > 0 && Object.entries(current_user.vehicles).map(([key,value]) => (
                             <li key={value["registration"]} className="listP-item" id={"id_" + value["registration"]}>
                                 <div>
-                                    <input type="text" id={"registration_" + key}  readOnly placeholder={value["registration"]}></input>
+                                    <input type="text" id={"registration_" + key} name={"registration_" + value["registration"]}  readOnly placeholder={value["registration"]}></input>
                                 </div>
 
                                 <div>
@@ -315,8 +315,8 @@ function Profile() {
                         <button className="button-add" id="button-add" onClick={() => setNewVehicle(true)}>Add <RiIcons.RiAddFill/></button>
 
                         <div className="both-buttons" id="both_buttons" style={{display:"none"}}>
-                            <button onClick={() => {setNewVehicle(false); addVehicle(); }} type="button" className="button-details">Confirm</button>
-                            <button onClick={() => setNewVehicle(false)} className="button-details cancelar">Cancel</button>
+                            <button onClick={() => {setNewVehicle(false); addVehicle(); }} type="button" className="button-details" id="button-nconfirm">Confirm</button>
+                            <button onClick={() => setNewVehicle(false)} className="button-details cancelar" id="button-ncancel">Cancel</button>
                         </div>
                     </div>
                     
