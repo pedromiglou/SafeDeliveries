@@ -68,6 +68,7 @@ public class NavbarFunctionalitiesSteps {
     
     @When("I change status to {string}")
     public void change_status(String status) {
+        home.clickLogo();
         home.changeStatus(status);
     }
 }

@@ -19,23 +19,26 @@ class RiderService {
         }
         
         async changeRider(id, fname, lname, email) {
-            var url =  'http://localhost:8080/api/rider?id='+id
+            let rider= {}
+
+            var url =  'http://localhost:8080/api/rider/'+id
 
             if (fname !== undefined && fname !== null && fname !== "") {
-                url = url + "&firstname=" + fname
+                rider.firstname = fname
             }
 
             if (lname !== undefined && lname !== null && lname !== "") {
-                url = url + "&lastname=" + lname
+                rider.lastname = lname
             }
 
             if (email !== undefined && email !== null && email !== "") {
-                url = url + "&email=" + email
+                rider.email = email
             }
     
             await fetch(url, {
                 method:'PUT',
-                headers:{'Content-type':'application/json'}
+                headers:{'Content-type':'application/json'},
+                body: JSON.stringify(rider)
             });
     
             return;       
