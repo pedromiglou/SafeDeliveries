@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import tqsua.DeliveriesServer.service.RiderService;
 import tqsua.DeliveriesServer.model.Rider;
+import tqsua.DeliveriesServer.model.RiderDTO;
 import tqsua.DeliveriesServer.JsonUtil;
 
 import static org.hamcrest.Matchers.*;
@@ -83,16 +84,17 @@ class RiderControllerTest {
 
     @Test
     void whenUpdateRider_thenReturnOk() throws Exception {
-        Rider newDetails = new Rider("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
-        given(service.updateRider(0L, newDetails)).willReturn(newDetails);
+        RiderDTO newDetails = new RiderDTO("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
+        Rider rider = new Rider("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
+        given(service.updateRider(0L, newDetails)).willReturn(rider);
         //with all arguments
         mvc.perform(put("/api/rider/0").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
                 .andExpect(status().isOk());
         verify(service, VerificationModeFactory.times(1)).updateRider(0, newDetails);
 
         //with less arguments
-        newDetails = new Rider(null, "B", "a@b.c", null, 5.0, "Offline");
-        given(service.updateRider(0L, newDetails)).willReturn(newDetails);
+        newDetails = new RiderDTO(null, "B", "a@b.c", null, 5.0, "Offline");
+        given(service.updateRider(0L, newDetails)).willReturn(rider);
         mvc.perform(put("/api/rider/0").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
                 .andExpect(status().isOk());
         verify(service, VerificationModeFactory.times(1)).updateRider(0, newDetails);
@@ -100,7 +102,7 @@ class RiderControllerTest {
 
     @Test
     void whenUpdateNotExistentRider_thenReturnNotFound() throws Exception {
-        Rider newDetails = new Rider("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
+        RiderDTO newDetails = new RiderDTO("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
         given(service.updateRider(0L, newDetails)).willReturn(null);
 
         mvc.perform(put("/api/rider/0").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))

@@ -8,7 +8,7 @@ import * as FiIcons from 'react-icons/fi';
 import * as FaIcons from 'react-icons/fa';
 
 /* router */
-import {Link, Route, Switch, withRouter, useHistory} from 'react-router-dom';
+import {Link, Route, Switch, withRouter} from 'react-router-dom';
 
 /* Components */
 import Home from './Components/Home/Home';
@@ -22,12 +22,15 @@ import AuthService from './Services/auth.service';
 
 function App() {
   const current_user = AuthService.getCurrentUser();
+  /*
   const history = useHistory();
 
+  
   function routeChange(path){ 
       let new_url = '/' + path; 
       history.push(new_url);
   }
+  */
 
   function logout(){
     sessionStorage.removeItem("user_orders");
