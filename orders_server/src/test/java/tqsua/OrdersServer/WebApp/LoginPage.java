@@ -1,4 +1,4 @@
-package tqsua.DeliveriesServer.WebApp;
+package tqsua.OrdersServer.WebApp;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
