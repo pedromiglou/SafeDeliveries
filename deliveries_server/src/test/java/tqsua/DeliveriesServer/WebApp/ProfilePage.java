@@ -31,17 +31,14 @@ public class ProfilePage {
     @FindBy(id= "n_capacity")
     private WebElement n_capacity;
 
+    /*
     @FindBy(id= "button_nconfirm")
     private WebElement button_nconfirm;
+    */
 
     public ProfilePage(WebDriver driver) {
         this.driver = driver;
         PageFactory.initElements(driver, this);
-    }
-
-    public void clickAdd() {
-        //this.button_add.click();
-        driver.findElement(By.id("button-add")).click();
     }
 
     public void setInputs(String id, String value){
@@ -65,10 +62,53 @@ public class ProfilePage {
     }
 
     public void clickConfirm() {
-        this.button_nconfirm.click();
+        driver.findElement(By.id("button-nconfirm")).click();
     }
 
     public String checkAdded(String registration) {
         return driver.findElement(By.name("registration_" + registration)).getAttribute("value");
+    }
+
+    public String checkEdited(String registration, String id){
+        String value;
+        switch (id) {
+            case "registration":
+                value = driver.findElement(By.name("registration_" + registration)).getAttribute("value");
+                break;
+            case "brand":
+                value = driver.findElement(By.name("brand_" + registration)).getAttribute("value");
+                break;
+            case "model":
+                value = driver.findElement(By.name("model_" + registration)).getAttribute("value");
+                break;
+            case "category":
+                value = driver.findElement(By.name("category_" + registration)).getAttribute("value");
+                break;
+            case "capacity":
+                value = driver.findElement(By.name("capacity_" + registration)).getAttribute("value");
+                break;
+            default:
+                value="";
+        }
+        return value;
+    }
+
+    public boolean checkDeleted(String registration){
+        if ( driver.findElements(By.name("registration_" + registration)).isEmpty() ) {
+            return false;
+        }
+        return true;
+    }
+
+    public void clickAdd() {
+        driver.findElement(By.id("button-add")).click();
+    }
+
+    public void clickEdit(String registration) {
+        driver.findElement(By.id("edit_" + registration)).click();
+    }
+
+    public void clickDelete(String registration){
+        driver.findElement(By.id("del_" + registration)).click();
     }
 }

@@ -13,11 +13,10 @@ Feature: Profile Area
     And Check that the vehicle with registration ("05-GC-32") is in the table
 
   Scenario: Edit vehicles
-    When I want to edit a vehicle, I Click on the pencil icon of the vehicle "Honda PCX"
+    When I want to edit a vehicle, I Click on the pencil icon of the vehicle with registration ("05-GC-32")
     Then Change the field referring to "capacity" to "10kg" and confirm
-    And Check that the vehicle "Honda PCX" was edited
+    And Check that the vehicle with registration ("05-GC-32") was edited, and now has in the field "capacity" the value "10kg"
 
   Scenario: Delete vehicles
-    When I want to delete a vehicle, I click on the delete icon of the vehicle "BMW Z3"
-    Then I click on button confirm
-    And Check that the vehicle "BMW Z3" is no longer in the table
+    When I want to delete a vehicle, I click on the delete icon of the vehicle with registration ("05-GC-32")
+    Then Check that the vehicle with registration ("05-GC-32") is no longer in the table

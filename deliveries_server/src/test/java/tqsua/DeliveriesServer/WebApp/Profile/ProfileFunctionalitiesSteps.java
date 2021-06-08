@@ -68,34 +68,29 @@ public class ProfileFunctionalitiesSteps {
     }
 
     //Scenario: Edit vehicle
-    @When("I want to edit a vehicle, I Click on the pencil icon of the vehicle {string}")
-    public void i_click_on_pencil_icon(String vehicle){
-
+    @When("I want to edit a vehicle, I Click on the pencil icon of the vehicle with registration \\({string})")
+    public void i_click_on_pencil_icon(String registration){
+        profile.clickEdit(registration);
     }
 
     @Then("Change the field referring to {string} to {string} and confirm")
-    public void change_field(String field, String new_field_value){
-
+    public void change_field(String id, String value){
+        profile.setInputs(id, value);
     }
 
-    @And("Check that the vehicle {string} was edited")
-    public void check_vehicle_edited(String vehicle){
-
+    @And("Check that the vehicle with registration \\({string}) was edited, and now has in the field {string} the value {string}")
+    public void check_vehicle_edited(String registration, String id, String value){
+        assertThat(profile.checkEdited(registration, id), is(value));
     }
 
     //Scenario: Delete vehicle
-    @When("I want to delete a vehicle, I click on the delete icon of the vehicle {string}")
-    public void i_click_on_delete_icon(String vehicle) {
-
+    @When("I want to delete a vehicle, I click on the delete icon of the vehicle with registration \\({string})")
+    public void i_click_on_delete_icon(String registration) {
+        profile.clickDelete(registration);
     }
 
-    @Then("I click on button confirm")
-    public void i_click_button_confirm() {
-
-    }
-
-    @And("Check that the vehicle {string} is no longer in the table")
-    public void checkThatItNoLongerExistsInTheTable() {
-
+    @Then("Check that the vehicle with registration \\({string}) is no longer in the table")
+    public void checkThatItNoLongerExistsInTheTable(String registration) {
+        assertThat(profile.checkDeleted(registration), is(false)) ;
     }
 }

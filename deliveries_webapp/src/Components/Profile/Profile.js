@@ -266,26 +266,26 @@ function Profile() {
                                 </div>
 
                                 <div>
-                                    <input type="text" id={"brand_" + key} readOnly placeholder={value["brand"]}></input>
+                                    <input type="text" id={"brand_" + key} name={"brand_" + value["registration"]} readOnly placeholder={value["brand"]}></input>
                                 </div>
                                 
                                 <div>
-                                    <input type="text" id={"model_" + key} readOnly placeholder={value["model"]}></input>
+                                    <input type="text" id={"model_" + key} name={"model_" + value["registration"]} readOnly placeholder={value["model"]}></input>
                                 </div>
 
                                 <div>
-                                    <input type="text" id={"category_" + key} readOnly placeholder={value["category"]}></input>
+                                    <input type="text" id={"category_" + key} name={"category_" + value["registration"]} readOnly placeholder={value["category"]}></input>
                                 </div>
 
                                 <div>
-                                    <input type="text" id={"capacity_" + key} readOnly placeholder={value["capacity"] + "kg"}></input>
+                                    <input type="text" id={"capacity_" + key} name={"capacity_" + value["registration"]} readOnly placeholder={value["capacity"] + "kg"}></input>
                                 </div>
 
                                 <div className="actions">
                                     
                                     <div id={"icons_ed" + key}>
-                                        <MdIcons.MdModeEdit size={20} title="edit" onClick={() => setCarEditable({key: key, car: value["registration"], editable: true})} />
-                                        <MdIcons.MdDelete size={20} title="delete" onClick={() => removeVehicle(value["id"])}/>
+                                        <MdIcons.MdModeEdit size={20} title="edit" id={"edit_" + value["registration"]} onClick={() => setCarEditable({key: key, car: value["registration"], editable: true})} />
+                                        <MdIcons.MdDelete size={20} title="delete" id={"del_" + value["registration"]} onClick={() => removeVehicle(value["id"])}/>
                                     </div>
                                         
                                     

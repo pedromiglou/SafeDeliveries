@@ -60,7 +60,6 @@ public class NavbarFunctionalitiesSteps {
     public void it_should_have_status(String status) {
         assertThat(home.checkStatus(status), is(true));
         if (status.equals("Offline")) {
-            System.out.println("entrei aqui");
             driver.quit();
         }
     }
