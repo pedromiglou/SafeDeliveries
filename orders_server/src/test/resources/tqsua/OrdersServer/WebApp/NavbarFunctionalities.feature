@@ -1,7 +1,7 @@
 Feature: Riders navbar
 
   Background:
-    Given I navigate to "http://localhost:3000/"
+    Given I navigate to "http://localhost:3001/"
 
   Scenario: Navbar without Account
     When I am not logged in my account
