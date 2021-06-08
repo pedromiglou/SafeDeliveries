@@ -17,12 +17,11 @@ import History from './Components/History/History';
 import Login from './Components/Login/Login';
 
 /* React */
-import { useState } from 'react';
+import AuthService from './Services/auth.service';
 
 
 function App() {
-  const [user, setUser] = useState({user_type: "not_logged", username: ""});
-
+  const current_user = AuthService.getCurrentUser();
   const history = useHistory();
 
   function routeChange(path){ 
@@ -31,7 +30,8 @@ function App() {
   }
 
   function logout(){
-    setUser({user_type: "not_logged", username: ""});
+    sessionStorage.removeItem("user_orders");
+    window.location.assign("http://localhost:3001/");
   }
 
   return (
@@ -49,7 +49,7 @@ function App() {
                 Home
               </Link>
             </li>
-            {user.user_type === "logged" && 
+            {current_user !== null && 
             <>
               <li className="nav-item">
                 <Link to="/delivery" id="request-tab">
@@ -70,16 +70,15 @@ function App() {
               </Link>
             </li>
 
-            {user.user_type === "not_logged" &&
+            {current_user === null && 
               <li className="nav-item">
-                {/* <Link to="/login">
+                <Link to="/login" id="login">
                   Login
-                </Link> */}
-                <button id="login" onClick={() => setUser({user_type: "logged", username: ""})}>Login</button>
+                </Link>
               </li>
             }
 
-            {user.user_type === "logged" && 
+            {current_user !== null && 
             <li className="nav-item">
               <DropdownButton title={<FaIcons.FaUserCircle size="60"/>} id="perfil-dropdown" className="navbar-dropdown">
                 <Dropdown.Divider/>
