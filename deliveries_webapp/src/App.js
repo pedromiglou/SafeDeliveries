@@ -25,6 +25,8 @@ import { useEffect, useState } from 'react';
 import AuthService from './Services/auth.service';
 import RiderService from './Services/rider.service';
 
+import {urlWeb} from "./data/data";
+
 function App() {
     
   var current_user = AuthService.getCurrentUser();
@@ -69,7 +71,7 @@ function App() {
   async function logout(){
     await RiderService.changeStatus(current_user.id, "Offline")
     sessionStorage.removeItem("user");
-    window.location.assign("http://localhost:3000/");
+    window.location.assign(urlWeb);
   }
 
   return (

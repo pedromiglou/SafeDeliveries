@@ -1,7 +1,9 @@
+import {urlAPI} from "./../data/data";
+
 class VehicleService {
 
     async getVehiclesByRiderId(riderId) {
-        var url = 'http://localhost:8080/api/vehiclesbyrider?id=' + riderId;
+        var url = urlAPI + 'api/vehiclesbyrider?id=' + riderId;
         var res = await fetch(url);
         return res.json();
     }
@@ -17,7 +19,7 @@ class VehicleService {
             rider: idRider
         }
 
-        var url =  'http://localhost:8080/api/vehicle'
+        var url = urlAPI + 'api/vehicle'
 
         await fetch(url, {
             method:'POST',
@@ -40,7 +42,7 @@ class VehicleService {
         }
         console.log(vehicle)
 
-        var url =  'http://localhost:8080/api/vehicle/'+id
+        var url = urlAPI + 'api/vehicle/'+id
 
         await fetch(url, {
             method:'PUT',
@@ -54,7 +56,7 @@ class VehicleService {
 
     async removeVehicle(id) {
 
-        var url =  'http://localhost:8080/api/vehicle/'+id
+        var url = urlAPI + 'api/vehicle/'+id
 
         await fetch(url, {
             method:'DELETE',

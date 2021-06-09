@@ -233,7 +233,7 @@ deploy-API-ORDERS:
     - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY"
     - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker pull $TAG_COMMIT_API_ORDERS"
     - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker container rm -f orders_api || true"
-    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run --network host -d -p 8080:8080 --name orders_api $TAG_COMMIT_API_ORDERS"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run --network host -d -p 8081:8080 --name orders_api $TAG_COMMIT_API_ORDERS"
   environment:
     name: production
     url: http://$SERVER_IP

@@ -19,6 +19,8 @@ import Login from './Components/Login/Login';
 /* React */
 import AuthService from './Services/auth.service';
 
+import {urlWeb} from "./data/data";
+
 
 function App() {
   const current_user = AuthService.getCurrentUser();
@@ -34,7 +36,7 @@ function App() {
 
   function logout(){
     sessionStorage.removeItem("user_orders");
-    window.location.assign("http://localhost:3001/");
+    window.location.assign(urlWeb);
   }
 
   return (
