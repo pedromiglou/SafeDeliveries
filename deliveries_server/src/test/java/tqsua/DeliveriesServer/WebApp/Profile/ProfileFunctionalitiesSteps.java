@@ -102,4 +102,23 @@ public class ProfileFunctionalitiesSteps {
         assertThat(profile.checkDeleted(), is(true)) ;
         driver.quit();
     }
+
+    //Last name edit
+    @When("I want to update my last name, I click on edit icon on top")
+    public void iWantToUpdateMyLastNameIClickOnEditIconOnTop() {
+        profile = new ProfilePage(driver);
+        profile.clickEditDetails();
+    }
+
+    @Then("Change the {string} to {string} and confirm")
+    public void changeTheLastNameToAndConfirm(String id, String value) {
+        profile.changeDetail(id, value);
+        profile.confirmDetail();
+    }
+
+    @And("Check that the {string} is {string}")
+    public void checkThatTheLastNameIs(String id, String value) {
+        assertThat(profile.checkDetail(id, value), is(true));
+        driver.quit();
+    }
 }

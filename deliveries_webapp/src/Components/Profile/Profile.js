@@ -50,10 +50,12 @@ function Profile() {
         let email_inp = document.getElementById("email");
         let fname_inp = document.getElementById("fname");
         let lname_inp = document.getElementById("lname");
+        let both_buttons = document.getElementById("buttons-details");
 
         email_inp.readOnly = false;
         fname_inp.readOnly = false;
         lname_inp.readOnly = false;
+        both_buttons.style.display = "flex";
 
         email_inp.style.borderBottom = "1px solid green"
         fname_inp.style.borderBottom = "1px solid green"
@@ -64,10 +66,12 @@ function Profile() {
         let email_inp = document.getElementById("email");
         let fname_inp = document.getElementById("fname");
         let lname_inp = document.getElementById("lname");
+        let both_buttons = document.getElementById("buttons-details");
 
         email_inp.readOnly = true;
         fname_inp.readOnly = true;
         lname_inp.readOnly = true;
+        both_buttons.style.display = "none";
 
         email_inp.style.borderBottom = "1px solid lightcoral"
         fname_inp.style.borderBottom = "1px solid lightcoral"
@@ -201,7 +205,7 @@ function Profile() {
             <div className="form-area">
                 <div className="details-edit">
                     <h2>Profile Details</h2>
-                    <MdIcons.MdModeEdit size={35} className="edit-icon" title="edit" onClick={() => make_fields_editable()}/>
+                    <MdIcons.MdModeEdit size={35} id="edit-icon" className="edit-icon" title="edit" onClick={() => make_fields_editable()}/>
                 </div>
                 
                 <form>
@@ -220,9 +224,9 @@ function Profile() {
                         </div>
                     </div>
                     <div className="button-div">
-                        <div className="both-buttons">
-                            <button onClick={() => {make_fields_uneditable(); submitFunction();}} type="button" className="button-details">Confirm</button>
-                            <button onClick={() => make_fields_uneditable()} type="button" className="button-details cancelar">Cancel</button>
+                        <div id="buttons-details" style={{display:"none"}} className="both-buttons">
+                            <button id="confirm-detail" onClick={() => {make_fields_uneditable(); submitFunction();}} type="button" className="button-details">Confirm</button>
+                            <button id="cancel-detail" onClick={() => make_fields_uneditable()} type="button" className="button-details cancelar">Cancel</button>
                         </div>
                     </div>
                     

@@ -20,3 +20,8 @@ Feature: Profile Area
   Scenario: Delete vehicles
     When I want to delete a vehicle, I click on the delete icon of the vehicle with registration ("05-GC-32")
     Then Check that the vehicle is no longer in the table
+
+  Scenario: Update last name
+    When I want to update my last name, I click on edit icon on top
+    Then Change the "last name" to "Cruz" and confirm
+    And Check that the "last name" is "Cruz"

@@ -18,6 +18,18 @@ public class ProfilePage {
     private WebElement button_add;
      */
 
+    @FindBy(id= "edit-icon")
+    private WebElement edit_icon;
+
+    @FindBy(id= "email")
+    private WebElement email;
+
+    @FindBy(id= "fname")
+    private WebElement fname;
+
+    @FindBy(id= "lname")
+    private WebElement lname;
+
     @FindBy(id= "n_registration")
     private WebElement n_registration;
 
@@ -155,4 +167,49 @@ public class ProfilePage {
             wait.until(ExpectedConditions.invisibilityOfElementLocated(By.name("registration_" + this.registration)));
         }
     }
+
+    public void clickEditDetails() {
+        this.edit_icon.click();
+    }
+
+    public void changeDetail(String id, String value) {
+        switch (id) {
+            case "email":
+                this.email.sendKeys(value);
+                break;
+            case "first name":
+                this.fname.sendKeys(value);
+                break;
+            case "last name":
+                this.lname.sendKeys(value);
+                break;
+        }
+    }
+
+    public void confirmDetail() {
+        driver.findElement(By.id("confirm-detail")).click();
+    }
+
+    public boolean checkDetail(String id, String value) {
+        switch (id) {
+            case "email":
+                if (this.email.getAttribute("placeholder").equals(value)){
+                    return true;
+                }
+                return false;
+            case "first name":
+                if (this.fname.getAttribute("placeholder").equals(value)){
+                    return true;
+                }
+                return false;
+            case "last name":
+                if (this.lname.getAttribute("placeholder").equals(value)){
+                    return true;
+                }
+                return false;
+        }
+        return false;
+    }
+
+
 }
