@@ -64,7 +64,7 @@ class VehicleServiceTest {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
         when(riderService.getRiderById(0L)).thenReturn(rider);
 
-        VehicleDTO vehicle = new VehicleDTO("Audi", "A5", "Carro", 365.0, 0L, "AAAAAA");
+        VehicleDTO vehicle = new VehicleDTO(null, "Audi", "A5", "Carro", 365.0, 0L, "AAAAAA");
 
         this.service.saveVehicle(vehicle);
         Mockito.verify(repository, VerificationModeFactory.times(1)).save(any());
@@ -75,7 +75,7 @@ class VehicleServiceTest {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
         when(riderService.getRiderById(0L)).thenReturn(rider);
 
-        VehicleDTO vehicle = new VehicleDTO(null, "A5", "Carro", 365.0, 0L, "BBBBBB");
+        VehicleDTO vehicle = new VehicleDTO(null, null, "A5", "Carro", 365.0, 0L, "BBBBBB");
 
         assertThat(service.saveVehicle(vehicle)).isNull();
         Mockito.verify(repository, VerificationModeFactory.times(0)).save(any());
@@ -90,13 +90,13 @@ class VehicleServiceTest {
         when(repository.findById(response.getId())).thenReturn(response);
 
         //check if status is updated while other parameter remains the same
-        VehicleDTO newDetails = new VehicleDTO(null, "A5", "Carro", 365.0, 0L, "BBBBBB");
+        VehicleDTO newDetails = new VehicleDTO(null, null, "A5", "Carro", 365.0, 0L, "BBBBBB");
         service.updateVehicle(response.getId(), newDetails);
         assertThat(response.getBrand()).isEqualTo("Audi");
         assertThat(response.getModel()).isEqualTo("A5");
 
         //check if all parameters are updated
-        newDetails = new VehicleDTO("BMW", "M4", "Carro", 320.0, 0L, "CCCCCC");
+        newDetails = new VehicleDTO(null, "BMW", "M4", "Carro", 320.0, 0L, "CCCCCC");
         service.updateVehicle(response.getId(), newDetails);
         assertThat(response.getBrand()).isEqualTo("BMW");
         assertThat(response.getModel()).isEqualTo("M4");
@@ -110,7 +110,7 @@ class VehicleServiceTest {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
         when(riderService.getRiderById(0L)).thenReturn(rider);
 
-        VehicleDTO newDetails = new VehicleDTO("BMW", "M4", "Carro", 320.0, 0L,"CCCCCC");
+        VehicleDTO newDetails = new VehicleDTO(null, "BMW", "M4", "Carro", 320.0, 0L,"CCCCCC");
         assertThat(service.updateVehicle(-1, newDetails)).isNull();
     }
 

@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 
 import tqsua.DeliveriesServer.model.Rider;
+import tqsua.DeliveriesServer.model.RiderDTO;
 import tqsua.DeliveriesServer.repository.RiderRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,13 +70,15 @@ class RiderServiceTest {
         Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
         when(repository.findById(response.getId())).thenReturn(response);
 
+        RiderDTO newDetails = new RiderDTO(null, null, null, null, null, "Online");
         //check if status is updated while other parameter remains the same
-        service.updateRider(response.getId(), null, null, null, null, null, "Online");
+        service.updateRider(response.getId(), newDetails);
         assertThat(response.getStatus()).isEqualTo("Online");
         assertThat(response.getFirstname()).isEqualTo("Ricardo");
 
         //check if all parameters are updated
-        service.updateRider(response.getId(), "Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
+        newDetails = new RiderDTO("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
+        service.updateRider(response.getId(), newDetails);
         assertThat(response.getFirstname()).isEqualTo("Diogo");
         assertThat(response.getLastname()).isEqualTo("Carvalho");
         assertThat(response.getEmail()).isEqualTo("diogo@gmail.com");
@@ -84,6 +87,12 @@ class RiderServiceTest {
         assertThat(response.getStatus()).isEqualTo("Offline");
     }
 
+    @Test
+    void whenUpdateNotExistentRider_returnNull() {
+        when(repository.findById(-1)).thenReturn(null);
+        RiderDTO newDetails = new RiderDTO("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
+        assertThat(service.updateRider(-1, newDetails)).isNull();
+    }
 
     @Test
     void whenSearchRiderExistsByEmail_ifRiderExists_ReturnTrue() {
