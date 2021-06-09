@@ -247,7 +247,7 @@ function Profile() {
                             </div>
 
                             <div>
-                                Capacity
+                                Capacity(kg)
                             </div>
 
                             <div>
@@ -278,7 +278,7 @@ function Profile() {
                                 </div>
 
                                 <div>
-                                    <input type="text" id={"capacity_" + key} name={"capacity_" + value["registration"]} readOnly placeholder={value["capacity"] + "kg"}></input>
+                                    <input type="text" id={"capacity_" + key} name={"capacity_" + value["registration"]} readOnly placeholder={value["capacity"]}></input>
                                 </div>
 
                                 <div className="actions">
@@ -290,8 +290,8 @@ function Profile() {
                                         
                                     
                                     <div id={"icons_cc" + key} style={{display:"none"}}>
-                                        <GiIcons.GiConfirmed size={20} title="confirm" color={"green"} onClick={() => {setCarEditable({key: key, car: value["registration"], editable: false}); editVehicle(value["id"], key)}}/>
-                                        <GiIcons.GiCancel size={20} title="cancel" color={"red"} onClick={() => setCarEditable({key: key, car: value["registration"], editable: false})}/>
+                                        <GiIcons.GiConfirmed size={20} title="confirm" id={"edit_c" + value["registration"]} color={"green"} onClick={() => {setCarEditable({key: key, car: value["registration"], editable: false}); editVehicle(value["id"], key)}}/>
+                                        <GiIcons.GiCancel size={20} title="cancel" id={"del_c" + value["registration"]} color={"red"} onClick={() => setCarEditable({key: key, car: value["registration"], editable: false})}/>
                                     </div>
                                         
                                     

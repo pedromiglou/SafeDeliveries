@@ -48,13 +48,14 @@ public class ProfileFunctionalitiesSteps {
         profile.clickAdd();
     }
 
-    @Then("I have to fill the registration\\({string}), maker\\({string}), model\\({string}), capacity\\({string}) and type\\({string}) fields")
+    @Then("I have to fill the registration\\({string}), maker\\({string}), model\\({string}), capacity\\({string}kg) and type\\({string}) fields")
     public void i_fill_fields(String registration, String maker, String model, String capacity, String type) {
+        profile.setRegistration(registration);
         profile.setInputs("registration", registration);
-        profile.setInputs("maker", maker);
+        profile.setInputs("brand", maker);
         profile.setInputs("model", model);
+        profile.setInputs("category", type);
         profile.setInputs("capacity", capacity);
-        profile.setInputs("type", type);
     }
 
     @Then("I have to click on button confirm")
@@ -64,33 +65,41 @@ public class ProfileFunctionalitiesSteps {
 
     @And("Check that the vehicle with registration \\({string}) is in the table")
     public void check_vehicle_added_is_in_table(String registration){
-        assertThat(profile.checkAdded(registration), is(registration));
+        assertThat(profile.checkAdded(), is(registration));
+        driver.quit();
     }
 
     //Scenario: Edit vehicle
     @When("I want to edit a vehicle, I Click on the pencil icon of the vehicle with registration \\({string})")
     public void i_click_on_pencil_icon(String registration){
-        profile.clickEdit(registration);
+        profile = new ProfilePage(driver);
+        profile.setRegistration(registration);
+        profile.clickEdit();
     }
 
-    @Then("Change the field referring to {string} to {string} and confirm")
+    @Then("Change the field referring to {string} to {string}kg and confirm")
     public void change_field(String id, String value){
-        profile.setInputs(id, value);
+        profile.setInputsEditable(id, value);
+        profile.clickConfirmEdit();
     }
 
-    @And("Check that the vehicle with registration \\({string}) was edited, and now has in the field {string} the value {string}")
-    public void check_vehicle_edited(String registration, String id, String value){
-        assertThat(profile.checkEdited(registration, id), is(value));
+    @And("Check that the vehicle was edited, and now has in the field {string} the value {string}kg")
+    public void check_vehicle_edited(String id, String value){
+        assertThat(profile.checkEdited(id), is(value));
+        driver.quit();
     }
 
     //Scenario: Delete vehicle
     @When("I want to delete a vehicle, I click on the delete icon of the vehicle with registration \\({string})")
     public void i_click_on_delete_icon(String registration) {
-        profile.clickDelete(registration);
+        profile = new ProfilePage(driver);
+        profile.setRegistration(registration);
+        profile.clickDelete();
     }
 
-    @Then("Check that the vehicle with registration \\({string}) is no longer in the table")
-    public void checkThatItNoLongerExistsInTheTable(String registration) {
-        assertThat(profile.checkDeleted(registration), is(false)) ;
+    @Then("Check that the vehicle is no longer in the table")
+    public void checkThatItNoLongerExistsInTheTable() {
+        assertThat(profile.checkDeleted(), is(true)) ;
+        driver.quit();
     }
 }
