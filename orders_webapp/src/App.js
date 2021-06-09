@@ -8,7 +8,7 @@ import * as FiIcons from 'react-icons/fi';
 import * as FaIcons from 'react-icons/fa';
 
 /* router */
-import {Link, Route, Switch, withRouter, useHistory} from 'react-router-dom';
+import {Link, Route, Switch, withRouter} from 'react-router-dom';
 
 /* Components */
 import Home from './Components/Home/Home';
@@ -22,12 +22,15 @@ import AuthService from './Services/auth.service';
 
 function App() {
   const current_user = AuthService.getCurrentUser();
+  /*
   const history = useHistory();
 
+  
   function routeChange(path){ 
       let new_url = '/' + path; 
       history.push(new_url);
   }
+  */
 
   function logout(){
     sessionStorage.removeItem("user_orders");
@@ -81,20 +84,6 @@ function App() {
             {current_user !== null && 
             <li className="nav-item">
               <DropdownButton title={<FaIcons.FaUserCircle size="60"/>} id="perfil-dropdown" className="navbar-dropdown">
-                <Dropdown.Divider/>
-                <Dropdown.ItemText>
-                  <div onClick={() => routeChange("profile")} className="modal-item">
-                    <h5>Profile</h5>
-                  </div>
-                  
-                </Dropdown.ItemText>
-                
-                {/* <Dropdown.ItemText>
-                  <div onClick={() => routeChange("settings")} className="modal-item">
-                    <h5>Settings</h5>
-                  </div>
-                </Dropdown.ItemText> */}
-                <Dropdown.Divider/>
                 <Dropdown.ItemText>
                   <div onClick={() => logout()} className="modal-item">
                     <h5>Logout</h5>

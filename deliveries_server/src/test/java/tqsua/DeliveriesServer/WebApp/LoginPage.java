@@ -23,9 +23,9 @@ public class LoginPage {
     @FindBy(className = "button-entrar")
     private WebElement button_entrar;
 
-    public LoginPage(WebDriver driver2) {
-        this.driver = driver2;
-        PageFactory.initElements(driver2, this);
+    public LoginPage(WebDriver driver) {
+        this.driver = driver;
+        PageFactory.initElements(driver, this);
     }
 
     public void register_click() {

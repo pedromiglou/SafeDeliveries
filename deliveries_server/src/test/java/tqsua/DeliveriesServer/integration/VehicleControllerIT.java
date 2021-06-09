@@ -1,6 +1,6 @@
 package tqsua.DeliveriesServer.integration;
 
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -35,8 +35,8 @@ public class VehicleControllerIT {
     @Autowired
     private RiderRepository riderRepository;
 
-    @AfterEach
-    void tearDown() {
+    @BeforeEach
+    void setUp() {
         repository.deleteAll();
         riderRepository.deleteAll();
     }
@@ -80,11 +80,33 @@ public class VehicleControllerIT {
                 .andExpect(status().isNotFound());
     }
 
+
+    @Test
+    void whenGetVehiclesByRiderId_thenReturnVehicles() throws Exception {
+        Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 4.0, "Offline");
+        riderRepository.save(rider);
+        Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
+        Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 365.0, "BBBBBB");
+        v1.setRider(rider);
+        v2.setRider(rider);
+        repository.save(v1);
+        repository.save(v2);
+
+
+        mvc.perform(get("/api/vehiclesbyrider?id="+rider.getId()).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)));
+    }
+
+
     @Test
     void whenPostNewVehicle_thenCreateIt() throws Exception {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
         riderRepository.save(rider);
-        VehicleDTO vehicle = new VehicleDTO("Audi", "A5", "Carro", 365.0, rider.getId(), "AAAAAA");
+        VehicleDTO vehicle = new VehicleDTO(null, "Audi", "A5", "Carro", 365.0, rider.getId(), "AAAAAA");
+        Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
+        response.setRider(rider);
+
 
         mvc.perform(post("/api/vehicle").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(vehicle)))
                 .andExpect(status().isCreated());
@@ -94,7 +116,7 @@ public class VehicleControllerIT {
     @Test
     void whenPostNewInvalidVehicle_thenReturnBadRequest() throws Exception {
         //missing rider
-        VehicleDTO vehicle = new VehicleDTO("Audi", "A5", "Carro", 365.0, null, "AAAAAA");
+        VehicleDTO vehicle = new VehicleDTO(null, "Audi", "A5", "Carro", 365.0, null, "AAAAAA");
 
         mvc.perform(post("/api/vehicle").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(vehicle)))
                 .andExpect(status().isBadRequest());
@@ -110,7 +132,7 @@ public class VehicleControllerIT {
         vehicle.setRider(rider);
         repository.save(vehicle);
 
-        VehicleDTO newDetails = new VehicleDTO("BMW", null, null, null, null, null);
+        VehicleDTO newDetails = new VehicleDTO(null, "BMW", null, null, null, null, null);
 
         mvc.perform(put("/api/vehicle/"+String.valueOf(vehicle.getId())).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
                 .andExpect(status().isOk());
@@ -119,7 +141,7 @@ public class VehicleControllerIT {
 
     @Test
     void whenUpdateNonExistentVehicle_thenReturnNotFound() throws Exception {
-        VehicleDTO newDetails = new VehicleDTO("BMW", null, null, null, null, null);
+        VehicleDTO newDetails = new VehicleDTO(null, "BMW", null, null, null, null, null);
 
         mvc.perform(put("/api/vehicle/"+String.valueOf(-1)).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
                 .andExpect(status().isNotFound());

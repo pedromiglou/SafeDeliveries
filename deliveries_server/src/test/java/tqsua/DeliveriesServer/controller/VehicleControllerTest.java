@@ -21,6 +21,7 @@ import java.util.ArrayList;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -91,15 +92,37 @@ public class VehicleControllerTest {
     }
 
     @Test
+    void whenGetVehiclesByRiderId_thenReturnVehicles() throws Exception {
+        Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 4.0, "Offline");
+        Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
+        Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 365.0, "AAAAAA");
+        v1.setRider(rider);
+        v2.setRider(rider);
+        ArrayList<Vehicle> vehicles = new ArrayList<>();
+        vehicles.add(v1);
+        vehicles.add(v2);
+
+        given(service.getVehiclesByRiderId(rider.getId())).willReturn(vehicles);
+
+        mvc.perform(get("/api/vehiclesbyrider?id="+rider.getId()).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)));
+        verify(service, VerificationModeFactory.times(1)).getVehiclesByRiderId(anyLong());
+    }
+
+
+    @Test
     void whenPostNewVehicle_thenCreateIt() throws Exception {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        VehicleDTO vehicle = new VehicleDTO("Audi", "A5", "Carro", 365.0, 0L, "AAAAAA");
+        VehicleDTO vehicle = new VehicleDTO(null, "Audi", "A5", "Carro", 365.0, 0L, "AAAAAA");
         Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         response.setRider(rider);
 
         given(service.saveVehicle(vehicle)).willReturn(response);
+        given(riderService.saveRider(response.getRider())).willReturn(null);
 
-        mvc.perform(post("/api/vehicle").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(vehicle)))
+        mvc.perform(post("/api/vehicle").contentType(MediaType.APPLICATION_JSON)
+            .content(JsonUtil.toJson(vehicle)))
                 .andExpect(status().isCreated());
         verify(service, VerificationModeFactory.times(1)).saveVehicle(vehicle);
     }
@@ -107,7 +130,7 @@ public class VehicleControllerTest {
     @Test
     void whenPostNewInvalidVehicle_thenReturnBadRequest() throws Exception {
         //missing rider
-        VehicleDTO vehicle = new VehicleDTO("Audi", "A5", "Carro", 365.0, null,"AAAAAAA");
+        VehicleDTO vehicle = new VehicleDTO(null, "Audi", "A5", "Carro", 365.0, null,"AAAAAAA");
 
         given(service.saveVehicle(vehicle)).willReturn(null);
         mvc.perform(post("/api/vehicle").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(vehicle)))
@@ -117,9 +140,11 @@ public class VehicleControllerTest {
 
     @Test
     void whenUpdateVehicle_thenUpdateIt() throws Exception {
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
         Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
+        vehicle.setRider(rider);
 
-        VehicleDTO newDetails = new VehicleDTO("BMW", null, null, null, 0L, "AAAAAA");
+        VehicleDTO newDetails = new VehicleDTO(null, "BMW", null, null, null, 0L, "AAAAAA");
         given(service.updateVehicle(vehicle.getId(), newDetails)).willReturn(vehicle);
 
         mvc.perform(put("/api/vehicle/"+String.valueOf(vehicle.getId())).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
@@ -129,7 +154,7 @@ public class VehicleControllerTest {
 
     @Test
     void whenUpdateNonExistentVehicle_thenReturnNotFound() throws Exception {
-        VehicleDTO newDetails = new VehicleDTO("BMW", null, null, null, 0L, "AAAAAA");
+        VehicleDTO newDetails = new VehicleDTO(null, "BMW", null, null, null, 0L, "AAAAAA");
         given(service.updateVehicle(-1, newDetails)).willReturn(null);
 
         mvc.perform(put("/api/vehicle/"+String.valueOf(-1)).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
@@ -137,6 +162,7 @@ public class VehicleControllerTest {
         verify(service, VerificationModeFactory.times(1)).updateVehicle(-1, newDetails);
     }
 
+    
     @Test
     void whenDeletingVehicle_thenDeleteIt() throws Exception {
         given(service.deleteVehicle(0L)).willReturn(0L);

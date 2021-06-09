@@ -1,6 +1,7 @@
 package tqsua.DeliveriesServer.model;
 
 public class VehicleDTO {
+    private Long id;
     private String brand;
     private String model;
     private String category;
@@ -8,7 +9,8 @@ public class VehicleDTO {
     private Long rider;
     private String registration;
 
-    public VehicleDTO(String brand, String model, String category, Double capacity, Long rider, String registration) {
+    public VehicleDTO(Long id, String brand, String model, String category, Double capacity, Long rider, String registration) {
+        this.id = id;
         this.brand = brand;
         this.model = model;
         this.category = category;
@@ -16,6 +18,15 @@ public class VehicleDTO {
         this.registration = registration;
         this.rider = rider;
     }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
 
     public String getBrand() {
         return brand;
@@ -68,6 +79,7 @@ public class VehicleDTO {
     @Override
     public String toString() {
         return "VehicleDTO{" +
+                "id='" + id + '\'' +
                 "brand='" + brand + '\'' +
                 ", model='" + model + '\'' +
                 ", category='" + category + '\'' +

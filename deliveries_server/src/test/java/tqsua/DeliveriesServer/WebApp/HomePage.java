@@ -47,6 +47,14 @@ public class HomePage {
     @FindBy(id = "login")
     private WebElement login;
 
+    @FindBy(id = "perfil-dropdown")
+    private WebElement profile_logo;
+
+    @FindBy(id = "profile-div")
+    private WebElement profile;
+
+    @FindBy(id = "logout")
+    private WebElement logout;
     private final HttpClient httpClient = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_2)
             .build();
@@ -94,18 +102,8 @@ public class HomePage {
         this.login.click();
     }
 
-    public boolean isLogin() {
-        return driver.findElement(By.cssSelector("h2")).getText().equals("Login");
-    }
-
-
-    public void login_auto() throws JSONException {
-        JSONObject json = new JSONObject();
-        json.put("email", "rafael2@gmail.com");
-        json.put("token", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyYWZhZWwyQGdtYWlsLmNvbSIsImV4cCI6MTYyMzA3NjM3Mn0.PVkhEWNd_RtM1BBbklZzfdfE3YpBH_cBEIR2fD4eiOSDm-OO61HWDUP7BqcDKDziAlMbrNNI4hIdVBk-HjVjuQ");
-        js.executeScript(String.format(
-        "window.sessionStorage.setItem('%s','%s');", "user", json));
-        driver.navigate().refresh();
+    public void  clickProfile(){
+        this.profile.click();
     }
 
     public void login() throws IOException, InterruptedException, JSONException {
@@ -154,8 +152,11 @@ public class HomePage {
         return null;
     }
 
+    public void clickLogo(){
+        this.profile_logo.click();
+    }
+
     public void changeStatus(String status) {
-        driver.findElement(By.id("perfil-dropdown")).click();
         switch (status) {
             case "Online":
                 driver.findElement(By.id("state-online")).click();

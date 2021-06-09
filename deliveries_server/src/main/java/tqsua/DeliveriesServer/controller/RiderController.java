@@ -9,7 +9,10 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.server.ResponseStatusException;
 import tqsua.DeliveriesServer.model.Rider;
+import tqsua.DeliveriesServer.model.RiderDTO;
 import tqsua.DeliveriesServer.service.RiderService;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
@@ -30,11 +33,10 @@ public class RiderController {
         return r;
     }
 
-    @PutMapping(path="/rider")
-    public void updateRider(@RequestParam(name="id") long id, @RequestParam(name="firstname", required = false) String firstname,
-                            @RequestParam(name="lastname", required = false) String lastname, @RequestParam(name="email", required = false) String email,
-                            @RequestParam(name="password", required = false) String password, @RequestParam(name="rating", required = false) Double rating,
-                            @RequestParam(name="status", required = false) String status) {
-        riderService.updateRider(id, firstname, lastname, email, password, rating, status);
+    @PutMapping(path="/rider/{id}")
+    public Rider updateRider(@PathVariable(value="id") Long id, @Valid @RequestBody RiderDTO rider) {
+        Rider r = riderService.updateRider(id, rider);
+        if (r==null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return r;
     }
 }
