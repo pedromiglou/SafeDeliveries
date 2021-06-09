@@ -25,6 +25,8 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    private String webURL;
+
     public WebSecurity( BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         if (System.getenv("environment")=="prod") {
