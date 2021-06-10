@@ -2,29 +2,46 @@
 import './Delivery.css';
 
 /* react */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useLocation } from 'react-router';
 
-import * as FaIcons from 'react-icons/fa';
 import * as MdIcons from 'react-icons/md';
 // import * as BiIcons from 'react-icons/bi';
 import * as RiIcons from 'react-icons/ri';
 import * as GiIcons from 'react-icons/gi';
-import * as BsIcons from 'react-icons/bs';
 
+
+import Map from '../map/Map.js'
+import { withScriptjs } from "react-google-maps";
 
 function Delivery() {
     const [state, setState] = useState("Requesting");
-    const [items, setItems] = useState([{name:"book", category:"Education", weight: "1"},
-                                        {name:"book", category:"Education", weight: "1"}
-                                    ]);
+
+    const [items, setItems] = useState([]);
+
     const [itemEditable, setItemEditable] = useState({key: -2, name: "", editable: false})
     const [newItem, setNewItem] = useState(false);
 
+    const [pick_up_lat, setPickUpLat] = useState(40.756795);
+    const [pick_up_lng, setPickUpLng] = useState(-73.954298);
+    const [deliver_lat, setDeliverLat] = useState(40.756795);
+    const [deliver_lng, setDeliverLng] = useState(-73.954298);
+
+    const pickUpMapCallBack = useCallback((msg) => { 
+        setPickUpLat(msg.lat)
+        setPickUpLng(msg.lng)
+    }, []);
+
+    const deliverMapCallBack = useCallback((msg) => { 
+        setDeliverLat(msg.lat)
+        setDeliverLng(msg.lng)
+    }, []);
+
     const location = useLocation();
 
+    const MapLoader = withScriptjs(Map);
+
     useEffect(() => {
-        console.log(location.state);
         if (location.state === undefined) {
             setState("Requesting");
         } else if (location.state.is_History){
@@ -87,24 +104,50 @@ function Delivery() {
     }, [newItem]);
 
 
-    async function submitFunction(){
-        var pickup = document.getElementById("pickup").value;
-        var destiny = document.getElementById("destiny").value;
+    function submitOrder(){
+        const order = { pick_up_lat: pick_up_lat,
+                        pick_up_lng: pick_up_lng,
+                        deliver_lat: deliver_lat,
+                        deliver_lng: deliver_lng,
+                        items: items}
+        console.log(order)
         // await RiderService.changeRider(current_user.id, firstname, lastname, email)
-        // window.location.reload()
+        //setState("waiting_rider")
     }
 
 
-    async function removeItem(item_id){
+    function removeItem(item_id) {
+        console.log(items)
+        console.log(item_id)
+        var newitems = items.splice(item_id, 1);
 
+        if (newItem)
+            setNewItem(false)
+        else
+            setNewItem(true)
     }
 
-    async function editItem(item_id){
-
+    function editItem(key) {
+        var name = document.getElementById("name_"+key).value;
+        var category = document.getElementById("category_"+key).value;
+        var weight = document.getElementById("weight_"+key).value;
+        if (name === "") name = document.getElementById("name_"+key).placeholder;
+        if (category === "") category = document.getElementById("category_"+key).placeholder;
+        if (weight === "") weight = document.getElementById("weight_"+key).placeholder;
+        var item = {"name":name, "category":category,"weight": weight}
+        items[key] = item
     }
 
-    async function addItem(){
-
+    function addItem(){
+        var name = document.getElementById("n_name");
+        var category = document.getElementById("n_category");
+        var weight = document.getElementById("n_weight");
+        var item = {"name":name.value, "category":category.value,"weight": weight.value}
+        name.value = "";
+        category.value = "";
+        weight.value = "";
+        items.push(item)
+        setItems(items)
     }
 
 
@@ -114,14 +157,27 @@ function Delivery() {
             <div className="DeliveriesSection req">
                 <div className="DeliveryDetails">
                     <h1>Delivery Details</h1>
+                    
                     <div className="div-addresses">
                         <div>
-                            <label for="pickup">Pick Up Address</label>
-                            <input id="pickup" type="text" placeholder="Ex:Rua dos Clérigos"/>
+                            <label htmlFor="pickup">Pick Up Address</label>
+                            {<MapLoader 
+                                googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco"
+                                loadingElement={<div style={{ height: "100%"}}/>}
+                                state={ {lat:pick_up_lat, lng: pick_up_lng}}
+                                parentCallback = {pickUpMapCallBack}
+                                />
+                            }
                         </div>
                         <div>
-                            <label for="destiny">Destiny Address</label>
-                            <input id="destiny" type="text" placeholder="Ex:Rua Manuel Boa Ventura"/>
+                            <label htmlFor="destiny">Destiny Address</label>
+                            {<MapLoader 
+                                googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco"
+                                loadingElement={<div style={{ height: "100%"}}/>}
+                                state={ {lat:deliver_lat, lng: deliver_lng}}
+                                parentCallback = {deliverMapCallBack}
+                                />
+                            }
                         </div>
                     </div>
                     
@@ -144,7 +200,7 @@ function Delivery() {
                             </li>
 
                             {  ( (items === null) || (items && items === 0) ) && 
-                                <p>Do not own any vehicle</p>
+                                <p>0 items on the list yet.</p>
                             }
                             
                             {Object.entries(items).map(([key,value]) => (
@@ -202,10 +258,10 @@ function Delivery() {
                 </div>
                 <div className="confirm">
                     <div className="image-confirm">
-                        <img src={process.env.PUBLIC_URL + "/images/mapexample.png"} alt="map"></img>
+                        
                     </div>
                     <div className="button-confirm">
-                        <button onClick={() => setState("waiting_rider")}>Confirm</button>
+                        <button onClick={() => submitOrder()}>Confirm</button>
                     </div>
                 </div>
                 
@@ -231,7 +287,11 @@ function Delivery() {
         {state === "confirmed" && 
             <div className="DeliveriesSection conf">
                 <div className="current_image">
-                    <img src={process.env.PUBLIC_URL + "/images/mapexample.png"} alt="map"></img>
+                    {<MapLoader 
+                    googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco"
+                    loadingElement={<div style={{ height: "100%"}}/>}
+                    />
+                    }
                 </div>
                 <h1>Order details</h1>
                 <div className="ConfirmDeliveryDetails">
