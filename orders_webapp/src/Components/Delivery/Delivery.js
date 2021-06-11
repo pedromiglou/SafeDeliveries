@@ -14,6 +14,9 @@ import * as GiIcons from 'react-icons/gi';
 import Map from '../map/Map.js'
 import { withScriptjs } from "react-google-maps";
 
+import OrdersService from '../../Services/orders.service';
+import AuthService from '../../Services/auth.service';
+
 function Delivery() {
     const [state, setState] = useState("Requesting");
 
@@ -21,11 +24,15 @@ function Delivery() {
 
     const [itemEditable, setItemEditable] = useState({key: -2, name: "", editable: false})
     const [newItem, setNewItem] = useState(false);
+    const [errorOrder, setErrorOrder] = useState(false);
+    const [sucessOrder, setSucessOrder] = useState(false);
 
     const [pick_up_lat, setPickUpLat] = useState(40.756795);
     const [pick_up_lng, setPickUpLng] = useState(-73.954298);
     const [deliver_lat, setDeliverLat] = useState(40.756795);
     const [deliver_lng, setDeliverLng] = useState(-73.954298);
+
+    const current_user = AuthService.getCurrentUser();
 
     const pickUpMapCallBack = useCallback((msg) => { 
         setPickUpLat(msg.lat)
@@ -104,22 +111,30 @@ function Delivery() {
     }, [newItem]);
 
 
-    function submitOrder(){
+    async function submitOrder(){
         const order = { pick_up_lat: pick_up_lat,
                         pick_up_lng: pick_up_lng,
                         deliver_lat: deliver_lat,
                         deliver_lng: deliver_lng,
-                        items: items}
+                        items: items,
+                        user_id: current_user.id}
         console.log(order)
-        // await RiderService.changeRider(current_user.id, firstname, lastname, email)
-        //setState("waiting_rider")
+
+        var res = await OrdersService.create(pick_up_lat, pick_up_lng, deliver_lat, deliver_lng, items, parseInt(current_user.id))
+        if (res.error) {
+            setErrorOrder(res.message);
+            setSucessOrder(false);
+        } else {
+            setErrorOrder(false);
+            setSucessOrder(true);
+        }
     }
 
 
     function removeItem(item_id) {
         console.log(items)
         console.log(item_id)
-        var newitems = items.splice(item_id, 1);
+        items.splice(item_id, 1);
 
         if (newItem)
             setNewItem(false)
@@ -153,6 +168,17 @@ function Delivery() {
 
     return (
       <>
+
+        {sucessOrder === true 
+          ? <div className="alert alert-success" role="alert" style={{margin:"10px auto", width: "90%", textAlign:"center", fontSize:"22px"}}>
+          Order was created successfully!
+          </div> : null}
+
+        {errorOrder !== false 
+          ? <div className="alert alert-alert" role="alert" style={{margin:"10px auto", width: "90%", textAlign:"center", fontSize:"22px"}}>
+          {errorOrder}
+          </div> : null}
+
         {state === "Requesting" && 
             <div className="DeliveriesSection req">
                 <div className="DeliveryDetails">

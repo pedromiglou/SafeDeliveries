@@ -41,7 +41,6 @@ public class User implements Serializable, UserDetails{
     @Column(name = "account_type", nullable = false)
     private String account_type;
 
-
     public User() {
     }
 
