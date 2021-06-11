@@ -14,8 +14,7 @@ import static org.hamcrest.Matchers.*;
 import tqsua.OrdersServer.JsonUtil;
 import tqsua.OrdersServer.OrdersServerApplication;
 import tqsua.OrdersServer.model.Item;
-import tqsua.OrdersServer.model.Order;
-import tqsua.OrdersServer.service.OrderService;
+import tqsua.OrdersServer.model.OrderDTO;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -29,7 +28,7 @@ public class OrderControllerIT {
 
     @Test
     void whenCreatingOrderWithValidParams_thenCreateWithSucess() throws Exception {
-        Order order1 = new Order(40.0, 30.0, 40.1, 31.1, "PREPROCESSING", 12);
+        OrderDTO order1 = new OrderDTO(40.0, 30.0, 40.1, 31.1, "PREPROCESSING", 12);
         Set<Item> items = new HashSet<>();
         Item item1 = new Item("Casaco", "Roupa", 12.0);
         Item item2 = new Item("Telemovel", "Eletronica", 0.7);
@@ -52,7 +51,7 @@ public class OrderControllerIT {
 
     @Test
     void whenCreatingOrderWithInvalidCoords_thenReturnErrorMessage() throws Exception {
-        Order order1 = new Order(null, 30.0, 40.1, 31.1, "PREPROCESSING", 12);
+        OrderDTO order1 = new OrderDTO(null, 30.0, 40.1, 31.1, "PREPROCESSING", 12);
         Set<Item> items = new HashSet<>();
         Item item1 = new Item("Casaco", "Roupa", 12.0);
         Item item2 = new Item("Telemovel", "Eletronica", 0.7);
@@ -70,7 +69,7 @@ public class OrderControllerIT {
 
     @Test
     void whenCreatingOrderWithNoUser_thenReturnErrorMessage() throws Exception {
-        Order order1 = new Order(40.0, 30.0, 40.1, 31.1, "PREPROCESSING", 0);
+        OrderDTO order1 = new OrderDTO(40.0, 30.0, 40.1, 31.1, "PREPROCESSING", 0);
         Set<Item> items = new HashSet<>();
         Item item1 = new Item("Casaco", "Roupa", 12.0);
         Item item2 = new Item("Telemovel", "Eletronica", 0.7);
@@ -88,7 +87,7 @@ public class OrderControllerIT {
 
     @Test
     void whenCreatingOrderWithNoItems_thenReturnErrorMessage() throws Exception {
-        Order order1 = new Order(40.1, 30.0, 40.1, 31.1, "PREPROCESSING", 0);
+        OrderDTO order1 = new OrderDTO(40.0, 30.0, 40.1, 31.1, "PREPROCESSING", 0);
         
         mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
         .content(JsonUtil.toJson(order1)))

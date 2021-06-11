@@ -15,6 +15,7 @@ import tqsua.OrdersServer.service.OrderService;
 import tqsua.OrdersServer.JsonUtil;
 import tqsua.OrdersServer.model.Item;
 import tqsua.OrdersServer.model.Order;
+import tqsua.OrdersServer.model.OrderDTO;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
@@ -60,26 +61,28 @@ class OrderControllerTest {
 
     @Test
     void whenCreateOrder_thenReturnResult() throws Exception {
-        Order order1 = new Order(40.0, 30.0, 40.1, 31.1, "PREPROCESSING", 12);
+        Order order = new Order(40.0, 30.0, 40.1, 31.1, "PREPROCESSING", 12);
+        OrderDTO order1 = new OrderDTO(40.0, 30.0, 40.1, 31.1, "PREPROCESSING", 12);
         Set<Item> items = new HashSet<>();
         Item item1 = new Item("Casaco", "Roupa", 12.0);
         Item item2 = new Item("Telemovel", "Eletronica", 0.7);
         items.add(item1);
         items.add(item2);
+        order.setItems(items);
         order1.setItems(items);
         
-        given(service.saveOrder(Mockito.any())).willReturn(order1);
+        given(service.saveOrder(Mockito.any())).willReturn(order);
 
         mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
         .content(JsonUtil.toJson(order1)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.pick_up_lat", is(order1.getPick_up_lat())))
-                .andExpect(jsonPath("$.pick_up_lng", is(order1.getPick_up_lng())))
-                .andExpect(jsonPath("$.deliver_lat", is(order1.getDeliver_lat())))
-                .andExpect(jsonPath("$.deliver_lng", is(order1.getDeliver_lng())))
-                .andExpect(jsonPath("$.status", is(order1.getStatus())))
-                .andExpect(jsonPath("$.rating", is(order1.getRating())))
-                .andExpect(jsonPath("$.user_id", is(Integer.parseInt(String.valueOf(order1.getUser_id())))))
+                .andExpect(jsonPath("$.pick_up_lat", is(order.getPick_up_lat())))
+                .andExpect(jsonPath("$.pick_up_lng", is(order.getPick_up_lng())))
+                .andExpect(jsonPath("$.deliver_lat", is(order.getDeliver_lat())))
+                .andExpect(jsonPath("$.deliver_lng", is(order.getDeliver_lng())))
+                .andExpect(jsonPath("$.status", is(order.getStatus())))
+                .andExpect(jsonPath("$.rating", is(order.getRating())))
+                .andExpect(jsonPath("$.user_id", is(Integer.parseInt(String.valueOf(order.getUser_id())))))
                 .andExpect(jsonPath("$.items", hasSize(2)))
                 .andExpect(jsonPath("$.id").isNotEmpty());
         verify(service, VerificationModeFactory.times(1)).saveOrder(Mockito.any());

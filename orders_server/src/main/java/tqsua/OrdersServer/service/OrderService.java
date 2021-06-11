@@ -31,6 +31,7 @@ public class OrderService {
         Set<Item> order_items = order.getItems();
         this.orderRepository.save(order);
         for (Item e : order_items) {
+            e.setOrder(order);
             this.itemRepository.save(e);
         }
         return order;
