@@ -33,6 +33,26 @@
     gap: 2em;
 }
 
+.div-addresses{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap:4%;
+}
+
+.div-addresses > *{
+    flex: 1 1 48%;
+}
+
+.div-addresses input{
+    width: 100%;
+    outline: none;
+    border: none;
+    border-bottom: 1px solid lightcoral;
+    margin-top: 0.7em;
+
+}
+
 .confirm{
     display: flex;
     flex-direction: column;
@@ -41,6 +61,156 @@
     align-items: center;
 }
 
+
+
+.item-Table{
+    padding-top: 2em;
+}
+
+.listP-group{
+    display: flex;
+    flex-direction: column;
+    border: 1px solid lightgrey;
+    margin-top: 1em;
+    padding: 1em;
+    height: 100%;
+    max-height: 300px;
+    overflow: auto;
+}
+
+.listP-item{
+    display: flex;
+    flex-direction: row;
+    font-size: 0.8rem;
+    padding: 1em;
+    border-bottom: 1px solid lightcoral;
+    margin-left: 0.2rem;
+}
+
+.listP-item:nth-child(1){
+    font-size: 1rem;
+    text-align: left;
+    margin-left: 0;
+}
+
+.listP-item > :nth-child(1){
+    flex-basis: 30%;
+}
+
+.listP-item > :nth-child(2){
+    flex-basis: 30%;
+}
+
+.listP-item > :nth-child(3){
+    flex-basis: 25%;
+}
+
+.listP-item > :nth-child(4){
+    flex-basis: 15%;
+}
+
+.listP-item div input{
+    width: 100%;
+    border: none;
+    background-color: transparent;
+    outline: none;
+}
+
+.listP-item div input.editable{
+    width: 70%;
+    border-bottom: 1px solid rgb(75, 167, 0);
+}
+
+.button-div{
+    display: flex;
+}
+
+.button-add{
+    width: 70px;
+    border: none;
+    background-color: lightcoral;
+    color: white;
+    padding: 0.2em;
+    font-size: 0.7rem;
+    margin-left: auto;
+}
+
+.listP-item:hover{
+    background-color: rgb(231, 231, 231);
+    cursor: pointer;
+}
+
+.listP-item:first-child:hover{
+    background-color: white;
+    cursor: default;
+}
+
+.actions svg{
+    padding: 0.1em;
+    margin: 0 5px;
+    
+}
+
+.actions svg:hover{
+    background-color: rgb(248, 248, 248);
+    border-radius: 50%;
+}
+
+.actions svg:first-child:hover{
+    color: rgb(255, 175, 2);
+}
+
+.actions svg:last-child:hover{
+    color: rgb(180, 19, 5);
+}
+
+.new-container{
+    margin-top: 2em;
+}
+.new-item{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 5%;
+    padding: 0.5em 0 1em 0;
+}
+
+.new-item input{
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid rgb(75, 167, 0);
+    outline: none;
+    font-size: 0.9rem;
+}
+
+.new-item > *{
+    flex: 1 1 16%
+}
+
+.both-buttons{
+    display: flex;
+    width: 160px;
+    margin-left: auto;
+}
+
+
+.button-details{
+    width: 70px;
+    border: none;
+    background-color: lightcoral;
+    color: white;
+    padding: 0.2em;
+    font-size: 0.7rem;
+    margin-left: auto;
+}
+
+.button-details.cancelar{
+    background-color: rgb(172, 172, 172);
+}
+
+
+
+/* Waiting */
 .DeliveriesSection.wait{
     flex-direction: row;
     justify-content: center;
@@ -129,5 +299,7 @@
 .ConfirmDeliveryDetails > *{
     flex: 1 1 20%;
 }
+
+
 
 

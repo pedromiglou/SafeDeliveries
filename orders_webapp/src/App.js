@@ -39,8 +39,7 @@ function App() {
 
   return (
     <>
-    
-      <navbar>
+      <div>
           <ul className="nav-list">
             <li className="nav-item" id="logo">
               <Link to="/">
@@ -95,7 +94,7 @@ function App() {
             }
             
           </ul>
-      </navbar>
+      </div>
 
       <div className="content">
           <Switch>
