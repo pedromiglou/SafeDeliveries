@@ -2,6 +2,8 @@ package tqsua.DeliveriesServer.controller;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,6 +26,10 @@ import tqsua.DeliveriesServer.model.Rider;
 @RestController
 @RequestMapping("/api")
 public class AuthController {
+    // Create a Logger
+    Logger logger
+            = Logger.getLogger(
+            AuthController.class.getName());
 
 
     @Autowired
@@ -42,6 +48,7 @@ public class AuthController {
 
             HashMap<String, String> response = new HashMap<>();
             response.put("error", "Email is already in use!");
+            this.logger.log(Level.INFO, "Failed Register");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);  
         }
 
@@ -50,6 +57,7 @@ public class AuthController {
         
         HashMap<String, String> response = new HashMap<>();
         response.put("message", "Rider was registed with sucess!");
+        this.logger.log(Level.INFO, "Successful Register");
         return new ResponseEntity<>(response, HttpStatus.CREATED);  
     }
 
