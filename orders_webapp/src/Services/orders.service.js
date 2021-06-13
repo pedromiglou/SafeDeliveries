@@ -1,3 +1,5 @@
+import {urlAPI} from "./../data/data";
+
 class OrdersService {
 
     async create(pick_up_lat, pick_up_lng, deliver_lat, deliver_lng, items, user_id) {
@@ -11,7 +13,7 @@ class OrdersService {
         }
         console.log(orderInfo);
         try {
-            var res = await fetch('http://localhost:8081/api/orders', {
+            var res = await fetch(urlAPI + 'api/orders', {
                 method:'POST',
                 headers:{'Content-type':'application/json'},
                 body: JSON.stringify(orderInfo)
