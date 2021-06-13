@@ -183,10 +183,10 @@ function Delivery() {
             <div className="DeliveriesSection req">
                 <div className="DeliveryDetails">
                     <h1>Delivery Details</h1>
-                    
+                    <hr style={{height:"2px", width:"100%"}}></hr>
                     <div className="div-addresses">
                         <div>
-                            <label htmlFor="pickup">Pick Up Address</label>
+                            <label htmlFor="pickup" style={{marginBottom: '10px'}}>Choose Pick Up Address</label>
                             {<MapLoader 
                                 googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco"
                                 loadingElement={<div style={{ height: "100%"}}/>}
@@ -196,7 +196,7 @@ function Delivery() {
                             }
                         </div>
                         <div>
-                            <label htmlFor="destiny">Destiny Address</label>
+                            <label htmlFor="destiny" style={{marginBottom: '10px'}}>Choose Destiny Address</label>
                             {<MapLoader 
                                 googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco"
                                 loadingElement={<div style={{ height: "100%"}}/>}
@@ -206,7 +206,7 @@ function Delivery() {
                             }
                         </div>
                     </div>
-                    
+                    <hr style={{height:"2px", width:"100%"}}></hr>
                     <div className="item-Table">
                         <h4>Items</h4>
                         <ul className="listP-group">
@@ -225,8 +225,8 @@ function Delivery() {
                                 </div>
                             </li>
 
-                            {  ( (items === null) || (items && items === 0) ) && 
-                                <p>0 items on the list yet.</p>
+                            {  ( (items.length === 0) ) && 
+                                <p style={{margin: "2em auto", }}>0 items on the list yet.</p>
                             }
                             
                             {Object.entries(items).map(([key,value]) => (
@@ -282,14 +282,11 @@ function Delivery() {
                     </div>
 
                 </div>
-                <div className="confirm">
-                    <div className="image-confirm">
-                        
-                    </div>
-                    <div className="button-confirm">
-                        <button onClick={() => submitOrder()}>Confirm</button>
-                    </div>
+                
+                <div className="button-confirm">
+                    <button onClick={() => submitOrder()} className="confirm-order">Place Order</button> 
                 </div>
+               
                 
             </div>
         }
