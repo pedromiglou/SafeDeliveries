@@ -11,7 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import tqsua.DeliveriesServer.model.CompositeKey;
 import tqsua.DeliveriesServer.model.Order;
 import tqsua.DeliveriesServer.repository.OrderRepository;
 
@@ -29,8 +28,8 @@ class OrderServiceTest {
     @Test
     void whenGetAllRiders_thenReturnCorrectResults() throws Exception {
         ArrayList<Order> response = new ArrayList<>();
-        Order order1 = new Order(new CompositeKey(1, 23));
-        Order order2 = new Order(new CompositeKey(2, 44));
+        Order order1 = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        Order order2 = new Order(0, 41.3, 32.4, 41.2, 32.3, 12.6, "SafeDeliveries");
         response.add(order1);
         response.add(order2);
 
@@ -39,4 +38,13 @@ class OrderServiceTest {
         reset(repository);
     }
 
+    @Test
+    void whenSaveOrder_thenSaveOrder() throws Exception {
+        Order order1 = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+
+        when(repository.save(order1)).thenReturn(order1);
+        assertThat(service.saveOrder(order1)).isEqualTo(order1);
+        reset(repository);
+    }
+    
 }

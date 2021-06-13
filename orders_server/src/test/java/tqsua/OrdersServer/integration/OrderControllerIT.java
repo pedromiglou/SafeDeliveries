@@ -3,6 +3,7 @@ package tqsua.OrdersServer.integration;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -26,6 +27,7 @@ public class OrderControllerIT {
     @Autowired
     private MockMvc mvc;
 
+    @Disabled
     @Test
     void whenCreatingOrderWithValidParams_thenCreateWithSucess() throws Exception {
         OrderDTO order1 = new OrderDTO(40.0, 30.0, 40.1, 31.1, "PREPROCESSING", 12);
@@ -35,7 +37,7 @@ public class OrderControllerIT {
         items.add(item1);
         items.add(item2);
         order1.setItems(items);
-
+        
         mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.toJson(order1)))
                 .andExpect(jsonPath("$.pick_up_lat", is(order1.getPick_up_lat())))

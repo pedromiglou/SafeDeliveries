@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
-import tqsua.DeliveriesServer.model.CompositeKey;
 import tqsua.DeliveriesServer.model.Order;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,8 +23,8 @@ class OrderRepositoryTest {
 
     @Test
     void whenGetAllOrders_thenReturnCorrectResults() throws IOException, InterruptedException {
-        Order order1 = new Order(new CompositeKey(1, 23));
-        Order order2 = new Order(new CompositeKey(1, 24));
+        Order order1 = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");;
+        Order order2 = new Order(0, 41.3, 31.4, 43.2, 33.3, 12.3, "SafeDeliveries");;
         entityManager.persistAndFlush(order1);
         entityManager.persistAndFlush(order2);
         

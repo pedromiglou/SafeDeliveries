@@ -35,11 +35,6 @@ public class Order{
     @Column(name = "deliver_lng", nullable = false)
     private Double deliver_lng;
 
-    /*
-    @Column(name = "creation_date", nullable = false)
-    private Date creation_date;
-    */
-
     @Column(name = "status", nullable = false)
     private String status;
 
@@ -56,6 +51,9 @@ public class Order{
 
     @Column(name = "user_id")
     private long user_id;
+
+    @Column(name = "deliver_id", nullable = false)
+    private long deliver_id;
 
     public Order() {
     }
@@ -146,6 +144,18 @@ public class Order{
 
     public void setItems(Set<Item> items) {
         this.items = items;
+    }
+
+    public void setCreation_date(LocalDateTime creation_date) {
+        this.creation_date = creation_date;
+    }
+
+    public long getDeliver_id() {
+        return this.deliver_id;
+    }
+
+    public void setDeliver_id(long deliver_id) {
+        this.deliver_id = deliver_id;
     }
 
 

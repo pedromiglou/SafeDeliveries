@@ -72,6 +72,7 @@ class OrderControllerTest {
         order1.setItems(items);
         
         given(service.saveOrder(Mockito.any())).willReturn(order);
+        given(service.deliveryRequest(Mockito.any())).willReturn("1");
 
         mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
         .content(JsonUtil.toJson(order1)))
