@@ -1,5 +1,5 @@
 FROM maven:3.6.3-jdk-11
-EXPOSE 8080
+EXPOSE 8081
 WORKDIR /app
 COPY . .
 RUN export environment="prod"
