@@ -1,4 +1,4 @@
-Feature: Riders navbar
+Feature: Users navbar
 
   Background:
     Given I navigate to "http://localhost:3001/"

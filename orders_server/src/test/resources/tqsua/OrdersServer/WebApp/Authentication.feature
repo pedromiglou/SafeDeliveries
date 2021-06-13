@@ -1,4 +1,4 @@
-Feature: Riders authentication
+Feature: Users authentication
 
   Background:
     Given I access "http://localhost:3001/"

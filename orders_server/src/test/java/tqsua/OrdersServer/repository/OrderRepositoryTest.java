@@ -11,7 +11,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 
 @DataJpaTest
 class OrderRepositoryTest {
@@ -24,8 +23,8 @@ class OrderRepositoryTest {
 
     @Test
     void whenGetAllOrders_thenReturnCorrectResults() throws IOException, InterruptedException {
-        Order order1 = new Order("Rua das Laranjeiras", "Rua Lourenço Peixinho", new Date(), "Entregue", 4);
-        Order order2 = new Order("Rua da Universidade", "Bairro de Santiago", new Date(), "Entregue", 5);
+        Order order1 = new Order(40.0, 30.0, 40.1, 31.1, "Entregue", 12);
+        Order order2 = new Order(41.0, 31.0, 41.1, 32.1, "Entregue", 12);
         entityManager.persistAndFlush(order1);
         entityManager.persistAndFlush(order2);
         
