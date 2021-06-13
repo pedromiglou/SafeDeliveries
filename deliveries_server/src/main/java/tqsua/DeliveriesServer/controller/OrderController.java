@@ -3,6 +3,9 @@ package tqsua.DeliveriesServer.controller;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.validation.Valid;
 
@@ -28,9 +31,10 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    private static final HashMap<String, String> APP_NAMES = new HashMap<String, String>() {{
-        put("SafeDeliveries", "http://localhost:8081");
-    }};
+    private static final Map<String, String> APP_NAMES = Stream.of(new String[][] {
+        { "SafeDeliveries", "http://localhost:8081" }, 
+      }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+
 
     //@CrossOrigin(origins = "http://localhost:4200")
     @GetMapping(path="/orders")
