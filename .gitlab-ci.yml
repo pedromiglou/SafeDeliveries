@@ -125,7 +125,7 @@ publish-WEB-ORDERS:
   services:
     - docker:18.09-dind
   script:
-    - cd deliveries_webapp
+    - cd orders_webapp
     - docker build -t $TAG_COMMIT_WEB_ORDERS -t $TAG_LATEST_WEB_ORDERS .
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
     - docker push $TAG_COMMIT_WEB_ORDERS
@@ -137,7 +137,7 @@ publish-API-ORDERS:
   services:
     - docker:18.09-dind
   script:
-    - cd deliveries_server
+    - cd orders_server
     - docker build -t $TAG_COMMIT_API_ORDERS -t $TAG_LATEST_API_ORDERS .
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
     - docker push $TAG_COMMIT_API_ORDERS
