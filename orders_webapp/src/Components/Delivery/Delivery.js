@@ -10,6 +10,8 @@ import * as MdIcons from 'react-icons/md';
 import * as RiIcons from 'react-icons/ri';
 import * as GiIcons from 'react-icons/gi';
 
+/* Geocode */
+import Geocode from "react-geocode";
 
 import Map from '../map/Map.js'
 import { withScriptjs } from "react-google-maps";
@@ -18,6 +20,9 @@ import OrdersService from '../../Services/orders.service';
 import AuthService from '../../Services/auth.service';
 
 function Delivery() {
+    Geocode.setApiKey("AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco");
+    Geocode.setLanguage("en");
+
     const [state, setState] = useState("Requesting");
 
     const [items, setItems] = useState([]);
@@ -27,21 +32,31 @@ function Delivery() {
     const [errorOrder, setErrorOrder] = useState(false);
     const [sucessOrder, setSucessOrder] = useState(false);
 
-    const [pick_up_lat, setPickUpLat] = useState(40.756795);
+    const [pick_up_lat, setPickUpLat] = useState(40.756795);    
     const [pick_up_lng, setPickUpLng] = useState(-73.954298);
-    const [deliver_lat, setDeliverLat] = useState(40.756795);
-    const [deliver_lng, setDeliverLng] = useState(-73.954298);
+    const [deliver_lat, setDeliverLat] = useState(41.5322699);
+    const [deliver_lng, setDeliverLng] = useState(-8.737535200000002);
 
     const current_user = AuthService.getCurrentUser();
 
-    const pickUpMapCallBack = useCallback((msg) => { 
-        setPickUpLat(msg.lat)
-        setPickUpLng(msg.lng)
-    }, []);
+    // const pickUpMapCallBack = useCallback((msg) => { 
+    //     setPickUpLat(msg.lat)
+    //     setPickUpLng(msg.lng)
+    // }, []);
 
-    const deliverMapCallBack = useCallback((msg) => { 
-        setDeliverLat(msg.lat)
-        setDeliverLng(msg.lng)
+    // const deliverMapCallBack = useCallback((msg) => { 
+    //     setDeliverLat(msg.lat)
+    //     setDeliverLng(msg.lng)
+    // }, []);
+
+    const addressChangeMapCallBack = useCallback((msg) => { 
+            if (msg.marker_id === "pick_up_position"){
+                setPickUpLat(msg.lat)
+                setPickUpLng(msg.lng)
+            } else if (msg.marker_id === "delivery_position"){
+                setDeliverLat(msg.lat)
+                setDeliverLng(msg.lng)
+            }
     }, []);
 
     const location = useLocation();
@@ -110,6 +125,24 @@ function Delivery() {
         }
     }, [newItem]);
 
+    useEffect(() => {
+        // Get address from latitude & longitude.
+
+        //Aqui temos de ir buscar a latitude e longitude tanto da delivery como da pickup, chamar a funçao para ir buscar os parametros
+        //Da string recebida, atualizar os campos dos inputs, com value = valores da string
+
+        // Geocode.fromLatLng("48.8583701", "2.2922926").then(
+            
+        //     (response) => {
+        //     const address = response.results[0].formatted_address;
+        //     console.log(address);
+        //     },
+        //     (error) => {
+        //     console.error(error);
+        //     }
+        // );
+    }, [pick_up_lat, pick_up_lng, deliver_lat, deliver_lng]);
+
 
     async function submitOrder(){
         const order = { pick_up_lat: pick_up_lat,
@@ -165,6 +198,48 @@ function Delivery() {
         setItems(items)
     }
 
+    function checkMap(){
+        //PickUp
+        let paddress = document.getElementById("paddress").value;
+        let pzip = document.getElementById("pzip").value;
+        let pcity = document.getElementById("pcity").value;
+        let pcountry = document.getElementById("pcountry").value;
+
+        let pick_up_address = paddress + ", " + pzip + " " + pcity + ", " + pcountry;
+
+        // Get latitude & longitude from address.
+        Geocode.fromAddress(pick_up_address).then(
+        (response) => {
+        const { lat, lng } = response.results[0].geometry.location;
+            setPickUpLat(lat)
+            setPickUpLng(lng)
+        },
+        (error) => {
+            console.error(error);
+        });
+
+        //Delivery
+        let daddress = document.getElementById("daddress").value;
+        let dzip = document.getElementById("dzip").value;
+        let dcity = document.getElementById("dcity").value;
+        let dcountry = document.getElementById("dcountry").value;
+
+        let delivery_address = daddress + ", " + dzip + " " + dcity + ", " + dcountry;
+
+        // Get latitude & longitude from address.
+        Geocode.fromAddress(delivery_address).then(
+        (response) => {
+        const { lat, lng } = response.results[0].geometry.location;
+            setDeliverLat(lat)
+            setDeliverLng(lng)
+        },
+        (error) => {
+            console.error(error);
+        });
+
+
+
+    }
 
     return (
       <>
@@ -181,21 +256,48 @@ function Delivery() {
 
         {state === "Requesting" && 
             <div className="DeliveriesSection req">
+                
                 <div className="DeliveryDetails">
                     <h1>Delivery Details</h1>
                     <hr style={{height:"2px", width:"100%"}}></hr>
                     <div className="div-addresses">
-                        <div>
-                            <label htmlFor="pickup" style={{marginBottom: '10px'}}>Choose Pick Up Address</label>
-                            {<MapLoader 
-                                googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco"
-                                loadingElement={<div style={{ height: "100%"}}/>}
-                                state={ {lat:pick_up_lat, lng: pick_up_lng}}
-                                parentCallback = {pickUpMapCallBack}
-                                />
-                            }
+                        <div className="addresses-inp">
+                            <div>
+                                <h5>Pick Up Address</h5>
+                                <label for="paddress">Address</label>
+                                <input id="paddress" type="text" placeholder="Ex: Rua dos Clérigos nº30"/>
+                                <label for="pcountry">Country</label>
+                                <input id="pcountry" type="text" placeholder="Ex: Portugal"/>
+                                <label for="pcity">City</label>
+                                <input id="pcity" type="text" placeholder="Ex: Esposende"/>
+                                <label for="pzip">Postal Code</label>
+                                <input id="pzip" type="text" placeholder="Ex: 4740-120"/>
+                            </div>
+                            <div>
+                                <h5>Delivery Address</h5>
+                                <label for="daddress">Address</label>
+                                <input id="daddress" type="text" placeholder="Ex: Rua dos Clérigos nº30"/>
+                                <label for="dcountry">Country</label>
+                                <input id="dcountry" type="text" placeholder="Ex: Portugal"/>
+                                <label for="dcity">City</label>
+                                <input id="dcity" type="text" placeholder="Ex: Esposende"/>
+                                <label for="dzip">Postal Code</label>
+                                <input id="dzip" type="text" placeholder="Ex: 4740-120"/>
+                            </div>
+                            <div className="button-check-map">
+                                <button onClick={() => checkMap()} className="confirm-order">Check In Map</button> 
+                            </div>
                         </div>
-                        <div>
+
+                        
+                        {<MapLoader 
+                            googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco"
+                            loadingElement={<div style={{ height: "100%"}}/>}
+                            state={ {pick_up_lat:pick_up_lat, pick_up_lng: pick_up_lng, del_lat:deliver_lat, del_lng: deliver_lng}}
+                            parentCallback = {addressChangeMapCallBack}
+                        />
+                        }
+                        {/* <div>
                             <label htmlFor="destiny" style={{marginBottom: '10px'}}>Choose Destiny Address</label>
                             {<MapLoader 
                                 googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco"
@@ -204,8 +306,9 @@ function Delivery() {
                                 parentCallback = {deliverMapCallBack}
                                 />
                             }
-                        </div>
+                        </div> */}
                     </div>
+                    
                     <hr style={{height:"2px", width:"100%"}}></hr>
                     <div className="item-Table">
                         <h4>Items</h4>

@@ -16,14 +16,38 @@
     gap: 2em;
 }
 
+
 .div-addresses{
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
+    gap: 5%;
+}
+
+.div-addresses > :first-child{
+    flex: 1 1 30%
+}
+
+.div-addresses > :last-child{
+    flex: 1 1 70%;
+}
+
+.addresses-inp{
+    display: flex;
+    flex-direction: column;
     gap: 2em;
 }
+
+.addresses-inp input{
+    width: 100%;
+    outline: none;
+    border: none;
+    border-bottom: 1px solid lightcoral;
+    margin-bottom: 0.7em;
+
+}
+
 
 .confirm{
     display: flex;
@@ -120,6 +144,11 @@
     padding: 0.2em;
     font-size: 0.7rem;
     margin-left: auto;
+}
+
+.button-check-map{
+    margin-top: 2em;
+    margin: 0 auto;
 }
 
 .button-confirm{
