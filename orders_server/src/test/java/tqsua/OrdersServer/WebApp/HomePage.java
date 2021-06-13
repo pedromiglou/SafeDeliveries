@@ -116,11 +116,12 @@ public class HomePage {
         HttpRequest request = HttpRequest.newBuilder()
                 .POST(BodyPublishers.ofString(requestBody))
                 .uri(URI.create("http://localhost:8081/api/login"))
-                .header("Content-Type", "application/x-www-form-urlencoded")
+                .header("Content-type", "application/json")
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
+        System.out.println(response.body());
         JSONObject json = new JSONObject(response.body());
         System.out.println(json);
         System.out.println(js);

@@ -19,4 +19,11 @@ public class OrderService {
         return this.orderRepository.findAll();
     }
 
+    public Order saveOrder(Order order) {
+        if (order.getDeliver_lat() == null || order.getDeliver_lng() == null || order.getPick_up_lat()==null || order.getPick_up_lng()==null ||
+            order.getApp_name() == null || order.getWeight() <= 0) return null;
+        order = this.orderRepository.save(order);
+        return order;
+    }
+
 }

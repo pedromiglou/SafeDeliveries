@@ -6,10 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import tqsua.DeliveriesServer.model.Rider;
 import tqsua.DeliveriesServer.model.Vehicle;
 import tqsua.DeliveriesServer.model.VehicleDTO;
-import tqsua.DeliveriesServer.service.RiderService;
 import tqsua.DeliveriesServer.service.VehicleService;
 
 import javax.validation.Valid;

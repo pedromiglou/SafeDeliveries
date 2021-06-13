@@ -23,6 +23,7 @@ public class OrderDTO {
 
     private long user_id;
 
+    private long deliver_id;
 
     public OrderDTO() {
     }
@@ -108,6 +109,15 @@ public class OrderDTO {
 
     public void setUser_id(long user_id) {
         this.user_id = user_id;
+    }
+
+
+    public long getDeliver_id() {
+        return this.deliver_id;
+    }
+
+    public void setDeliver_id(long deliver_id) {
+        this.deliver_id = deliver_id;
     }
 
 

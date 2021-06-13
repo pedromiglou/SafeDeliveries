@@ -25,6 +25,7 @@ class ItemRepositoryTest {
     @Test
     void whenGetAllItems_thenReturnCorrectResults() throws IOException, InterruptedException {
         Order order = new Order(40.0, 30.0, 40.1, 31.1, "Entregue", 12);
+        order.setDeliver_id(1);
         entityManager.persistAndFlush(order);
         Item item1 = new Item("TV", "Informatica", 43.0);
         Item item2 = new Item("Frigorifico", "Eletrodomesticos", 290.6);
