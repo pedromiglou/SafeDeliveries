@@ -27,7 +27,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     public WebSecurity( BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         if (System.getenv("environment")!=null && System.getenv("environment").equals("prod")) {
-            this.webURL = "http://192.168.160.233";
+            this.webURL = "http://192.168.160.233:81";
         } else {
             this.webURL = "http://localhost:3001";
         }
