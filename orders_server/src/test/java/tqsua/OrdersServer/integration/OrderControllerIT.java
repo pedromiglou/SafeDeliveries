@@ -35,7 +35,7 @@ public class OrderControllerIT {
         items.add(item1);
         items.add(item2);
         order1.setItems(items);
-
+        
         mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.toJson(order1)))
                 .andExpect(jsonPath("$.pick_up_lat", is(order1.getPick_up_lat())))

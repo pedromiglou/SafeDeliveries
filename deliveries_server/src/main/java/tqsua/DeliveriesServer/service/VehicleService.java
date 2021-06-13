@@ -2,7 +2,6 @@ package tqsua.DeliveriesServer.service;
 
 import org.springframework.stereotype.Service;
 
-import tqsua.DeliveriesServer.model.Rider;
 import tqsua.DeliveriesServer.model.Vehicle;
 import tqsua.DeliveriesServer.model.VehicleDTO;
 import tqsua.DeliveriesServer.repository.VehicleRepository;

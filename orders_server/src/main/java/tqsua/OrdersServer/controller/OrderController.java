@@ -36,7 +36,7 @@ public class OrderController {
 
     @PostMapping(path="/orders")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Object> createOrder(@Valid @RequestBody OrderDTO o) {
+    public ResponseEntity<Object> createOrder(@Valid @RequestBody OrderDTO o) throws IOException, InterruptedException {
         o.setStatus("PREPROCESSING");
         String message = "message";
         HashMap<String, String> response = new HashMap<>();
@@ -54,7 +54,19 @@ public class OrderController {
         }
         Order o1 = new Order(o.getPick_up_lat(), o.getPick_up_lng(), o.getDeliver_lat(), o.getDeliver_lng(), o.getStatus(), o.getUser_id());
         o1.setItems(o.getItems());
+        
+        // Get deliver id
+        String deliver_id = orderService.deliveryRequest(o1);
+        if (deliver_id == null) {
+            response.put(message, "Error. Some error occured while connecting to Safe Deliveries.");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        // Set order with deliver id received
+        o1.setDeliver_id(Long.parseLong(deliver_id));
+
+        // Save order
         Order order = orderService.saveOrder(o1);
+
         if (order == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(order, HttpStatus.CREATED);
     }
