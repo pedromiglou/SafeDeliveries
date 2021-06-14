@@ -49,7 +49,6 @@ class Map extends Component {
   };*/
 
   changePos = (t,marker) => {
-    console.log(this.props.state)
     var lat = t.latLng.lat();
     var lng = t.latLng.lng();
     this.props.parentCallback({lat: lat, lng: lng, marker_id: marker});
