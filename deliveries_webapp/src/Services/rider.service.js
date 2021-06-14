@@ -1,14 +1,16 @@
+import {urlAPI} from './../data/data';
+
 class RiderService {
 
         async getRiderById(riderId) {
-            var url = 'http://localhost:8080/api/rider?id=' + riderId;
+            var url = urlAPI + 'api/rider?id=' + riderId;
             var res = await fetch(url);
             return res.json();
         }
 
 
         async changeStatus(rider, newStatus) {
-            var url =  'http://localhost:8080/api/rider?id=' +rider + '&status=' + newStatus;
+            var url = urlAPI + 'api/rider?id=' +rider + '&status=' + newStatus;
     
             await fetch(url, {
                 method:'PUT',
@@ -21,7 +23,7 @@ class RiderService {
         async changeRider(id, fname, lname, email) {
             let rider= {}
 
-            var url =  'http://localhost:8080/api/rider/'+id
+            var url = urlAPI + 'api/rider/'+id
 
             if (fname !== undefined && fname !== null && fname !== "") {
                 rider.firstname = fname
