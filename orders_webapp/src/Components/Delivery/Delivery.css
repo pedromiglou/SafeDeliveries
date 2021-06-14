@@ -75,6 +75,14 @@
         margin-top: 2em;
         margin: 2em auto;
     }
+
+    .div-addresses{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 0;
+    }
     
   }
 

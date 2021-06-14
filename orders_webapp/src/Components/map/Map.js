@@ -57,8 +57,9 @@ class Map extends Component {
   render() {
     const GoogleMapExample = withGoogleMap(props => (
       <GoogleMap
-        defaultCenter={{ lat: this.props.state.pick_up_lat, lng: this.props.state.pick_up_lng }}
-        defaultZoom={13}
+        // defaultCenter={{ lat: this.props.state.pick_up_lat, lng: this.props.state.pick_up_lng }}
+        center={{ lat: this.props.state.pick_up_lat, lng: this.props.state.pick_up_lng }}
+        defaultZoom={1}
       >
         
         {this.state.markers.map((marker, index) => (
@@ -79,7 +80,7 @@ class Map extends Component {
       <div>
         <GoogleMapExample
           containerElement={<div style={{ height: `600px`}} />}
-          mapElement={<div style={{ height: `100%`, width: '70vw', minWidth: '200px' }} />}
+          mapElement={<div style={{ height: `100%`, width: '70vw', minWidth: '350px' }} />}
         />
       </div>
     );
