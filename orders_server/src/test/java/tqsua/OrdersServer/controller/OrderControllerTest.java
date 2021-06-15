@@ -105,6 +105,33 @@ class OrderControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is("Error. Invalid coords.")));
         reset(service);
+
+        order1 = new OrderDTO(40.2, null, 40.1, 31.1, "PREPROCESSING", 12);
+        order1.setItems(items);
+
+        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        .content(JsonUtil.toJson(order1)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Error. Invalid coords.")));
+        reset(service);
+
+        order1 = new OrderDTO(40.2, 43.3, null, 31.1, "PREPROCESSING", 12);
+        order1.setItems(items);
+
+        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        .content(JsonUtil.toJson(order1)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Error. Invalid coords.")));
+        reset(service);
+
+        order1 = new OrderDTO(40.2, 34.2, 40.1, null, "PREPROCESSING", 12);
+        order1.setItems(items);
+
+        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        .content(JsonUtil.toJson(order1)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Error. Invalid coords.")));
+        reset(service);
     }
 
     @Test

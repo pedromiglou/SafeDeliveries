@@ -72,7 +72,8 @@ public class OrderService {
 
     public Order saveOrder(Order order) {
         if (order.getDeliver_lat() == null || order.getDeliver_lng() == null || order.getPick_up_lat()==null || order.getPick_up_lng()==null ||
-             order.getStatus()==null || order.getItems().isEmpty() || order.getUser_id()==0) return null;
+             order.getStatus()==null || (order.getItems() != null && order.getItems().isEmpty()) || order.getItems() == null || order.getUser_id()==0) return null;
+        
         Set<Item> orderItems = order.getItems();
         this.orderRepository.save(order);
         for (Item e : orderItems) {
