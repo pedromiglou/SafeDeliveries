@@ -32,6 +32,7 @@ import { Modal } from "react-bootstrap";
 import Map from './Components/map/Map.js'
 
 import { withScriptjs } from "react-google-maps";
+import {urlWeb} from "./data/data";
 
 import Geocode from "react-geocode";
 
@@ -41,7 +42,7 @@ Geocode.setApiKey("AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco");
 // set response language. Defaults to english.
 Geocode.setLanguage("en");
 
-import {urlWeb} from "./data/data";
+
 
 function App() {
     
