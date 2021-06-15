@@ -16,15 +16,13 @@ public class RiderDTO {
     public RiderDTO() {
     }
 
-    public RiderDTO(String firstname, String lastname, String email, String password, Double rating, String status, Double lat, Double lng) {
+    public RiderDTO(String firstname, String lastname, String email, String password, Double rating, String status) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
         this.password = password;
         this.rating = rating;
         this.status = status;
-        this.lat = lat;
-        this.lng = lng;
     }
 
 

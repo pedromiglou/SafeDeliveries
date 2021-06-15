@@ -66,11 +66,56 @@ class OrderServiceTest {
     }
 
     @Test
+    void whenGetOrderById_thenReturnCorrectResults() throws Exception {
+        Order order1 = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+
+        when(repository.findByPk(1)).thenReturn(order1);
+        assertThat(service.getOrderById(1)).isEqualTo(order1);
+        reset(repository);
+    }
+
+    @Test
     void whenSaveOrder_thenSaveOrder() throws Exception {
         Order order1 = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
 
         when(repository.save(order1)).thenReturn(order1);
         assertThat(service.saveOrder(order1)).isEqualTo(order1);
+        reset(repository);
+    }
+
+    @Test
+    void whenSaveOrderWithInvalidCoords_thenReturnNull() throws Exception {
+        Order order1 = new Order(0, null, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+
+        assertThat(service.saveOrder(order1)).isNull();
+        reset(repository);
+    }
+
+    @Test
+    void whenSaveOrderWithInvalidAppName_thenReturnNull() throws Exception {
+        Order order1 = new Order(0, 30.4, 30.4, 41.2, 31.3, 36.3, null);
+
+        assertThat(service.saveOrder(order1)).isNull();
+        reset(repository);
+    }
+
+    @Test
+    void whenSaveOrderWithInvalidWeight_thenReturnNull() throws Exception {
+        Order order1 = new Order(0, 30.4, 30.4, 41.2, 31.3, -1.2, "SafeDeliveries");
+
+        assertThat(service.saveOrder(order1)).isNull();
+        reset(repository);
+    }
+
+    @Test
+    void whenUpdateRider_onlyUpdateNotNullParameters() {
+        Order order1 = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+
+        when(repository.findByPk(1)).thenReturn(order1);
+        order1.setRider_id(2);
+        when(repository.save(order1)).thenReturn(order1);
+
+        assertThat(service.updateRider(1, 2)).isEqualTo(order1);
         reset(repository);
     }
     

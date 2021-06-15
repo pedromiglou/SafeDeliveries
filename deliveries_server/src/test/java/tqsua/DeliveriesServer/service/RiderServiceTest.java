@@ -39,8 +39,12 @@ class RiderServiceTest {
     @Test
     void whenGetAllRiders_thenReturnCorrectResults() throws Exception {
         ArrayList<Rider> response = new ArrayList<>();
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", 12.0, 93.0);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline", 12.0, 93.0);
+        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider1.setLat(12.0);
+        rider1.setLng(93.0);
+        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
+        rider2.setLat(12.0);
+        rider2.setLng(93.0);
         response.add(rider1);
         response.add(rider2);
 
@@ -51,7 +55,9 @@ class RiderServiceTest {
 
     @Test
     void whenGetRiderById_thenReturnRider() {
-        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", 12.0, 93.0);
+        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        response.setLat(12.0);
+        response.setLng(93.0);
 
         when(repository.findById(response.getId())).thenReturn(response);
         assertThat(service.getRiderById(response.getId())).isEqualTo(response);
@@ -67,17 +73,23 @@ class RiderServiceTest {
 
     @Test
     void whenUpdateRider_onlyUpdateNotNullParameters() {
-        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", 12.0, 93.0);
+        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        response.setLat(12.0);
+        response.setLng(93.0);
         when(repository.findById(response.getId())).thenReturn(response);
 
-        RiderDTO newDetails = new RiderDTO(null, null, null, null, null, "Online", 12.0, 93.0);
+        RiderDTO newDetails = new RiderDTO(null, null, null, null, null, "Online");
+        newDetails.setLat(12.0);
+        newDetails.setLng(93.0);
         //check if status is updated while other parameter remains the same
         service.updateRider(response.getId(), newDetails);
         assertThat(response.getStatus()).isEqualTo("Online");
         assertThat(response.getFirstname()).isEqualTo("Ricardo");
 
         //check if all parameters are updated
-        newDetails = new RiderDTO("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline", 12.0, 93.0);
+        newDetails = new RiderDTO("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
+        newDetails.setLat(12.0);
+        newDetails.setLng(93.0);
         service.updateRider(response.getId(), newDetails);
         assertThat(response.getFirstname()).isEqualTo("Diogo");
         assertThat(response.getLastname()).isEqualTo("Carvalho");
@@ -90,7 +102,9 @@ class RiderServiceTest {
     @Test
     void whenUpdateNotExistentRider_returnNull() {
         when(repository.findById(-1)).thenReturn(null);
-        RiderDTO newDetails = new RiderDTO("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline", 12.0, 93.0);
+        RiderDTO newDetails = new RiderDTO("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
+        newDetails.setLat(12.0);
+        newDetails.setLng(93.0);
         assertThat(service.updateRider(-1, newDetails)).isNull();
     }
 
@@ -110,5 +124,24 @@ class RiderServiceTest {
         //check if service returns false when a rider with that email do not exists
         service.existsRiderByEmail(anyString());
         assertThat(service.existsRiderByEmail(anyString())).isFalse();
+    }
+
+    @Test
+    void whenChangeStatus_ifRiderNotExists_ReturnNull() {
+        when(repository.findById(1)).thenReturn(null);
+
+        assertThat(service.changeStatus(1, "Online")).isNull();
+    }
+
+    @Test
+    void whenChangeStatus_ifRiderExists_ReturnRider() {
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        when(repository.findById(1)).thenReturn(rider);
+        rider.setStatus("Online");
+        when(repository.save(rider)).thenReturn(rider);
+
+        assertThat(service.changeStatus(1, "Online")).isEqualTo(rider);
     }
 }

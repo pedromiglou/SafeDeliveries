@@ -101,7 +101,9 @@ public class OrderControllerIT {
     @Test
     void whenAcceptOrder_thenReturnResult() throws Exception {
         Order order = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", 12.0, 93.0);
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
         order = orderRepository.save(order);
         rider = riderRepository.save(rider);
         Notification notification = new Notification(rider.getId(), order.getOrder_id());
@@ -114,7 +116,9 @@ public class OrderControllerIT {
     @Test
     void whenDeclineOrder_thenReturnResult() throws Exception {
         Order order = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", 12.0, 93.0);
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
         order = orderRepository.save(order);
         rider = riderRepository.save(rider);
         Notification notification = new Notification(rider.getId(), order.getOrder_id());

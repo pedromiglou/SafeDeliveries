@@ -80,7 +80,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         HashMap<String, String> map = new HashMap<>();
         
         Rider updatedRider = (Rider) auth.getPrincipal();
-        RiderDTO r = new RiderDTO(null, null, null, null, null, "Online", null, null); 
+        RiderDTO r = new RiderDTO(null, null, null, null, null, "Online"); 
         Rider rider = riderService.updateRider(updatedRider.getId(), r);
 
         ArrayList<Order> orders;
@@ -111,7 +111,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 this.notificationService.save(notification_for_rider);
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
         
         map.put("id", String.valueOf(updatedRider.getId()));

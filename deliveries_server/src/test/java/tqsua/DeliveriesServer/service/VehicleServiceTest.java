@@ -61,7 +61,9 @@ class VehicleServiceTest {
 
     @Test
     void whenCreateVehicle_thenSaveIt() {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", 12.0, 93.0);
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
         when(riderService.getRiderById(0L)).thenReturn(rider);
 
         VehicleDTO vehicle = new VehicleDTO(null, "Audi", "A5", "Carro", 365.0, 0L, "AAAAAA");
@@ -72,7 +74,9 @@ class VehicleServiceTest {
 
     @Test
     void whenCreateVehicleWithoutTheNeededParameters_thenDoNotSaveIt() {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", 12.0, 93.0);
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
         when(riderService.getRiderById(0L)).thenReturn(rider);
 
         VehicleDTO vehicle = new VehicleDTO(null, null, "A5", "Carro", 365.0, 0L, "BBBBBB");
@@ -83,7 +87,9 @@ class VehicleServiceTest {
 
     @Test
     void whenUpdateVehicle_onlyUpdateNotNullParameters() {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", 12.0, 93.0);
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
         when(riderService.getRiderById(0L)).thenReturn(rider);
         Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
 
@@ -107,7 +113,9 @@ class VehicleServiceTest {
 
     @Test
     void whenUpdateNotExistentVehicle_returnNull() {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", 12.0, 93.0);
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
         when(riderService.getRiderById(0L)).thenReturn(rider);
 
         VehicleDTO newDetails = new VehicleDTO(null, "BMW", "M4", "Carro", 320.0, 0L,"CCCCCC");

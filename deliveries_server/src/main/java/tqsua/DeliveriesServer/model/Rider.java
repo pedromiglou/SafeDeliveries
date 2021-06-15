@@ -56,15 +56,13 @@ public class Rider implements Serializable, UserDetails {
     public Rider() {
     }
 
-    public Rider(String firstname, String lastname, String email, String password, Double rating, String status, Double lat, Double lng) {
+    public Rider(String firstname, String lastname, String email, String password, Double rating, String status) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
         this.password = password;
         this.rating = rating;
         this.status = status;
-        this.lat = lat;
-        this.lng = lng;
     }
 
     public long getId() {

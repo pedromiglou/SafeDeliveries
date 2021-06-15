@@ -64,5 +64,17 @@ class OrderServiceTest {
         assertThat(service.saveOrder(order1)).isEqualTo(order1);
         reset(repository);
     }
+
+    /* for teacher
+    @Test
+    void whendeliveryRequest_thenReturnCorrectResults() throws Exception {
+        Order order = new Order(40.0, 30.0, 40.1, 31.1, "Entregue", 12);
+        HttpResponse<String> response = new HttpResponse();
+        when(HttpClient.newHttpClient().send(Mockito.any(), Mockito.any())).thenReturn(response);
+
+        assertThat(service.deliveryRequest(order)).isEqualTo(null);
+        reset(repository);
+    }
+    */
     
 }

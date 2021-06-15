@@ -51,8 +51,12 @@ public class VehicleControllerTest {
     @Test
     void whenGetAllVehicles_thenReturnResult() throws Exception {
         ArrayList<Vehicle> response = new ArrayList<>();
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", 12.0, 93.0);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline", 12.0, 93.0);
+        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider1.setLat(12.0);
+        rider1.setLng(93.0);
+        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
+        rider2.setLat(12.0);
+        rider2.setLng(93.0);
 
         Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 320.0, "BBBBBB");
@@ -71,7 +75,9 @@ public class VehicleControllerTest {
 
     @Test
     void whenGetVehicleById_thenReturnVehicle() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", 12.0, 93.0);
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
         Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         response.setRider(rider);
         given(service.getVehicleById(response.getId())).willReturn(response);
@@ -93,7 +99,9 @@ public class VehicleControllerTest {
 
     @Test
     void whenGetVehiclesByRiderId_thenReturnVehicles() throws Exception {
-        Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 4.0, "Offline", 12.0, 93.0);
+        Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 4.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
         Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 365.0, "AAAAAA");
         v1.setRider(rider);
@@ -113,7 +121,9 @@ public class VehicleControllerTest {
 
     @Test
     void whenPostNewVehicle_thenCreateIt() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", 12.0, 93.0);
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
         VehicleDTO vehicle = new VehicleDTO(null, "Audi", "A5", "Carro", 365.0, 0L, "AAAAAA");
         Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         response.setRider(rider);
@@ -140,7 +150,9 @@ public class VehicleControllerTest {
 
     @Test
     void whenUpdateVehicle_thenUpdateIt() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", 12.0, 93.0);
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
         Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         vehicle.setRider(rider);
 

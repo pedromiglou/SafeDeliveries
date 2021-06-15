@@ -50,33 +50,37 @@ public class RiderController {
         Rider r = riderService.updateRider(id, rider);
         if (r == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         
-        if (rider.getStatus() != null) {
-            // When Rider turns Online, then search for pending orders
-            if (rider.getStatus().equals("Online")) {
-                ArrayList<Order> orders = orderService.getPendingOrders();
-                ArrayList<Order> refused_orders = orderService.getRefusedOrders(r.getId());
-                orders.removeAll(refused_orders);
-                if (orders.size() != 0) {
-                    Order final_order = orders.remove(0);
-                    double pick_up_lat = final_order.getPick_up_lat();
-                    double pick_up_lng = final_order.getPick_up_lng();
-                    double x1 = r.getLat();
-                    double y1 = r.getLng();
-                    double min_distance = Math.sqrt((pick_up_lat-x1)*(pick_up_lat-x1) + (pick_up_lng-y1)*(pick_up_lng-y1));
-                    for (Order o: orders) {
-                        pick_up_lat = o.getPick_up_lat();
-                        pick_up_lng = o.getPick_up_lng();
-                        double distance = Math.sqrt((pick_up_lat-x1)*(pick_up_lat-x1) + (pick_up_lng-y1)*(pick_up_lng-y1));
-                        if (distance < min_distance) {
-                            final_order = o;
-                            min_distance = distance;
-                        }
-                    }
-                    Notification notification_for_rider = new Notification(r.getId(), final_order.getOrder_id());
-                    this.notificationService.save(notification_for_rider);
-                }
+        // When Rider turns Online, then search for pending orders
+        if (rider.getStatus() != null && rider.getStatus().equals("Online")) {
+            ArrayList<Order> orders = orderService.getPendingOrders();
+            ArrayList<Order> refused_orders = orderService.getRefusedOrders(r.getId());
+            orders.removeAll(refused_orders);
+            if (orders.size() != 0) {
+                Order final_order = getBestOrder(orders, r);
+                Notification notification_for_rider = new Notification(r.getId(), final_order.getOrder_id());
+                this.notificationService.save(notification_for_rider);
             }
         }
+        
         return new ResponseEntity<>(r, HttpStatus.OK);
+    }
+
+    public Order getBestOrder(ArrayList<Order> orders, Rider r) {
+        Order final_order = orders.remove(0);
+        double pick_up_lat = final_order.getPick_up_lat();
+        double pick_up_lng = final_order.getPick_up_lng();
+        double x1 = r.getLat();
+        double y1 = r.getLng();
+        double min_distance = Math.sqrt((pick_up_lat-x1)*(pick_up_lat-x1) + (pick_up_lng-y1)*(pick_up_lng-y1));
+        for (Order o: orders) {
+            pick_up_lat = o.getPick_up_lat();
+            pick_up_lng = o.getPick_up_lng();
+            double distance = Math.sqrt((pick_up_lat-x1)*(pick_up_lat-x1) + (pick_up_lng-y1)*(pick_up_lng-y1));
+            if (distance < min_distance) {
+                final_order = o;
+                min_distance = distance;
+            }
+        }
+        return final_order;
     }
 }

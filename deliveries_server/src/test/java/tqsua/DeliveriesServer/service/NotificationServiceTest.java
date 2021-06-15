@@ -35,9 +35,26 @@ class NotificationServiceTest {
     }
 
     @Test
+    void whenSaveNotification_thenSaveOrder() throws Exception {
+        Notification notification1 = new Notification(1, 2);
+
+        when(repository.save(notification1)).thenReturn(notification1);
+        assertThat(service.save(notification1)).isEqualTo(notification1);
+        reset(repository);
+    }
+
+    @Test
     void whenDeleteNotificationByRider_thenDelete() throws Exception {
         when(repository.existsById(1L)).thenReturn(true);
         assertThat(service.delete(1)).isNotNull();
+        Mockito.verify(repository, VerificationModeFactory.times(1)).existsById(1L);
+        reset(repository);
+    }
+
+    @Test
+    void whenDeleteNotificationByRiderThatDoesNotExist_thenReturnNull() throws Exception {
+        when(repository.existsById(1L)).thenReturn(false);
+        assertThat(service.delete(1)).isNull();
         Mockito.verify(repository, VerificationModeFactory.times(1)).existsById(1L);
         reset(repository);
     }
