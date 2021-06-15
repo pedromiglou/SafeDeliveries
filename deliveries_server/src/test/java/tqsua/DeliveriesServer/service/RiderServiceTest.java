@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.mockito.junit.jupiter.MockitoExtension;
-
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import tqsua.DeliveriesServer.model.Rider;
 import tqsua.DeliveriesServer.model.RiderDTO;
@@ -30,6 +30,9 @@ class RiderServiceTest {
 
     @InjectMocks
     private RiderService service;
+
+    private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+
 
     @AfterEach
     void tearDown() {
@@ -51,6 +54,27 @@ class RiderServiceTest {
         when(repository.findAll()).thenReturn(response);
         assertThat(service.getAllRiders()).isEqualTo(response);
         Mockito.verify(repository, VerificationModeFactory.times(1)).findAll();
+    }
+
+    @Test
+    void whenGetAvailableRiders_thenReturnCorrectResults() throws Exception {
+        ArrayList<Rider> response = new ArrayList<>();
+        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Online");
+        rider1.setLat(12.0);
+        rider1.setLng(93.0);
+        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Online");
+        rider2.setLat(12.0);
+        rider2.setLng(93.0);
+        Rider rider3 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Online");
+        rider3.setLat(12.0);
+        rider3.setLng(93.0);
+        response.add(rider1);
+        response.add(rider2);
+        response.add(rider3);
+
+        when(repository.findAvailableRiders(23.0)).thenReturn(response);
+        assertThat(service.getAvailableRiders(23.0)).isEqualTo(response);
+        Mockito.verify(repository, VerificationModeFactory.times(1)).findAvailableRiders(23.0);
     }
 
     @Test
@@ -143,5 +167,17 @@ class RiderServiceTest {
         when(repository.save(rider)).thenReturn(rider);
 
         assertThat(service.changeStatus(1, "Online")).isEqualTo(rider);
+    }
+
+    @Test
+    void whenSaveRider_ReturnRider() {
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        Rider rider2 = rider;
+        rider2.setPassword(bCryptPasswordEncoder.encode(rider.getPassword()));
+        when(repository.save(rider)).thenReturn(rider2);
+
+        assertThat(service.saveRider(rider)).isEqualTo(rider2);
     }
 }

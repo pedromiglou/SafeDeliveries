@@ -146,8 +146,10 @@ class RiderControllerTest {
         ArrayList<Order> response = new ArrayList<>();
         Order order1 = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
         Order order2 = new Order(0, 37.3, 39.4, 38.2, 39.3, 36.3, "SafeDeliveries");
+        Order order3 = new Order(0, 31.3, 31.4, 31.2, 31.3, 36.3, "SafeDeliveries");
         response.add(order1);
         response.add(order2);
+        response.add(order3);
 
         given(service.updateRider(1L, newDetails)).willReturn(rider);
 

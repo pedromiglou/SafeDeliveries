@@ -111,7 +111,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 this.notificationService.save(notification_for_rider);
             }
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
         }
         
         map.put("id", String.valueOf(updatedRider.getId()));

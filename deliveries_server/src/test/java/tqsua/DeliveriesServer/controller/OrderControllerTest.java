@@ -73,12 +73,16 @@ class OrderControllerTest {
         
         ArrayList<Rider> response = new ArrayList<>();
         Rider rider = new Rider("Rafael", "Baptista", "rafael@ua.pt", "1234", 5.0, "Online");
-        rider.setLat(40.3);
-        rider.setLng(30.4);
+        rider.setLat(43.3);
+        rider.setLng(32.4);
 
         Rider rider2 = new Rider("Rafael", "Baptista", "rafael2@ua.pt", "1234", 5.0, "Online");
         rider2.setLat(12.0);
         rider2.setLng(93.0);
+
+        Rider rider3 = new Rider("Rafael", "Baptista", "rafael3@ua.pt", "1234", 5.0, "Online");
+        rider3.setLat(40.1);
+        rider3.setLng(30.4);
 
         response.add(rider);
         response.add(rider2);
