@@ -24,7 +24,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.ArrayList;
 
 //@WebMvcTest(AuthController.class)
 @AutoConfigureMockMvc
@@ -40,6 +39,8 @@ class AuthControllerTest {
     @Test
     void whenRegistWithValidData_thenRegistWithSucess() throws Exception {
         Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 0.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
 
         given(riderService.existsRiderByEmail(anyString())).willReturn(false);
 
@@ -54,6 +55,8 @@ class AuthControllerTest {
     @Test
     void whenRegistWithInvalidEmail_thenReturnErrorMessage() throws Exception {
         Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 0.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
 
         given(riderService.existsRiderByEmail(anyString())).willReturn(true);
 

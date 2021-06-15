@@ -2,7 +2,6 @@ package tqsua.DeliveriesServer.integration;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.internal.verification.VerificationModeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,13 +13,9 @@ import tqsua.DeliveriesServer.model.Rider;
 import tqsua.DeliveriesServer.model.RiderDTO;
 import tqsua.DeliveriesServer.repository.RiderRepository;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -38,10 +33,15 @@ public class RiderControllerIT {
     void setUp() {
         riderRepository.deleteAll();
     }
+    
     @Test
     void whenGetAllRiders_thenReturnResult() throws Exception {
         Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider1.setLat(12.0);
+        rider1.setLng(93.0);
         Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
+        rider2.setLat(12.0);
+        rider2.setLng(93.0);
         riderRepository.save(rider1);
         riderRepository.save(rider2);
 
@@ -54,6 +54,8 @@ public class RiderControllerIT {
     @Test
     void whenGetRiderById_thenReturnRider() throws Exception {
         Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider1.setLat(12.0);
+        rider1.setLng(93.0);
         riderRepository.save(rider1);
 
         mvc.perform(get("/api/rider?id="+String.valueOf(rider1.getId())).contentType(MediaType.APPLICATION_JSON)
@@ -73,8 +75,12 @@ public class RiderControllerIT {
     @Test
     void whenUpdateRider_thenReturnOk() throws Exception {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
         riderRepository.save(rider);
         RiderDTO newDetails = new RiderDTO("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
+        newDetails.setLat(12.0);
+        newDetails.setLng(93.0);
 
         //with all arguments
         mvc.perform(put("/api/rider/"+String.valueOf(rider.getId())).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
@@ -82,6 +88,8 @@ public class RiderControllerIT {
 
         //with less arguments
         newDetails = new RiderDTO(null, "B", "a@b.c", null, 5.0, "Offline");
+        newDetails.setLat(12.0);
+        newDetails.setLng(93.0);
         mvc.perform(put("/api/rider/"+String.valueOf(rider.getId())).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
                 .andExpect(status().isOk());
     }
@@ -89,6 +97,8 @@ public class RiderControllerIT {
     @Test
     void whenUpdateNotExistentRider_thenReturnNotFound() throws Exception {
         RiderDTO newDetails = new RiderDTO("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
+        newDetails.setLat(12.0);
+        newDetails.setLng(93.0);
 
         mvc.perform(put("/api/rider/0").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
                 .andExpect(status().isNotFound());

@@ -43,6 +43,12 @@ public class Rider implements Serializable, UserDetails {
     @Column(name = "status", nullable = false)
     private String status;
 
+    @Column(name = "lat", nullable = false)
+    private Double lat;
+
+    @Column(name = "lng", nullable = false)
+    private Double lng;
+
 /*    // tem varios vehicles
     @OneToMany
     private Set<Vehicle> vehicles = new HashSet<>();*/
@@ -132,6 +138,24 @@ public class Rider implements Serializable, UserDetails {
         this.vehicles.remove(vehicle);
     }
 */
+
+    public Double getLat() {
+        return this.lat;
+    }
+
+    public void setLat(Double lat) {
+        this.lat = lat;
+    }
+
+    public Double getLng() {
+        return this.lng;
+    }
+
+    public void setLng(Double lng) {
+        this.lng = lng;
+    }
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return new ArrayList<>();

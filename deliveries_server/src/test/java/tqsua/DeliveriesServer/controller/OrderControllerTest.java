@@ -12,10 +12,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import tqsua.DeliveriesServer.service.NotificationService;
 import tqsua.DeliveriesServer.service.OrderService;
+import tqsua.DeliveriesServer.service.RiderService;
 import tqsua.DeliveriesServer.JsonUtil;
+import tqsua.DeliveriesServer.model.Notification;
 import tqsua.DeliveriesServer.model.Order;
 import tqsua.DeliveriesServer.model.OrderDTO;
+import tqsua.DeliveriesServer.model.Rider;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
@@ -39,6 +43,12 @@ class OrderControllerTest {
     @MockBean
     private OrderService service;
 
+    @MockBean
+    private NotificationService notification_service;
+
+    @MockBean
+    private RiderService rider_service;
+
     @Test
     void whenGetAllOrders_thenReturnResult() throws Exception {
         ArrayList<Order> response = new ArrayList<>();
@@ -61,14 +71,140 @@ class OrderControllerTest {
         Order order = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
         OrderDTO order1 = new OrderDTO(40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
         
+        ArrayList<Rider> response = new ArrayList<>();
+        Rider rider = new Rider("Rafael", "Baptista", "rafael@ua.pt", "1234", 5.0, "Online");
+        rider.setLat(43.3);
+        rider.setLng(32.4);
+
+        Rider rider2 = new Rider("Rafael", "Baptista", "rafael2@ua.pt", "1234", 5.0, "Online");
+        rider2.setLat(12.0);
+        rider2.setLng(93.0);
+
+        Rider rider3 = new Rider("Rafael", "Baptista", "rafael3@ua.pt", "1234", 5.0, "Online");
+        rider3.setLat(40.1);
+        rider3.setLng(30.4);
+
+        response.add(rider);
+        response.add(rider2);
+
         given(service.saveOrder(Mockito.any())).willReturn(order);
+        given(rider_service.getAvailableRiders(36.3)).willReturn(response);
 
         mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
         .content(JsonUtil.toJson(order1)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.deliver_id").isNotEmpty());
         verify(service, VerificationModeFactory.times(1)).saveOrder(Mockito.any());
+        verify(notification_service, VerificationModeFactory.times(1)).save(Mockito.any());
+        reset(service);
+        reset(notification_service);
+    }
+
+    @Test
+    void whenCreateOrderWithInvalidCoords_thenReturnError() throws Exception {
+        OrderDTO order1 = new OrderDTO(null, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        
+        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        .content(JsonUtil.toJson(order1)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Error. Invalid coords.")));
+        verify(service, VerificationModeFactory.times(0)).saveOrder(Mockito.any());
+        reset(service);
+
+        order1 = new OrderDTO(30.4, null, 41.2, 31.3, 36.3, "SafeDeliveries");
+        
+        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        .content(JsonUtil.toJson(order1)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Error. Invalid coords.")));
+        verify(service, VerificationModeFactory.times(0)).saveOrder(Mockito.any());
+        reset(service);
+
+        order1 = new OrderDTO(30.4, 30.4, null, 31.3, 36.3, "SafeDeliveries");
+        
+        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        .content(JsonUtil.toJson(order1)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Error. Invalid coords.")));
+        verify(service, VerificationModeFactory.times(0)).saveOrder(Mockito.any());
+        reset(service);
+
+        order1 = new OrderDTO(30.4, 30.4, 41.2, null, 36.3, "SafeDeliveries");
+        
+        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        .content(JsonUtil.toJson(order1)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Error. Invalid coords.")));
+        verify(service, VerificationModeFactory.times(0)).saveOrder(Mockito.any());
         reset(service);
     }
 
+    @Test
+    void whenCreateOrderWithInvalidWeight_thenReturnError() throws Exception {
+        OrderDTO order1 = new OrderDTO(40.3, 30.4, 41.2, 31.3, -1.2, "SafeDeliveries");
+        
+        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        .content(JsonUtil.toJson(order1)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Error. Invalid Weight.")));
+        verify(service, VerificationModeFactory.times(0)).saveOrder(Mockito.any());
+        reset(service);
+    }
+
+    @Test
+    void whenCreateOrderWithInvalidAppName_thenReturnError() throws Exception {
+        OrderDTO order1 = new OrderDTO(40.3, 30.4, 41.2, 31.3, 30.2, "invalidAppName");
+        
+        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        .content(JsonUtil.toJson(order1)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Error. Invalid App name.")));
+        verify(service, VerificationModeFactory.times(0)).saveOrder(Mockito.any());
+        reset(service);
+    }
+
+    @Test
+    void whenAcceptOrder_thenReturnResult() throws Exception {
+        Order order = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        
+        given(service.updateRider(2, 1)).willReturn(order);
+
+        mvc.perform(post("/api/acceptorder?order_id=2&rider_id=1").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        verify(service, VerificationModeFactory.times(1)).updateRider(2, 1);
+        reset(service);
+    } 
+
+    @Test
+    void whenDeclineOrder_thenReturnResult() throws Exception {
+        Order order = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order.setRefused_riders(new ArrayList<>());
+
+        ArrayList<Rider> response = new ArrayList<>();
+        Rider rider = new Rider("Rafael", "Baptista", "rafael@ua.pt", "1234", 5.0, "Online");
+        rider.setLat(46.3);
+        rider.setLng(36.4);
+
+        Rider rider2 = new Rider("Rafael", "Baptista", "rafael2@ua.pt", "1234", 5.0, "Online");
+        rider2.setLat(12.0);
+        rider2.setLng(93.0);
+
+        Rider rider3 = new Rider("Rafael", "Baptista", "rafael2@ua.pt", "1234", 5.0, "Online");
+        rider3.setLat(40.3);
+        rider3.setLng(30.4);
+
+        response.add(rider);
+        response.add(rider2);
+        response.add(rider3);
+
+        given(service.getOrderById(1)).willReturn(order);
+        given(rider_service.getAvailableRiders(36.3)).willReturn(response);
+
+        mvc.perform(post("/api/declineorder?order_id=1&rider_id=2").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        verify(service, VerificationModeFactory.times(1)).getOrderById(1);
+        verify(notification_service, VerificationModeFactory.times(1)).save(Mockito.any());
+        reset(service);
+        reset(notification_service);
+    } 
 }

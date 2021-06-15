@@ -38,13 +38,13 @@ public class OrderController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Object> createOrder(@Valid @RequestBody OrderDTO o) throws IOException, InterruptedException {
         o.setStatus("PREPROCESSING");
-        String message = "message";
+        var message = "message";
         HashMap<String, String> response = new HashMap<>();
         if (o.getDeliver_lat() == null || o.getDeliver_lng() == null || o.getPick_up_lat() == null || o.getPick_up_lng() == null) {
             response.put(message, "Error. Invalid coords.");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
-        if (o.getItems() == null || o.getItems().size() == 0) {
+        if (o.getItems() == null || o.getItems().isEmpty()) {
             response.put(message, "Error. Order with 0 items.");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
@@ -52,20 +52,20 @@ public class OrderController {
             response.put(message, "Error. No user specified.");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
-        Order o1 = new Order(o.getPick_up_lat(), o.getPick_up_lng(), o.getDeliver_lat(), o.getDeliver_lng(), o.getStatus(), o.getUser_id());
+        var o1 = new Order(o.getPick_up_lat(), o.getPick_up_lng(), o.getDeliver_lat(), o.getDeliver_lng(), o.getStatus(), o.getUser_id());
         o1.setItems(o.getItems());
         
         // Get deliver id
-        String deliver_id = orderService.deliveryRequest(o1);
-        if (deliver_id == null) {
+        String deliverId = orderService.deliveryRequest(o1);
+        if (deliverId == null) {
             response.put(message, "Error. Some error occured while connecting to Safe Deliveries.");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         // Set order with deliver id received
-        o1.setDeliver_id(Long.parseLong(deliver_id));
+        o1.setDeliver_id(Long.parseLong(deliverId));
 
         // Save order
-        Order order = orderService.saveOrder(o1);
+        var order = orderService.saveOrder(o1);
 
         if (order == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(order, HttpStatus.CREATED);
