@@ -27,7 +27,7 @@ public class OrderControllerIT {
     @Autowired
     private MockMvc mvc;
 
-    @Disabled
+    @Disabled("Unable to run in CI")
     @Test
     void whenCreatingOrderWithValidParams_thenCreateWithSucess() throws Exception {
         OrderDTO order1 = new OrderDTO(40.0, 30.0, 40.1, 31.1, "PREPROCESSING", 12);

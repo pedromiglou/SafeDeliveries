@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.mockito.junit.jupiter.MockitoExtension;
-
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import tqsua.DeliveriesServer.model.Rider;
 import tqsua.DeliveriesServer.model.RiderDTO;
@@ -31,6 +31,9 @@ class RiderServiceTest {
     @InjectMocks
     private RiderService service;
 
+    private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+
+
     @AfterEach
     void tearDown() {
         reset(repository);
@@ -40,7 +43,11 @@ class RiderServiceTest {
     void whenGetAllRiders_thenReturnCorrectResults() throws Exception {
         ArrayList<Rider> response = new ArrayList<>();
         Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider1.setLat(12.0);
+        rider1.setLng(93.0);
         Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
+        rider2.setLat(12.0);
+        rider2.setLng(93.0);
         response.add(rider1);
         response.add(rider2);
 
@@ -50,8 +57,31 @@ class RiderServiceTest {
     }
 
     @Test
+    void whenGetAvailableRiders_thenReturnCorrectResults() throws Exception {
+        ArrayList<Rider> response = new ArrayList<>();
+        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Online");
+        rider1.setLat(12.0);
+        rider1.setLng(93.0);
+        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Online");
+        rider2.setLat(12.0);
+        rider2.setLng(93.0);
+        Rider rider3 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Online");
+        rider3.setLat(12.0);
+        rider3.setLng(93.0);
+        response.add(rider1);
+        response.add(rider2);
+        response.add(rider3);
+
+        when(repository.findAvailableRiders(23.0)).thenReturn(response);
+        assertThat(service.getAvailableRiders(23.0)).isEqualTo(response);
+        Mockito.verify(repository, VerificationModeFactory.times(1)).findAvailableRiders(23.0);
+    }
+
+    @Test
     void whenGetRiderById_thenReturnRider() {
         Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        response.setLat(12.0);
+        response.setLng(93.0);
 
         when(repository.findById(response.getId())).thenReturn(response);
         assertThat(service.getRiderById(response.getId())).isEqualTo(response);
@@ -68,9 +98,13 @@ class RiderServiceTest {
     @Test
     void whenUpdateRider_onlyUpdateNotNullParameters() {
         Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        response.setLat(12.0);
+        response.setLng(93.0);
         when(repository.findById(response.getId())).thenReturn(response);
 
         RiderDTO newDetails = new RiderDTO(null, null, null, null, null, "Online");
+        newDetails.setLat(12.0);
+        newDetails.setLng(93.0);
         //check if status is updated while other parameter remains the same
         service.updateRider(response.getId(), newDetails);
         assertThat(response.getStatus()).isEqualTo("Online");
@@ -78,6 +112,8 @@ class RiderServiceTest {
 
         //check if all parameters are updated
         newDetails = new RiderDTO("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
+        newDetails.setLat(12.0);
+        newDetails.setLng(93.0);
         service.updateRider(response.getId(), newDetails);
         assertThat(response.getFirstname()).isEqualTo("Diogo");
         assertThat(response.getLastname()).isEqualTo("Carvalho");
@@ -91,6 +127,8 @@ class RiderServiceTest {
     void whenUpdateNotExistentRider_returnNull() {
         when(repository.findById(-1)).thenReturn(null);
         RiderDTO newDetails = new RiderDTO("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
+        newDetails.setLat(12.0);
+        newDetails.setLng(93.0);
         assertThat(service.updateRider(-1, newDetails)).isNull();
     }
 
@@ -110,5 +148,36 @@ class RiderServiceTest {
         //check if service returns false when a rider with that email do not exists
         service.existsRiderByEmail(anyString());
         assertThat(service.existsRiderByEmail(anyString())).isFalse();
+    }
+
+    @Test
+    void whenChangeStatus_ifRiderNotExists_ReturnNull() {
+        when(repository.findById(1)).thenReturn(null);
+
+        assertThat(service.changeStatus(1, "Online")).isNull();
+    }
+
+    @Test
+    void whenChangeStatus_ifRiderExists_ReturnRider() {
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        when(repository.findById(1)).thenReturn(rider);
+        rider.setStatus("Online");
+        when(repository.save(rider)).thenReturn(rider);
+
+        assertThat(service.changeStatus(1, "Online")).isEqualTo(rider);
+    }
+
+    @Test
+    void whenSaveRider_ReturnRider() {
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        Rider rider2 = rider;
+        rider2.setPassword(bCryptPasswordEncoder.encode(rider.getPassword()));
+        when(repository.save(rider)).thenReturn(rider2);
+
+        assertThat(service.saveRider(rider)).isEqualTo(rider2);
     }
 }

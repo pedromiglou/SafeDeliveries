@@ -10,9 +10,13 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import tqsua.DeliveriesServer.DeliveriesServerApplication;
 import tqsua.DeliveriesServer.JsonUtil;
+import tqsua.DeliveriesServer.model.Notification;
 import tqsua.DeliveriesServer.model.Order;
 import tqsua.DeliveriesServer.model.OrderDTO;
+import tqsua.DeliveriesServer.model.Rider;
+import tqsua.DeliveriesServer.repository.NotificationRepository;
 import tqsua.DeliveriesServer.repository.OrderRepository;
+import tqsua.DeliveriesServer.repository.RiderRepository;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -30,6 +34,12 @@ public class OrderControllerIT {
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private RiderRepository riderRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @BeforeEach
     void setUp() {
@@ -87,4 +97,34 @@ public class OrderControllerIT {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is("Error. Invalid App name.")));
     }
+
+    @Test
+    void whenAcceptOrder_thenReturnResult() throws Exception {
+        Order order = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        order = orderRepository.save(order);
+        rider = riderRepository.save(rider);
+        Notification notification = new Notification(rider.getId(), order.getOrder_id());
+        notificationRepository.save(notification);
+
+        mvc.perform(post("/api/acceptorder?order_id=" + order.getOrder_id() + "&rider_id=" + rider.getId()).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    } 
+
+    @Test
+    void whenDeclineOrder_thenReturnResult() throws Exception {
+        Order order = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        order = orderRepository.save(order);
+        rider = riderRepository.save(rider);
+        Notification notification = new Notification(rider.getId(), order.getOrder_id());
+        notificationRepository.save(notification);
+
+        mvc.perform(post("/api/acceptorder?order_id=" + order.getOrder_id() + "&rider_id=" + rider.getId()).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    } 
 }

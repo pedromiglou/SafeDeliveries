@@ -1,13 +1,18 @@
 package tqsua.DeliveriesServer.model;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "Orders")
@@ -37,6 +42,14 @@ public class Order implements Serializable{
 
     @Column(name = "app_name", nullable = false)
     private String app_name;
+
+    @CreationTimestamp
+    @Column(name="creation_date", updatable = false)
+    private LocalDateTime creation_date;
+
+    @ElementCollection 
+    @Column(name="refused_riders")
+    private List<Long> refused_riders;
 
     public Order() {
     }
@@ -118,6 +131,22 @@ public class Order implements Serializable{
         this.app_name = app_name;
     }
 
+
+    public LocalDateTime getCreation_date() {
+        return this.creation_date;
+    }
+
+    public void setCreation_date(LocalDateTime creation_date) {
+        this.creation_date = creation_date;
+    }
+
+    public List<Long> getRefused_riders() {
+        return this.refused_riders;
+    }
+
+    public void setRefused_riders(List<Long> refused_riders) {
+        this.refused_riders = refused_riders;
+    }
 
     @Override
     public String toString() {
