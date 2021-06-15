@@ -6,12 +6,15 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.net.http.HttpResponse;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.net.http.HttpClient;
 
 import tqsua.OrdersServer.model.Item;
 import tqsua.OrdersServer.model.Order;
@@ -61,6 +64,5 @@ class OrderServiceTest {
         assertThat(service.saveOrder(order1)).isEqualTo(order1);
         reset(repository);
     }
-
     
 }

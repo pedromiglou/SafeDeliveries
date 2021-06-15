@@ -90,4 +90,69 @@ class OrderControllerTest {
         reset(service);
     }
 
+    @Test
+    void whenCreateOrderWithInvalidCoords_thenReturnError() throws Exception {
+        OrderDTO order1 = new OrderDTO(null, 30.0, 40.1, 31.1, "PREPROCESSING", 12);
+        Set<Item> items = new HashSet<>();
+        Item item1 = new Item("Casaco", "Roupa", 12.0);
+        Item item2 = new Item("Telemovel", "Eletronica", 0.7);
+        items.add(item1);
+        items.add(item2);
+        order1.setItems(items);
+
+        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        .content(JsonUtil.toJson(order1)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Error. Invalid coords.")));
+        reset(service);
+    }
+
+    @Test
+    void whenCreateOrderWithNoItems_thenReturnError() throws Exception {
+        OrderDTO order1 = new OrderDTO(30.2, 30.0, 40.1, 31.1, "PREPROCESSING", 12);
+
+        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        .content(JsonUtil.toJson(order1)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Error. Order with 0 items.")));
+        reset(service);
+    }
+
+    @Test
+    void whenCreateOrderWithInvalidUser_thenReturnError() throws Exception {
+        OrderDTO order1 = new OrderDTO(40.3, 30.0, 40.1, 31.1, "PREPROCESSING", 0);
+        Set<Item> items = new HashSet<>();
+        Item item1 = new Item("Casaco", "Roupa", 12.0);
+        Item item2 = new Item("Telemovel", "Eletronica", 0.7);
+        items.add(item1);
+        items.add(item2);
+        order1.setItems(items);
+
+        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        .content(JsonUtil.toJson(order1)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Error. No user specified.")));
+        reset(service);
+    }
+
+    @Test
+    void whenCreateOrderWithErrorConnectionDeliveries_thenReturnError() throws Exception {
+        OrderDTO order1 = new OrderDTO(40.2, 30.0, 40.1, 31.1, "PREPROCESSING", 12);
+        Set<Item> items = new HashSet<>();
+        Item item1 = new Item("Casaco", "Roupa", 12.0);
+        Item item2 = new Item("Telemovel", "Eletronica", 0.7);
+        items.add(item1);
+        items.add(item2);
+        order1.setItems(items);
+
+        given(service.deliveryRequest(Mockito.any())).willReturn(null);
+
+        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        .content(JsonUtil.toJson(order1)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Error. Some error occured while connecting to Safe Deliveries.")));
+        verify(service, VerificationModeFactory.times(1)).deliveryRequest(Mockito.any());
+        reset(service);
+    }
+
 }
