@@ -24,6 +24,10 @@ public class RiderService {
         return this.riderRepository.findAll();
     }
 
+    public ArrayList<Rider> getAvailableRiders(Double weight) throws IOException, InterruptedException {
+        return this.riderRepository.findAvailableRiders(weight);
+    }
+
     public boolean existsRiderByEmail(String email) {
         return this.riderRepository.existsRiderByEmail(email);
     }
@@ -47,6 +51,13 @@ public class RiderService {
         if (newDetails.getPassword()!=null) rider.setPassword(newDetails.getPassword());
         if (newDetails.getRating()!=null) rider.setRating(newDetails.getRating());
         if (newDetails.getStatus()!=null) rider.setStatus(newDetails.getStatus());
+        return this.riderRepository.save(rider);
+    }
+
+    public Rider changeStatus(long id, String status) {
+        Rider rider = this.riderRepository.findById(id);
+        if (rider==null) return null;
+        rider.setStatus(status);
         return this.riderRepository.save(rider);
     }
 }

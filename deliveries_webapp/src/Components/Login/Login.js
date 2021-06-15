@@ -4,6 +4,14 @@ import './Login.css';
 import AuthService from "../../Services/auth.service";
 import {urlWeb} from "./../../data/data";
 
+import Geocode from "react-geocode";
+
+// set Google Maps Geocoding API for purposes of quota management. Its optional but recommended.
+Geocode.setApiKey("AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco");
+
+// set response language. Defaults to english.
+Geocode.setLanguage("en");
+
 function Login() {
     const [state, setState] = useState("Login");
     const [sucessRegister, setSucessRegister] = useState(false);
@@ -36,11 +44,22 @@ function Login() {
     }
 
     async function register() {
+      setSucessRegister(false);
+      setErrorRegister(false);
+      setErrorLogin(false);
+      var city_name = document.getElementById("register_city_input").value;
+
+      // Get latitude & longitude from address.
+      var coords = await Geocode.fromAddress(city_name);
+      const { lat, lng } = coords.results[0].geometry.location;
+
       var response = await AuthService.register(
         document.getElementById("register_firstname_input").value,
         document.getElementById("register_lastname_input").value,
         document.getElementById("register_email_input").value,
-        document.getElementById("register_password_input").value
+        document.getElementById("register_password_input").value,
+        lat,
+        lng
       )   
 
       if (response.error !== true) {
@@ -112,6 +131,8 @@ function Login() {
                   <input onChange={validatePassword} type="password" id="register_password_input" placeholder="Password" required></input>
                   <h3>Confirm Password</h3>
                   <input onKeyUp={validatePassword} type="password" id="register_confirmpass_input" placeholder="Confirm Password" required></input>
+                  <h3>City</h3>
+                  <input type="text" id="register_city_input" placeholder="City name" required></input>
                   <i onClick={() => setState("Login")}>Already have an account? Click here</i>
                   <button type="submit" className="button-entrar">Create</button>
               </div>
