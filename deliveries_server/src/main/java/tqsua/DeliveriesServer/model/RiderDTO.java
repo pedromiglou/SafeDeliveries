@@ -10,17 +10,21 @@ public class RiderDTO {
     private String password;
     private Double rating;
     private String status;
+    private Double lat;
+    private Double lng;
 
     public RiderDTO() {
     }
 
-    public RiderDTO(String firstname, String lastname, String email, String password, Double rating, String status) {
+    public RiderDTO(String firstname, String lastname, String email, String password, Double rating, String status, Double lat, Double lng) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
         this.password = password;
         this.rating = rating;
         this.status = status;
+        this.lat = lat;
+        this.lng = lng;
     }
 
 
@@ -78,6 +82,22 @@ public class RiderDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Double getLat() {
+        return this.lat;
+    }
+
+    public void setLat(Double lat) {
+        this.lat = lat;
+    }
+
+    public Double getLng() {
+        return this.lng;
+    }
+
+    public void setLng(Double lng) {
+        this.lng = lng;
     }
 
 

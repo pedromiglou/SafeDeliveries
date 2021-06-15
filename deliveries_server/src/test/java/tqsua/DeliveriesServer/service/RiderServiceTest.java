@@ -39,8 +39,8 @@ class RiderServiceTest {
     @Test
     void whenGetAllRiders_thenReturnCorrectResults() throws Exception {
         ArrayList<Rider> response = new ArrayList<>();
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
+        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", 12.0, 93.0);
+        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline", 12.0, 93.0);
         response.add(rider1);
         response.add(rider2);
 
@@ -51,7 +51,7 @@ class RiderServiceTest {
 
     @Test
     void whenGetRiderById_thenReturnRider() {
-        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", 12.0, 93.0);
 
         when(repository.findById(response.getId())).thenReturn(response);
         assertThat(service.getRiderById(response.getId())).isEqualTo(response);
@@ -67,17 +67,17 @@ class RiderServiceTest {
 
     @Test
     void whenUpdateRider_onlyUpdateNotNullParameters() {
-        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", 12.0, 93.0);
         when(repository.findById(response.getId())).thenReturn(response);
 
-        RiderDTO newDetails = new RiderDTO(null, null, null, null, null, "Online");
+        RiderDTO newDetails = new RiderDTO(null, null, null, null, null, "Online", 12.0, 93.0);
         //check if status is updated while other parameter remains the same
         service.updateRider(response.getId(), newDetails);
         assertThat(response.getStatus()).isEqualTo("Online");
         assertThat(response.getFirstname()).isEqualTo("Ricardo");
 
         //check if all parameters are updated
-        newDetails = new RiderDTO("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
+        newDetails = new RiderDTO("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline", 12.0, 93.0);
         service.updateRider(response.getId(), newDetails);
         assertThat(response.getFirstname()).isEqualTo("Diogo");
         assertThat(response.getLastname()).isEqualTo("Carvalho");
@@ -90,7 +90,7 @@ class RiderServiceTest {
     @Test
     void whenUpdateNotExistentRider_returnNull() {
         when(repository.findById(-1)).thenReturn(null);
-        RiderDTO newDetails = new RiderDTO("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
+        RiderDTO newDetails = new RiderDTO("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline", 12.0, 93.0);
         assertThat(service.updateRider(-1, newDetails)).isNull();
     }
 

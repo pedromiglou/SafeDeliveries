@@ -7,12 +7,17 @@ class RiderService {
         }
 
 
-        async changeStatus(rider, newStatus) {
-            var url =  'http://localhost:8080/api/rider?id=' +rider + '&status=' + newStatus;
+        async changeStatus(id, newStatus) {
+            var url =  'http://localhost:8080/api/rider/' +id;
     
+            let rider = {
+                status: newStatus
+            }
+
             await fetch(url, {
                 method:'PUT',
-                headers:{'Content-type':'application/json'}
+                headers:{'Content-type':'application/json'},
+                body: JSON.stringify(rider)
             });
     
             return;       

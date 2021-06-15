@@ -26,7 +26,7 @@ class OrderServiceTest {
     private OrderService service;
 
     @Test
-    void whenGetAllRiders_thenReturnCorrectResults() throws Exception {
+    void whenGetAllOrders_thenReturnCorrectResults() throws Exception {
         ArrayList<Order> response = new ArrayList<>();
         Order order1 = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
         Order order2 = new Order(0, 41.3, 32.4, 41.2, 32.3, 12.6, "SafeDeliveries");
@@ -35,6 +35,33 @@ class OrderServiceTest {
 
         when(repository.findAll()).thenReturn(response);
         assertThat(service.getAllOrders()).isEqualTo(response);
+        reset(repository);
+    }
+
+
+    @Test
+    void whenGetPendingOrders_thenReturnCorrectResults() throws Exception {
+        ArrayList<Order> response = new ArrayList<>();
+        Order order1 = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        Order order2 = new Order(0, 41.3, 32.4, 41.2, 32.3, 12.6, "SafeDeliveries");
+        response.add(order1);
+        response.add(order2);
+
+        when(repository.findPendingOrders()).thenReturn(response);
+        assertThat(service.getPendingOrders()).isEqualTo(response);
+        reset(repository);
+    }
+
+    @Test
+    void whenGetRefusedOrders_thenReturnCorrectResults() throws Exception {
+        ArrayList<Order> response = new ArrayList<>();
+        Order order1 = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        Order order2 = new Order(0, 41.3, 32.4, 41.2, 32.3, 12.6, "SafeDeliveries");
+        response.add(order1);
+        response.add(order2);
+
+        when(repository.findRefusedOrders(1)).thenReturn(response);
+        assertThat(service.getRefusedOrders(1)).isEqualTo(response);
         reset(repository);
     }
 

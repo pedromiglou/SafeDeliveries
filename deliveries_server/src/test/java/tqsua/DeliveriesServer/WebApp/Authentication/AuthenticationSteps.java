@@ -53,6 +53,7 @@ public class AuthenticationSteps {
         register_page.setInputs("register_email_input", "rafael2@gmail.com");
         register_page.setInputs("register_password_input", "rafael123");
         register_page.setInputs("register_confirmpass_input", "rafael123");
+        register_page.setInputs("register_city_input", "Aveiro");
     }
 
     @And("I click on create")

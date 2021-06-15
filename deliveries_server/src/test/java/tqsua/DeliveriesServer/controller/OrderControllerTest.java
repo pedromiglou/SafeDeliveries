@@ -12,6 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import tqsua.DeliveriesServer.service.NotificationService;
 import tqsua.DeliveriesServer.service.OrderService;
 import tqsua.DeliveriesServer.JsonUtil;
 import tqsua.DeliveriesServer.model.Order;
@@ -38,6 +39,9 @@ class OrderControllerTest {
 
     @MockBean
     private OrderService service;
+
+    @MockBean
+    private NotificationService notification_service;
 
     @Test
     void whenGetAllOrders_thenReturnResult() throws Exception {
@@ -71,4 +75,27 @@ class OrderControllerTest {
         reset(service);
     }
 
+    @Test
+    void whenAcceptOrder_thenReturnResult() throws Exception {
+        Order order = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        
+        given(service.updateRider(2, 1)).willReturn(order);
+
+        mvc.perform(post("/api/acceptorder?order_id=2&rider_id=1").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        verify(service, VerificationModeFactory.times(1)).updateRider(2, 1);
+        reset(service);
+    } 
+
+    @Test
+    void whenDeclineOrder_thenReturnResult() throws Exception {
+        Order order = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order.setRefused_riders(new ArrayList<>());
+        given(service.getOrderById(1)).willReturn(order);
+
+        mvc.perform(post("/api/declineorder?order_id=1&rider_id=2").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        verify(service, VerificationModeFactory.times(1)).getOrderById(1);
+        reset(service);
+    } 
 }

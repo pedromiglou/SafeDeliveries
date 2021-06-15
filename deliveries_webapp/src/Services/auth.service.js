@@ -30,14 +30,16 @@ class AuthService {
 
     }
 
-    async register(firstname, lastname, email, password) {
+    async register(firstname, lastname, email, password, lat, lng) {
         let userInfo= {
             firstname: firstname,
             lastname: lastname,
             email: email,
             password: password,
             rating: 0.0,
-            status: "Offline"
+            status: "Offline",
+            lat: lat,
+            lng: lng
         }
         try {
             var res = await fetch('http://localhost:8080/api/register', {

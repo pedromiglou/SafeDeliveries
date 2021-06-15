@@ -43,6 +43,12 @@ public class Rider implements Serializable, UserDetails {
     @Column(name = "status", nullable = false)
     private String status;
 
+    @Column(name = "lat", nullable = false)
+    private Double lat;
+
+    @Column(name = "lng", nullable = false)
+    private Double lng;
+
 /*    // tem varios vehicles
     @OneToMany
     private Set<Vehicle> vehicles = new HashSet<>();*/
@@ -50,13 +56,15 @@ public class Rider implements Serializable, UserDetails {
     public Rider() {
     }
 
-    public Rider(String firstname, String lastname, String email, String password, Double rating, String status) {
+    public Rider(String firstname, String lastname, String email, String password, Double rating, String status, Double lat, Double lng) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
         this.password = password;
         this.rating = rating;
         this.status = status;
+        this.lat = lat;
+        this.lng = lng;
     }
 
     public long getId() {
@@ -132,6 +140,24 @@ public class Rider implements Serializable, UserDetails {
         this.vehicles.remove(vehicle);
     }
 */
+
+    public Double getLat() {
+        return this.lat;
+    }
+
+    public void setLat(Double lat) {
+        this.lat = lat;
+    }
+
+    public Double getLng() {
+        return this.lng;
+    }
+
+    public void setLng(Double lng) {
+        this.lng = lng;
+    }
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return new ArrayList<>();
