@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import './Login.css';
 import AuthService from "../../Services/auth.service";
+import {urlWeb} from "./../../data/data";
 
 import Geocode from "react-geocode";
 
@@ -26,7 +27,7 @@ function Login() {
       )   
 
       if (response.error !== true) {
-        window.location.assign("http://localhost:3000/");
+        window.location.assign(urlWeb);
       } else {
         setErrorLogin(true);
       }

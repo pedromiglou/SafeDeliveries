@@ -41,6 +41,8 @@ Geocode.setApiKey("AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco");
 // set response language. Defaults to english.
 Geocode.setLanguage("en");
 
+import {urlWeb} from "./data/data";
+
 function App() {
     
   var current_user = AuthService.getCurrentUser();
@@ -163,7 +165,7 @@ function App() {
   async function logout(){
     await RiderService.changeStatus(current_user.id, "Offline")
     sessionStorage.removeItem("user");
-    window.location.assign("http://localhost:3000/");
+    window.location.assign(urlWeb);
   }
 
   return (

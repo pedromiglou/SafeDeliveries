@@ -1,3 +1,5 @@
+import {urlAPI} from './../data/data';
+
 class AuthService {
 
     async login(email, password) {
@@ -7,7 +9,7 @@ class AuthService {
         }
 
         try {
-            var res = await fetch('http://localhost:8080/api/login', {
+            var res = await fetch(urlAPI + 'api/login', {
                 method:'POST',
                 headers:{'Content-type':'application/json'},
                 body: JSON.stringify(userInfo)
@@ -42,7 +44,7 @@ class AuthService {
             lng: lng
         }
         try {
-            var res = await fetch('http://localhost:8080/api/register', {
+            var res = await fetch(urlAPI + 'api/register', {
                 method:'POST',
                 headers:{'Content-type':'application/json'},
                 body: JSON.stringify(userInfo)

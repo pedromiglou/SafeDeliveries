@@ -14,10 +14,17 @@ class Map extends Component {
       directions: null,
       markers: [
         {
-          name: "Current position",
+          name: "pick_up_position",
           position: {
-            lat: this.props.state.lat,
-            lng: this.props.state.lng
+            lat: this.props.state.pick_up_lat,
+            lng: this.props.state.pick_up_lng
+          }
+        }, 
+        {
+          name: "delivery_position",
+          position: {
+            lat: this.props.state.del_lat,
+            lng: this.props.state.del_lng
           }
         }
       ]
@@ -41,18 +48,18 @@ class Map extends Component {
     });
   };*/
 
-  changePos = (t) => {
-    console.log(this.props.state)
+  changePos = (t,marker) => {
     var lat = t.latLng.lat();
     var lng = t.latLng.lng();
-    this.props.parentCallback({lat: lat, lng: lng});
+    this.props.parentCallback({lat: lat, lng: lng, marker_id: marker});
   }
 
   render() {
     const GoogleMapExample = withGoogleMap(props => (
       <GoogleMap
-        defaultCenter={{ lat: this.props.state.lat, lng: this.props.state.lng }}
-        defaultZoom={13}
+        // defaultCenter={{ lat: this.props.state.pick_up_lat, lng: this.props.state.pick_up_lng }}
+        center={{ lat: this.props.state.pick_up_lat, lng: this.props.state.pick_up_lng }}
+        defaultZoom={1}
       >
         
         {this.state.markers.map((marker, index) => (
@@ -60,7 +67,7 @@ class Map extends Component {
             key={index}
             position={marker.position}
             draggable={true}
-            onDragEnd={(t, map, coord) => {this.changePos(t)}}
+            onDragEnd={(t, map, coord) => {this.changePos(t, marker.name)}}
             //onDragEnd={(t, map, coord) => {this.changePos(t, map, coord, index); this.onMarkerDragEnd(coord, index);}}
             //onDrag={(t, map, coord) => {this.changePos(coord, index)}}
             name={marker.name}
@@ -72,8 +79,8 @@ class Map extends Component {
     return (
       <div>
         <GoogleMapExample
-          containerElement={<div style={{ height: `500px`, width: '500px' }} />}
-          mapElement={<div style={{ height: `100%` }} />}
+          containerElement={<div style={{ height: `600px`}} />}
+          mapElement={<div style={{ height: `100%`, width: '70vw', minWidth: '350px' }} />}
         />
       </div>
     );
