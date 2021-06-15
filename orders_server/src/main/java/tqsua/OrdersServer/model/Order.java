@@ -1,13 +1,19 @@
 package tqsua.OrdersServer.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "Orders")
@@ -17,30 +23,48 @@ public class Order{
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    @Column(name = "pick_up_address", nullable = false)
-    private String pick_up_address;
+    @Column(name = "pick_up_lat", nullable = false)
+    private Double pick_up_lat;
 
-    @Column(name = "deliver_address", nullable = false)
-    private String deliver_address;
+    @Column(name = "pick_up_lng", nullable = false)
+    private Double pick_up_lng;
 
-    @Column(name = "creation_date", nullable = false)
-    private Date creation_date;
+    @Column(name = "deliver_lat", nullable = false)
+    private Double deliver_lat;
+
+    @Column(name = "deliver_lng", nullable = false)
+    private Double deliver_lng;
 
     @Column(name = "status", nullable = false)
     private String status;
 
-    @Column(name = "rating", nullable = false)
+    @Column(name = "rating")
     private int rating;
+
+    @CreationTimestamp
+    @Column(name="creation_date", updatable = false)
+    private LocalDateTime creation_date;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy="order")
+    private Set<Item> items;
+
+    @Column(name = "user_id")
+    private long user_id;
+
+    @Column(name = "deliver_id", nullable = false)
+    private long deliver_id;
 
     public Order() {
     }
     
-    public Order(String pick_up_address, String deliver_address, Date creation_date, String status, int rating) {
-        this.pick_up_address = pick_up_address;
-        this.deliver_address = deliver_address;
-        this.creation_date = creation_date;
+    public Order(Double pick_up_lat, Double pick_up_lng, Double deliver_lat, Double deliver_lng, String status, long user_id) {
+        this.user_id = user_id;
+        this.pick_up_lat = pick_up_lat;
+        this.pick_up_lng = pick_up_lng;
+        this.deliver_lat = deliver_lat;
+        this.deliver_lng = deliver_lng;
         this.status = status;
-        this.rating = rating;
     }
 
     public long getId() {
@@ -51,29 +75,52 @@ public class Order{
         this.id = id;
     }
 
-    public String getPick_up_address() {
-        return this.pick_up_address;
+
+    public long getUser_id() {
+        return this.user_id;
     }
 
-    public void setPick_up_address(String pick_up_address) {
-        this.pick_up_address = pick_up_address;
+    public void setUser_id(long user_id) {
+        this.user_id = user_id;
     }
 
-    public String getDeliver_address() {
-        return this.deliver_address;
+
+    public Double getPick_up_lat() {
+        return this.pick_up_lat;
     }
 
-    public void setDeliver_address(String deliver_address) {
-        this.deliver_address = deliver_address;
+    public void setPick_up_lat(Double pick_up_lat) {
+        this.pick_up_lat = pick_up_lat;
     }
 
-    public Date getCreation_date() {
+    public Double getPick_up_lng() {
+        return this.pick_up_lng;
+    }
+
+    public void setPick_up_lng(Double pick_up_lng) {
+        this.pick_up_lng = pick_up_lng;
+    }
+
+    public Double getDeliver_lat() {
+        return this.deliver_lat;
+    }
+
+    public void setDeliver_lat(Double deliver_lat) {
+        this.deliver_lat = deliver_lat;
+    }
+
+    public Double getDeliver_lng() {
+        return this.deliver_lng;
+    }
+
+    public void setDeliver_lng(Double deliver_lng) {
+        this.deliver_lng = deliver_lng;
+    }
+
+    public LocalDateTime getCreation_date() {
         return this.creation_date;
     }
-
-    public void setCreation_date(Date creation_date) {
-        this.creation_date = creation_date;
-    }
+    
 
     public String getStatus() {
         return this.status;
@@ -91,19 +138,42 @@ public class Order{
         this.rating = rating;
     }
 
+    public Set<Item> getItems() {
+        return this.items;
+    }
+
+    public void setItems(Set<Item> items) {
+        this.items = items;
+    }
+
+    public void setCreation_date(LocalDateTime creation_date) {
+        this.creation_date = creation_date;
+    }
+
+    public long getDeliver_id() {
+        return this.deliver_id;
+    }
+
+    public void setDeliver_id(long deliver_id) {
+        this.deliver_id = deliver_id;
+    }
+
+
 
     @Override
     public String toString() {
         return "{" +
             " id='" + getId() + "'" +
-            ", pick_up_address='" + getPick_up_address() + "'" +
-            ", deliver_address='" + getDeliver_address() + "'" +
+            ", pick_up_lat='" + getPick_up_lat() + "'" +
+            ", pick_up_lng='" + getPick_up_lng() + "'" +
+            ", deliver_lat='" + getDeliver_lat() + "'" +
+            ", deliver_lng='" + getDeliver_lng() + "'" +
             ", creation_date='" + getCreation_date() + "'" +
             ", status='" + getStatus() + "'" +
             ", rating='" + getRating() + "'" +
+            //", items='" + getItems() + "'" +
             "}";
     }
-    
-    
+
 
 }

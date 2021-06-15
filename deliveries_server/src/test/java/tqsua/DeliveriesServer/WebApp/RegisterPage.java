@@ -26,6 +26,9 @@ public class RegisterPage {
     @FindBy(id= "register_confirmpass_input")
     private WebElement register_confirmpass_input;
 
+    @FindBy(id= "register_city_input")
+    private WebElement register_city_input;
+
     @FindBy(className = "button-entrar")
     private WebElement button_entrar;
 
@@ -55,6 +58,9 @@ public class RegisterPage {
                 break;
             case "register_confirmpass_input":
                 register_confirmpass_input.sendKeys(value);
+                break;
+            case "register_city_input":
+                register_city_input.sendKeys(value);
                 break;
         }
 

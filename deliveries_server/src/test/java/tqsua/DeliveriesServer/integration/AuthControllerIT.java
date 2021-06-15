@@ -38,6 +38,8 @@ class AuthControllerIT {
     @BeforeEach 
     public void setUp() {
         Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 0.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
         riderService.saveRider(rider);
     }
 
@@ -50,6 +52,8 @@ class AuthControllerIT {
     void whenRegistWithValidData_thenRegistWithSucess() throws Exception {
 
         Rider rider = new Rider("Filipe", "Carvalho", "filipe@gmail.com", "filipe123", 0.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
 
         mvc.perform(post("/api/register").contentType(MediaType.APPLICATION_JSON)
         .content(JsonUtil.toJson(rider)))
@@ -63,6 +67,8 @@ class AuthControllerIT {
     void whenRegistWithInvalidEmail_thenReturnErrorMessage() throws Exception {
 
         Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 0.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
 
         mvc.perform(post("/api/register").contentType(MediaType.APPLICATION_JSON)
         .content(JsonUtil.toJson(rider)))
