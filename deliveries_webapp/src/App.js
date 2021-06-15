@@ -24,6 +24,25 @@ import { useEffect, useState } from 'react';
 /* Services */
 import AuthService from './Services/auth.service';
 import RiderService from './Services/rider.service';
+import NotificationService from './Services/notification.service';
+import OrderService from './Services/order.service';
+
+import { Modal } from "react-bootstrap";
+
+import Map from './Components/map/Map.js'
+
+import { withScriptjs } from "react-google-maps";
+import {urlWeb} from "./data/data";
+
+import Geocode from "react-geocode";
+
+// set Google Maps Geocoding API for purposes of quota management. Its optional but recommended.
+Geocode.setApiKey("AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco");
+
+// set response language. Defaults to english.
+Geocode.setLanguage("en");
+
+
 
 function App() {
     
@@ -31,7 +50,74 @@ function App() {
 
   var [state, setState] = useState(current_user === null ? "Online": current_user.status);
 
+  const [modalNotificationShow, setNotificationModalShow] = useState(false);
+                                                                    
+  const [notificationInfo, setNotificationInfo] = useState(null);
+
+  const MapLoader = withScriptjs(Map);
+
+  async function acceptOrder(order_id) {
+    await OrderService.acceptOrder(order_id, current_user.id);
+    current_user.status = "Delivering"
+    sessionStorage.setItem("user", JSON.stringify(current_user));
+    window.location.reload();
+  }
+
+  async function declineOrder(order_id) {
+    await OrderService.declineOrder(order_id, current_user.id);
+    window.location.reload();
+  }
+
+	function NotificationModal(props) {
+    let pick_up_lat = props.pick_up_lat;
+    let pick_up_lng = props.pick_up_lng;
+    let deliver_lat = props.deliver_lat;
+    let deliver_lng = props.deliver_lng;
+
+    let weight = props.weight;
+        return (
+          <Modal
+            {...props}
+            size="lg"
+            aria-labelledby="contained-modal-title-vcenter"
+            centered
+          >
+            <Modal.Header>
+              <Modal.Title id="contained-modal-title-vcenter" >
+                Order request!
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <p>Order information</p>
+              <p>Weight: {weight} kg</p>
+              {<MapLoader 
+                googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco"
+                loadingElement={<div style={{ height: "100%"}}/>}
+                pick_up_lat={pick_up_lat}
+                pick_up_lng={pick_up_lng}
+                deliver_lat={deliver_lat}
+                deliver_lng={deliver_lng}
+                />
+              }
+            </Modal.Body>
+            <Modal.Footer>
+              <button onClick={() => {acceptOrder(props.order_id); props.onHide();}} className="btn">Accept</button>
+              <button onClick={() => {declineOrder(props.order_id); props.onHide();}} className="btn">Decline</button>
+            </Modal.Footer>
+          </Modal>
+        );
+      }
+
   useEffect(() => {
+
+    async function getNotification(userid) {
+      let notification = await NotificationService.getNotificationByUserId(current_user.id);
+      console.log(notification);
+      if (notification.length !== 0) {
+        setNotificationInfo(notification);
+        setNotificationModalShow(true);
+      }
+    }
 
     if (current_user !== null) {
 
@@ -50,8 +136,19 @@ function App() {
         perfil.classList.remove("offline");
         perfil.classList.remove("online");
       }
+      
+      if (notificationInfo === null) {
+        getNotification(current_user.id);
+        const interval = setInterval(() => {
+          getNotification(current_user.id);
+        }, 8000);
+
+        return () => clearInterval(interval);
+      }
+    
     } 
-  }, [state, current_user]);
+
+  }, [state, current_user, notificationInfo]);
 
   const history = useHistory();
 
@@ -69,12 +166,23 @@ function App() {
   async function logout(){
     await RiderService.changeStatus(current_user.id, "Offline")
     sessionStorage.removeItem("user");
-    window.location.assign("http://localhost:3000/");
+    window.location.assign(urlWeb);
   }
 
   return (
     <>
-    
+    { notificationInfo !== null &&
+      <NotificationModal
+        show={modalNotificationShow}
+        onHide={() => setNotificationModalShow(false)}
+        pick_up_lat={notificationInfo.pick_up_lat}
+        pick_up_lng={notificationInfo.pick_up_lng}
+        deliver_lat={notificationInfo.deliver_lat}
+        deliver_lng={notificationInfo.deliver_lng}
+        weight={notificationInfo.weight}
+        order_id={notificationInfo.order_id}
+      />
+    }
     <navbar>
         <ul className="nav-list">
           <li className="nav-item">
