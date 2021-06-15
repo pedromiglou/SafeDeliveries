@@ -43,6 +43,9 @@ public class Rider implements Serializable, UserDetails {
     @Column(name = "status", nullable = false)
     private String status;
 
+    @Column(name = "accountType", nullable = false)
+    private String accountType;
+
 /*    // tem varios vehicles
     @OneToMany
     private Set<Vehicle> vehicles = new HashSet<>();*/
