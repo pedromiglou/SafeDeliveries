@@ -89,7 +89,23 @@ class OrderServiceTest {
 
         assertThat(service.saveOrder(order1)).isNull();
         reset(repository);
+
+        order1 = new Order(0, 30.4, null, 41.2, 31.3, 36.3, "SafeDeliveries");
+
+        assertThat(service.saveOrder(order1)).isNull();
+        reset(repository);
+
+        order1 = new Order(0, 30.4, 30.4, null, 31.3, 36.3, "SafeDeliveries");
+
+        assertThat(service.saveOrder(order1)).isNull();
+        reset(repository);
+
+        order1 = new Order(0, 42.9, 30.4, 41.2, null, 36.3, "SafeDeliveries");
+
+        assertThat(service.saveOrder(order1)).isNull();
+        reset(repository);
     }
+
 
     @Test
     void whenSaveOrderWithInvalidAppName_thenReturnNull() throws Exception {

@@ -110,6 +110,33 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.message", is("Error. Invalid coords.")));
         verify(service, VerificationModeFactory.times(0)).saveOrder(Mockito.any());
         reset(service);
+
+        order1 = new OrderDTO(30.4, null, 41.2, 31.3, 36.3, "SafeDeliveries");
+        
+        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        .content(JsonUtil.toJson(order1)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Error. Invalid coords.")));
+        verify(service, VerificationModeFactory.times(0)).saveOrder(Mockito.any());
+        reset(service);
+
+        order1 = new OrderDTO(30.4, 30.4, null, 31.3, 36.3, "SafeDeliveries");
+        
+        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        .content(JsonUtil.toJson(order1)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Error. Invalid coords.")));
+        verify(service, VerificationModeFactory.times(0)).saveOrder(Mockito.any());
+        reset(service);
+
+        order1 = new OrderDTO(30.4, 30.4, 41.2, null, 36.3, "SafeDeliveries");
+        
+        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        .content(JsonUtil.toJson(order1)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Error. Invalid coords.")));
+        verify(service, VerificationModeFactory.times(0)).saveOrder(Mockito.any());
+        reset(service);
     }
 
     @Test
@@ -155,15 +182,20 @@ class OrderControllerTest {
 
         ArrayList<Rider> response = new ArrayList<>();
         Rider rider = new Rider("Rafael", "Baptista", "rafael@ua.pt", "1234", 5.0, "Online");
-        rider.setLat(40.3);
-        rider.setLng(30.4);
+        rider.setLat(46.3);
+        rider.setLng(36.4);
 
         Rider rider2 = new Rider("Rafael", "Baptista", "rafael2@ua.pt", "1234", 5.0, "Online");
         rider2.setLat(12.0);
         rider2.setLng(93.0);
 
+        Rider rider3 = new Rider("Rafael", "Baptista", "rafael2@ua.pt", "1234", 5.0, "Online");
+        rider3.setLat(40.3);
+        rider3.setLng(30.4);
+
         response.add(rider);
         response.add(rider2);
+        response.add(rider3);
 
         given(service.getOrderById(1)).willReturn(order);
         given(rider_service.getAvailableRiders(36.3)).willReturn(response);
