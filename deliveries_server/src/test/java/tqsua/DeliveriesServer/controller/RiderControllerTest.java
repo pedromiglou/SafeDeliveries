@@ -133,7 +133,6 @@ class RiderControllerTest {
         verify(service, VerificationModeFactory.times(1)).updateRider(0, newDetails);
     }
 
-
     @Test
     void whenUpdateRiderStateToOnline_thenSearchForOrder_AndReturnOk() throws Exception {
         RiderDTO newDetails = new RiderDTO("A", "B", "a@b.c", "abcdefgh", 5.0, "Online");
