@@ -22,4 +22,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>{
 	@Query(value = "SELECT orders.* FROM order_refused_riders JOIN orders on order_refused_riders.order_order_id = orders.order_id where refused_riders = :id", nativeQuery = true)
 	ArrayList<Order> findRefusedOrders(long id);
 
+	@Query(value = "SELECT count(*) FROM orders", nativeQuery = true)
+	int countAll();
+
 }

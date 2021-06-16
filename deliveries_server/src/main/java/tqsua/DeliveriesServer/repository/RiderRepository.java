@@ -22,4 +22,7 @@ public interface RiderRepository extends JpaRepository<Rider, Long>{
 	Rider findByEmail(String email);
 
 	boolean existsRiderByEmail(String email);
+
+	@Query(value = "SELECT count(*) FROM riders where status = :state", nativeQuery = true)
+	int countByState(@Param("state") String state);
 }

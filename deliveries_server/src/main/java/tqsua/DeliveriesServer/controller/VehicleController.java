@@ -7,8 +7,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import tqsua.DeliveriesServer.model.Rider;
 import tqsua.DeliveriesServer.model.Vehicle;
 import tqsua.DeliveriesServer.model.VehicleDTO;
+import tqsua.DeliveriesServer.service.RiderService;
 import tqsua.DeliveriesServer.service.VehicleService;
 
 import javax.validation.Valid;
@@ -23,18 +25,40 @@ public class VehicleController {
     @Autowired
     private VehicleService vehicleService;
 
+    @Autowired
+    private RiderService riderService;
+
     private static final String MESSAGE = "message";
     private static final String UNAUTHORIZED = "Unauthorized";
 
     @GetMapping(path="/private/vehicles")
-    public ArrayList<VehicleDTO> getVehicles(Authentication authentication) throws IOException, InterruptedException {
-        // TODO:
-        // Verify Admin
+    public ResponseEntity<Object> getVehicles(Authentication authentication) throws IOException, InterruptedException {
+        HashMap<String, Object> response = new HashMap<>();
+        Rider rider = riderService.getRiderById(Long.parseLong(authentication.getName()));
+        if (!rider.getAccountType().equals("Admin")) {
+            response.put(MESSAGE, UNAUTHORIZED);
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
         ArrayList<VehicleDTO> vehicles = new ArrayList<>();
         for (Vehicle vehicle: this.vehicleService.getAllVehicles()) {
             vehicles.add(new VehicleDTO(vehicle.getId(), vehicle.getBrand(), vehicle.getModel(), vehicle.getCategory(), vehicle.getCapacity(), vehicle.getRider().getId(), vehicle.getRegistration()));
         }
-        return vehicles;
+        return new ResponseEntity<>(vehicles, HttpStatus.OK);
+    }
+
+    @GetMapping(path="/private/vehicles/statistics")
+    public ResponseEntity<Object> getVehiclesStatistics(Authentication authentication) throws IOException, InterruptedException {
+        HashMap<String, Object> response = new HashMap<>();
+        Rider rider = riderService.getRiderById(Long.parseLong(authentication.getName()));
+        if (!rider.getAccountType().equals("Admin")) {
+            response.put(MESSAGE, UNAUTHORIZED);
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+        ArrayList<Integer> vehiclesByCapacity = vehicleService.getVehiclesByCapacity();
+        
+        response.put("vehicles_by_capacity", vehiclesByCapacity);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(path="/private/vehicle")

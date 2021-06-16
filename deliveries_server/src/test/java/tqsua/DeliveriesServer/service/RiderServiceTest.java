@@ -42,12 +42,8 @@ class RiderServiceTest {
     @Test
     void whenGetAllRiders_thenReturnCorrectResults() throws Exception {
         ArrayList<Rider> response = new ArrayList<>();
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        rider1.setLat(12.0);
-        rider1.setLng(93.0);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
-        rider2.setLat(12.0);
-        rider2.setLng(93.0);
+        Rider rider1 = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider2 = createRider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
         response.add(rider1);
         response.add(rider2);
 
@@ -59,15 +55,9 @@ class RiderServiceTest {
     @Test
     void whenGetAvailableRiders_thenReturnCorrectResults() throws Exception {
         ArrayList<Rider> response = new ArrayList<>();
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Online");
-        rider1.setLat(12.0);
-        rider1.setLng(93.0);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Online");
-        rider2.setLat(12.0);
-        rider2.setLng(93.0);
-        Rider rider3 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Online");
-        rider3.setLat(12.0);
-        rider3.setLng(93.0);
+        Rider rider1 = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Online");
+        Rider rider2 = createRider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Online");
+        Rider rider3 = createRider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Online");
         response.add(rider1);
         response.add(rider2);
         response.add(rider3);
@@ -79,9 +69,7 @@ class RiderServiceTest {
 
     @Test
     void whenGetRiderById_thenReturnRider() {
-        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        response.setLat(12.0);
-        response.setLng(93.0);
+        Rider response = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
 
         when(repository.findById(response.getId())).thenReturn(response);
         assertThat(service.getRiderById(response.getId())).isEqualTo(response);
@@ -97,23 +85,17 @@ class RiderServiceTest {
 
     @Test
     void whenUpdateRider_onlyUpdateNotNullParameters() {
-        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        response.setLat(12.0);
-        response.setLng(93.0);
+        Rider response = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
         when(repository.findById(response.getId())).thenReturn(response);
 
-        RiderDTO newDetails = new RiderDTO(null, null, null, null, null, "Online");
-        newDetails.setLat(12.0);
-        newDetails.setLng(93.0);
+        RiderDTO newDetails = createRiderDTO(null, null, null, null, null, "Online");
         //check if status is updated while other parameter remains the same
         service.updateRider(response.getId(), newDetails);
         assertThat(response.getStatus()).isEqualTo("Online");
         assertThat(response.getFirstname()).isEqualTo("Ricardo");
 
         //check if all parameters are updated
-        newDetails = new RiderDTO("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
-        newDetails.setLat(12.0);
-        newDetails.setLng(93.0);
+        newDetails = createRiderDTO("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
         service.updateRider(response.getId(), newDetails);
         assertThat(response.getFirstname()).isEqualTo("Diogo");
         assertThat(response.getLastname()).isEqualTo("Carvalho");
@@ -126,9 +108,7 @@ class RiderServiceTest {
     @Test
     void whenUpdateNotExistentRider_returnNull() {
         when(repository.findById(-1)).thenReturn(null);
-        RiderDTO newDetails = new RiderDTO("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
-        newDetails.setLat(12.0);
-        newDetails.setLng(93.0);
+        RiderDTO newDetails = createRiderDTO("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
         assertThat(service.updateRider(-1, newDetails)).isNull();
     }
 
@@ -159,9 +139,7 @@ class RiderServiceTest {
 
     @Test
     void whenChangeStatus_ifRiderExists_ReturnRider() {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        rider.setLat(12.0);
-        rider.setLng(93.0);
+        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
         when(repository.findById(1)).thenReturn(rider);
         rider.setStatus("Online");
         when(repository.save(rider)).thenReturn(rider);
@@ -171,13 +149,38 @@ class RiderServiceTest {
 
     @Test
     void whenSaveRider_ReturnRider() {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        rider.setLat(12.0);
-        rider.setLng(93.0);
+        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
         Rider rider2 = rider;
         rider2.setPassword(bCryptPasswordEncoder.encode(rider.getPassword()));
         when(repository.save(rider)).thenReturn(rider2);
 
         assertThat(service.saveRider(rider)).isEqualTo(rider2);
+    }
+
+    @Test
+    void whenGetRidersByState_ReturnRider() {
+        when(repository.countByState("Online")).thenReturn(2);
+
+        assertThat(service.getRidersByState("Online")).isEqualTo(2);
+    }
+
+    @Test
+    void whenGetRidersByInvalidState_ReturnRider() {
+        assertThat(service.getRidersByState("invalidState")).isEqualTo(0);
+    }
+
+    public Rider createRider(String firstname, String lastname, String email, String password, double rating, String status) {
+        Rider rider = new Rider(firstname, lastname, email, password, rating, status);
+        rider.setAccountType("User");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        return rider;
+    }
+
+    public RiderDTO createRiderDTO(String firstname, String lastname, String email, String password, Double rating, String status) {
+        RiderDTO rider = new RiderDTO(firstname, lastname, email, password, rating, status);
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        return rider;
     }
 }

@@ -6,7 +6,6 @@ import org.mockito.Mockito;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -16,7 +15,6 @@ import tqsua.DeliveriesServer.service.NotificationService;
 import tqsua.DeliveriesServer.service.OrderService;
 import tqsua.DeliveriesServer.service.RiderService;
 import tqsua.DeliveriesServer.JsonUtil;
-import tqsua.DeliveriesServer.model.Notification;
 import tqsua.DeliveriesServer.model.Order;
 import tqsua.DeliveriesServer.model.OrderDTO;
 import tqsua.DeliveriesServer.model.Rider;
@@ -54,15 +52,9 @@ class OrderControllerTest {
     @MockBean
     private RiderService rider_service;
 
-    String token = "Bearer " + JWT.create()
-        .withSubject( "1" )
-        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+    String token = this.getToken("1");
 
-    String invalidtoken = "Bearer " + JWT.create()
-        .withSubject( "5" )
-        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+    String invalidtoken = this.getToken("5");
 
     @Test
     void whenGetAllOrders_thenReturnResult() throws Exception {
@@ -71,15 +63,87 @@ class OrderControllerTest {
         Order order2 = new Order(0, 37.3, 39.4, 38.2, 39.3, 36.3, "SafeDeliveries");
         response.add(order1);
         response.add(order2);
+        Rider rider = createRider("Rafael", "Baptista", "rafael@gmail.com", "1234", 4.0, "Online", "Admin");
+        given(rider_service.getRiderById(1)).willReturn(rider);
         given(service.getAllOrders()).willReturn(response);
 
         mvc.perform(get("/api/private/orders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));
         verify(service, VerificationModeFactory.times(1)).getAllOrders();
+        verify(rider_service, VerificationModeFactory.times(1)).getRiderById(1);
         reset(service);
     }
 
+    @Test
+    void whenGetAllOrdersWithoutPermission_thenReturnResult() throws Exception {
+        Rider rider = createRider("Rafael", "Baptista", "rafael@gmail.com", "1234", 4.0, "Online", "User");
+        given(rider_service.getRiderById(1)).willReturn(rider);
+
+        mvc.perform(get("/api/private/orders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+        verify(service, VerificationModeFactory.times(0)).getAllOrders();
+        verify(rider_service, VerificationModeFactory.times(1)).getRiderById(1);
+        reset(service);
+    }
+
+    @Test
+    void whenGetStatisticsOrders_thenReturnResult() throws Exception {
+        Rider rider = createRider("Rafael", "Baptista", "rafael@ua.pt", "1234", 5.0, "Online", "Admin");
+
+        ArrayList<Order> response = new ArrayList<>();
+        Order order1 = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        Order order2 = new Order(0, 37.3, 39.4, 38.2, 39.3, 36.3, "SafeDeliveries");
+        response.add(order1);
+        response.add(order2);
+
+        ArrayList<Integer> orderLast7Days = new ArrayList<>();
+        orderLast7Days.add(1);
+        orderLast7Days.add(2);
+        orderLast7Days.add(3);
+        orderLast7Days.add(4);
+        orderLast7Days.add(5);
+        orderLast7Days.add(6);
+        orderLast7Days.add(7);
+
+        ArrayList<Integer> orderWeight = new ArrayList<>();
+        orderWeight.add(1);
+        orderWeight.add(2);
+        orderWeight.add(3);
+        orderWeight.add(4);
+
+        given(rider_service.getRiderById(1)).willReturn(rider);
+        given(service.getTotalOrders()).willReturn(3);
+        given(service.getPendingOrders()).willReturn(response);
+        given(service.getOrdersLast7Days()).willReturn(orderLast7Days);
+        given(service.getOrdersByWeight()).willReturn(orderWeight);
+
+        mvc.perform(get("/api/private/orders/statistics").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total_orders", is(3)))
+                .andExpect(jsonPath("$.pending_orders", is(2)))
+                .andExpect(jsonPath("$.delivering_orders", is(1)))
+                .andExpect(jsonPath("$.orders_7_days", is(orderLast7Days)))
+                .andExpect(jsonPath("$.orders_by_weight", is(orderWeight)));
+
+        verify(rider_service, VerificationModeFactory.times(1)).getRiderById(1);
+        verify(service, VerificationModeFactory.times(1)).getTotalOrders();
+        verify(service, VerificationModeFactory.times(1)).getPendingOrders();
+        verify(service, VerificationModeFactory.times(1)).getOrdersLast7Days();
+        verify(service, VerificationModeFactory.times(1)).getOrdersByWeight();
+        reset(service);
+    }
+
+    @Test
+    void whenGetStatisticsOrdersWithoutPermissions_thenReturnUnauthorized() throws Exception {
+        Rider rider = createRider("Rafael", "Baptista", "rafael@ua.pt", "1234", 5.0, "Online", "User");
+        given(rider_service.getRiderById(1)).willReturn(rider);
+
+        mvc.perform(get("/api/private/orders/statistics").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+    }
 
     @Test
     void whenCreateOrder_thenReturnResult() throws Exception {
@@ -269,4 +333,20 @@ class OrderControllerTest {
         reset(service);
         reset(notification_service);
     } 
+
+    public Rider createRider(String firstname, String lastname, String email, String password, double rating, String status, String account_type) {
+        Rider rider = new Rider(firstname, lastname, email, password, rating, status);
+        rider.setAccountType(account_type);
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        return rider;
+    }
+
+    public String getToken(String id) {
+        String token = "Bearer " + JWT.create()
+            .withSubject( id )
+            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+        return token;
+    }
 }

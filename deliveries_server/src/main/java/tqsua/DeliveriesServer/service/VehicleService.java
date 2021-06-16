@@ -8,6 +8,9 @@ import tqsua.DeliveriesServer.repository.VehicleRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -60,5 +63,39 @@ public class VehicleService {
         if (!this.vehicleRepository.existsById(id)) return null;
         this.vehicleRepository.deleteById(id);
         return id;
+    }
+
+    public ArrayList<Integer> getVehiclesByCapacity() {
+        ArrayList<Integer> vehiclesByCapacity = new ArrayList<Integer>();
+        Map<Double, Double> capacity = new TreeMap<Double, Double>();
+        capacity.put(0.0, 5.0);
+        capacity.put(5.0, 15.0);
+        capacity.put(15.0, 30.0);
+        capacity.put(30.0, 100.0);
+        capacity.put(100.0, 10000.0);
+
+        ArrayList<Vehicle> vehicles = vehicleRepository.findAll();
+
+        List<Vehicle> vehiclesVerified = new ArrayList<>();
+
+        for (Map.Entry<Double,Double> entry : capacity.entrySet()) {
+            Double initialCapacity = entry.getKey();
+            Double finalCapacity = entry.getValue();
+
+            int contador = 0;
+            for (Vehicle o : vehicles) {
+
+                if (initialCapacity < o.getCapacity() && o.getCapacity() <= finalCapacity ) {
+                    contador += 1;
+                    vehiclesVerified.add(o);
+                }
+            }
+            for (Vehicle o: vehiclesVerified) {
+                vehicles.remove(o);
+            }
+            vehiclesVerified = new ArrayList<>();
+            vehiclesByCapacity.add(contador);
+        }        
+        return vehiclesByCapacity;
     }
 }

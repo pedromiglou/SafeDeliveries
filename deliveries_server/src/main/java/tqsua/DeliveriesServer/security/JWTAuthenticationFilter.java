@@ -122,6 +122,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         map.put("status", updatedRider.getStatus());
         map.put("rating", String.valueOf(updatedRider.getRating()));
         map.put("token", token);
+        map.put("accountType", updatedRider.getAccountType());
         String json = new ObjectMapper().writeValueAsString(map);
         res.getWriter().write(json);
         res.getWriter().flush();

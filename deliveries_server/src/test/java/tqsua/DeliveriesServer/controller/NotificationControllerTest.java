@@ -1,13 +1,10 @@
 package tqsua.DeliveriesServer.controller;
 
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -15,10 +12,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import tqsua.DeliveriesServer.service.NotificationService;
 import tqsua.DeliveriesServer.service.OrderService;
-import tqsua.DeliveriesServer.JsonUtil;
 import tqsua.DeliveriesServer.model.Notification;
 import tqsua.DeliveriesServer.model.Order;
-import tqsua.DeliveriesServer.model.OrderDTO;
 import tqsua.DeliveriesServer.security.SecurityConstants;
 
 import static org.hamcrest.Matchers.*;
@@ -26,11 +21,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 import com.auth0.jwt.JWT;
@@ -50,17 +43,9 @@ class NotificationControllerTest {
     @MockBean
     private OrderService order_service;
 
-    
-    String token = "Bearer " + JWT.create()
-        .withSubject( "1" )
-        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+    String token = this.getToken("1");
 
-    String invalidtoken = "Bearer " + JWT.create()
-        .withSubject( "5" )
-        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
-    
+    String invalidtoken = this.getToken("5");
 
     @Test
     void whenGetNotificationByRiderId_thenReturnResult() throws Exception {
@@ -117,5 +102,13 @@ class NotificationControllerTest {
                 .andExpect(status().isNotFound());
         verify(service, VerificationModeFactory.times(1)).getNotificationByRider(1);
         reset(service);
+    }
+
+    public String getToken(String id) {
+        String token = "Bearer " + JWT.create()
+            .withSubject( id )
+            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+        return token;
     }
 }

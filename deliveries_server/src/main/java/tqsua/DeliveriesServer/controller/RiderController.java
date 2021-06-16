@@ -34,10 +34,42 @@ public class RiderController {
     @Autowired
     private NotificationService notificationService;
 
+    private static final String MESSAGE = "message";
+    private static final String UNAUTHORIZED = "Unauthorized";
+
     //@CrossOrigin(origins = "http://localhost:4200")
     @GetMapping(path="/private/riders")
-    public ArrayList<Rider> getAllRiders() throws IOException, InterruptedException {
-        return riderService.getAllRiders();
+    public ResponseEntity<Object> getAllRiders(Authentication authentication) throws IOException, InterruptedException {
+        HashMap<String, Object> response = new HashMap<>();
+        Rider rider = riderService.getRiderById(Long.parseLong(authentication.getName()));
+        if (!rider.getAccountType().equals("Admin")) {
+            response.put(MESSAGE, UNAUTHORIZED);
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(riderService.getAllRiders(), HttpStatus.OK);
+    }
+
+    @GetMapping(path="/private/riders/statistics")
+    public ResponseEntity<Object> getRidersStatistics(Authentication authentication) throws IOException, InterruptedException {
+        HashMap<String, Object> response = new HashMap<>();
+        
+        Rider rider = riderService.getRiderById(Long.parseLong(authentication.getName()));
+        if (!rider.getAccountType().equals("Admin")) {
+            response.put(MESSAGE, UNAUTHORIZED);
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
+        int onlineRiders = riderService.getRidersByState("Online");
+        int offlineRiders = riderService.getRidersByState("Offline");
+        int deliveringRiders = riderService.getRidersByState("Delivering");
+        int totalRiders = onlineRiders + offlineRiders + deliveringRiders;
+        
+        response.put("total_riders", totalRiders);
+        response.put("online_riders", onlineRiders);
+        response.put("offline_riders", offlineRiders);
+        response.put("delivering_riders", deliveringRiders);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(path="/private/rider")
@@ -46,7 +78,7 @@ public class RiderController {
 
         if (!rider_id.equals(String.valueOf(id))) {
             HashMap<String, String> response = new HashMap<>();
-            response.put("message", "Unauthorized");
+            response.put(MESSAGE, UNAUTHORIZED);
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
         Rider r = riderService.getRiderById(id);
@@ -61,7 +93,7 @@ public class RiderController {
 
         if (!rider_id.equals(String.valueOf(id))) {
             HashMap<String, String> response = new HashMap<>();
-            response.put("message", "Unauthorized");
+            response.put(MESSAGE, UNAUTHORIZED);
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
 

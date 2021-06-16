@@ -53,6 +53,12 @@ public class HomePage {
     @FindBy(id = "profile-div")
     private WebElement profile;
 
+    @FindBy(id = "admin_text")
+    private WebElement admin_text;
+
+    @FindBy(id = "statistics-tab")
+    private WebElement statistics;
+
     @FindBy(id = "logout")
     private WebElement logout;
     private final HttpClient httpClient = HttpClient.newBuilder()
@@ -75,6 +81,10 @@ public class HomePage {
 
     public String getSearchDeliveryTab(){
         return this.search_tab.getText();
+    }
+
+    public String getAdminText(){
+        return this.admin_text.getText();
     }
 
     public String getHistoryTab(){
@@ -102,6 +112,10 @@ public class HomePage {
         this.login.click();
     }
 
+    public void clickStatistics(){
+        this.statistics.click();
+    }
+
     public void  clickProfile(){
         this.profile.click();
     }
@@ -111,6 +125,31 @@ public class HomePage {
         Map<Object, Object> data = new HashMap<>();
         data.put("email", "rafael2@gmail.com");
         data.put("password", "rafael123");
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestBody = objectMapper
+            .writerWithDefaultPrettyPrinter()
+            .writeValueAsString(data);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .POST(BodyPublishers.ofString(requestBody))
+                .uri(URI.create("http://localhost:8080/api/login"))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        JSONObject json = new JSONObject(response.body());
+
+        js.executeScript(String.format(
+        "window.sessionStorage.setItem('%s','%s');", "user", json));
+        driver.navigate().refresh();
+    }
+
+    public void loginWithAdmin() throws IOException, InterruptedException, JSONException {
+        // form parameters
+        Map<Object, Object> data = new HashMap<>();
+        data.put("email", "admin@gmail.com");
+        data.put("password", "admin123");
         ObjectMapper objectMapper = new ObjectMapper();
         String requestBody = objectMapper
             .writerWithDefaultPrettyPrinter()

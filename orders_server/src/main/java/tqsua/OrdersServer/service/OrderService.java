@@ -61,7 +61,7 @@ public class OrderService {
             .build();
 
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println(response);
+        
         var json = new JSONObject(response.body());
         
         if (response.statusCode() != 201) {
