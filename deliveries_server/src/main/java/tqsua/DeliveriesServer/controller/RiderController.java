@@ -34,13 +34,16 @@ public class RiderController {
     @Autowired
     private NotificationService notificationService;
 
+    private static final String MESSAGE = "message";
+    private static final String UNAUTHORIZED = "Unauthorized";
+
     //@CrossOrigin(origins = "http://localhost:4200")
     @GetMapping(path="/private/riders")
     public ResponseEntity<Object> getAllRiders(Authentication authentication) throws IOException, InterruptedException {
         HashMap<String, Object> response = new HashMap<>();
         Rider rider = riderService.getRiderById(Long.parseLong(authentication.getName()));
         if (!rider.getAccountType().equals("Admin")) {
-            response.put("message", "Unauthorized");
+            response.put(MESSAGE, UNAUTHORIZED);
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
         return new ResponseEntity<>(riderService.getAllRiders(), HttpStatus.OK);
@@ -51,9 +54,8 @@ public class RiderController {
         HashMap<String, Object> response = new HashMap<>();
         
         Rider rider = riderService.getRiderById(Long.parseLong(authentication.getName()));
-        System.out.println(rider);
         if (!rider.getAccountType().equals("Admin")) {
-            response.put("message", "Unauthorized");
+            response.put(MESSAGE, UNAUTHORIZED);
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
 
@@ -76,7 +78,7 @@ public class RiderController {
 
         if (!rider_id.equals(String.valueOf(id))) {
             HashMap<String, String> response = new HashMap<>();
-            response.put("message", "Unauthorized");
+            response.put(MESSAGE, UNAUTHORIZED);
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
         Rider r = riderService.getRiderById(id);
@@ -91,7 +93,7 @@ public class RiderController {
 
         if (!rider_id.equals(String.valueOf(id))) {
             HashMap<String, String> response = new HashMap<>();
-            response.put("message", "Unauthorized");
+            response.put(MESSAGE, UNAUTHORIZED);
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
 

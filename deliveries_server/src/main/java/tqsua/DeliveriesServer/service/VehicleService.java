@@ -78,8 +78,9 @@ public class VehicleService {
 
         List<Vehicle> vehiclesVerified = new ArrayList<>();
 
-        for (Double initialCapacity : capacity.keySet()) {
-            Double finalCapacity = capacity.get(initialCapacity);
+        for (Map.Entry<Double,Double> entry : capacity.entrySet()) {
+            Double initialCapacity = entry.getKey();
+            Double finalCapacity = entry.getValue();
 
             int contador = 0;
             for (Vehicle o : vehicles) {

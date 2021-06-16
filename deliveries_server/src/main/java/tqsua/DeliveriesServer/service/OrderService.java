@@ -57,8 +57,10 @@ public class OrderService {
 
         List<Order> ordersVerified = new ArrayList<>();
         
-        for (Date dia : dicionarioDias.keySet()) {
-            Date data_fim_dia = dicionarioDias.get(dia);
+        
+        for (Map.Entry<Date,Date> entry : dicionarioDias.entrySet()) {
+            Date dia = entry.getKey();
+            Date data_fim_dia = entry.getValue();
             
             int contador = 0;
             for (Order o : orders) {
@@ -91,8 +93,9 @@ public class OrderService {
 
         List<Order> ordersVerified = new ArrayList<>();
 
-        for (Double initialWeight : weights.keySet()) {
-            Double finalWeight = weights.get(initialWeight);
+        for (Map.Entry<Double,Double> entry : weights.entrySet()) {
+            Double initialWeight = entry.getKey();
+            Double finalWeight = entry.getValue();
 
             int contador = 0;
             for (Order o : orders) {
