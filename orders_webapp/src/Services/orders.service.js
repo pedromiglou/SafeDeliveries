@@ -11,11 +11,12 @@ class OrdersService {
             items: items,
             user_id: user_id
         }
-        console.log(orderInfo);
+
         try {
-            var res = await fetch(urlAPI + 'api/orders', {
+            var res = await fetch(urlAPI + 'api/private/orders', {
                 method:'POST',
-                headers:{'Content-type':'application/json'},
+                headers:{'Content-type':'application/json',
+                    'Authorization': 'Bearer ' + JSON.parse(sessionStorage.getItem("user_orders"))["token"]},
                 body: JSON.stringify(orderInfo)
             })
         } catch {

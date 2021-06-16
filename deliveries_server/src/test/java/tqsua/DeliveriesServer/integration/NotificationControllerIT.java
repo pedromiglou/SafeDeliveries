@@ -17,11 +17,18 @@ import tqsua.DeliveriesServer.model.Rider;
 import tqsua.DeliveriesServer.repository.NotificationRepository;
 import tqsua.DeliveriesServer.repository.OrderRepository;
 import tqsua.DeliveriesServer.repository.RiderRepository;
+import tqsua.DeliveriesServer.security.SecurityConstants;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Date;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+
 import static org.hamcrest.Matchers.*;
 
 
@@ -38,6 +45,11 @@ public class NotificationControllerIT {
     @Autowired
     private OrderRepository orderRepository;
 
+    String token = "Bearer " + JWT.create()
+        .withSubject( "1" )
+        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+
     @BeforeEach
     void setUp() {
         notificationRepository.deleteAll();
@@ -51,7 +63,7 @@ public class NotificationControllerIT {
         Notification notification1 = new Notification(1, order.getOrder_id());
         notificationRepository.save(notification1); 
 
-        mvc.perform(get("/api/notifications?id=1").contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/api/private/notifications?id=1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.rider_id", is(1)))
                 .andExpect(jsonPath("$.pick_up_lat", is(40.3)))
@@ -63,16 +75,20 @@ public class NotificationControllerIT {
 
     @Test
     void whenGetNotificationByInvalidRiderId_thenReturnError() throws Exception {
+        token = "Bearer " + JWT.create()
+            .withSubject( "-1" )
+            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
 
-        mvc.perform(get("/api/notifications?id=-1").contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/api/private/notifications?id=-1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void whenGetNotificationByInvalidOrderId_thenReturnError() throws Exception {
-        Notification notification1 = new Notification(2, -1);
+        Notification notification1 = new Notification(1, -1);
         notificationRepository.save(notification1);
-        mvc.perform(get("/api/notifications?id=2").contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/api/private/notifications?id=1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
                 .andExpect(status().isNotFound());
     }
 }

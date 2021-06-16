@@ -14,6 +14,7 @@ import tqsua.DeliveriesServer.model.Vehicle;
 import tqsua.DeliveriesServer.model.VehicleDTO;
 import tqsua.DeliveriesServer.repository.RiderRepository;
 import tqsua.DeliveriesServer.repository.VehicleRepository;
+import tqsua.DeliveriesServer.security.SecurityConstants;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -22,6 +23,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Date;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = DeliveriesServerApplication.class)
 @AutoConfigureMockMvc
@@ -34,6 +40,11 @@ public class VehicleControllerIT {
 
     @Autowired
     private RiderRepository riderRepository;
+
+    String token = "Bearer " + JWT.create()
+        .withSubject( "1" )
+        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
 
     @BeforeEach
     void setUp() {
@@ -59,7 +70,8 @@ public class VehicleControllerIT {
         repository.save(v1);
         repository.save(v2);
 
-        mvc.perform(get("/api/vehicles").contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/api/private/vehicles").contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", token ))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[*].id").isNotEmpty());
@@ -70,19 +82,31 @@ public class VehicleControllerIT {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
         rider.setLat(12.0);
         rider.setLng(93.0);
-        riderRepository.save(rider);
+        rider = riderRepository.save(rider);
         Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         vehicle.setRider(rider);
         repository.save(vehicle);
 
-        mvc.perform(get("/api/vehicle?id="+String.valueOf(vehicle.getId())).contentType(MediaType.APPLICATION_JSON))
+        token = "Bearer " + JWT.create()
+        .withSubject( String.valueOf(rider.getId()) )
+        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+
+        mvc.perform(get("/api/private/vehicle?id="+String.valueOf(vehicle.getId())).contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", token ))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is((int) vehicle.getId())));
     }
 
     @Test
     void whenGetVehicleByInvalidId_thenReturnNotFound() throws Exception {
-        mvc.perform(get("/api/vehicle?id=-1").contentType(MediaType.APPLICATION_JSON))
+        token = "Bearer " + JWT.create()
+            .withSubject( "-1" )
+            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+
+        mvc.perform(get("/api/private/vehicle?id=-1").contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", token ))
                 .andExpect(status().isNotFound());
     }
 
@@ -100,8 +124,14 @@ public class VehicleControllerIT {
         repository.save(v1);
         repository.save(v2);
 
+        token = "Bearer " + JWT.create()
+        .withSubject( String.valueOf(rider.getId()) )
+        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
 
-        mvc.perform(get("/api/vehiclesbyrider?id="+rider.getId()).contentType(MediaType.APPLICATION_JSON))
+
+        mvc.perform(get("/api/private/rider/"+ rider.getId() +"/vehicles").contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", token ))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));
     }
@@ -117,19 +147,27 @@ public class VehicleControllerIT {
         Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         response.setRider(rider);
 
+        token = "Bearer " + JWT.create()
+        .withSubject( String.valueOf(rider.getId()) )
+        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
 
-        mvc.perform(post("/api/vehicle").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(vehicle)))
+        mvc.perform(post("/api/private/vehicle").contentType(MediaType.APPLICATION_JSON)
+                .content(JsonUtil.toJson(vehicle))
+                .header("Authorization", token ))
                 .andExpect(status().isCreated());
         assertThat(repository.findAll().size()).isEqualTo(1);
     }
 
     @Test
-    void whenPostNewInvalidVehicle_thenReturnBadRequest() throws Exception {
+    void whenPostNewInvalidVehicle_thenReturnUnauthorized() throws Exception {
         //missing rider
         VehicleDTO vehicle = new VehicleDTO(null, "Audi", "A5", "Carro", 365.0, null, "AAAAAA");
 
-        mvc.perform(post("/api/vehicle").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(vehicle)))
-                .andExpect(status().isBadRequest());
+        mvc.perform(post("/api/private/vehicle").contentType(MediaType.APPLICATION_JSON)
+                .content(JsonUtil.toJson(vehicle))
+                .header("Authorization", token ))
+                .andExpect(status().isUnauthorized());
         assertThat(repository.findAll().size()).isEqualTo(0);
     }
 
@@ -138,15 +176,22 @@ public class VehicleControllerIT {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
         rider.setLat(12.0);
         rider.setLng(93.0);
-        riderRepository.save(rider);
+        rider = riderRepository.save(rider);
 
         Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         vehicle.setRider(rider);
-        repository.save(vehicle);
+        vehicle = repository.save(vehicle);
 
         VehicleDTO newDetails = new VehicleDTO(null, "BMW", null, null, null, null, null);
 
-        mvc.perform(put("/api/vehicle/"+String.valueOf(vehicle.getId())).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
+        token = "Bearer " + JWT.create()
+            .withSubject( String.valueOf(rider.getId()) )
+            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+
+        mvc.perform(put("/api/private/vehicle/"+String.valueOf(vehicle.getId())).contentType(MediaType.APPLICATION_JSON)
+                .content(JsonUtil.toJson(newDetails))
+                .header("Authorization", token ))
                 .andExpect(status().isOk());
         assertThat(repository.findById(vehicle.getId())).hasFieldOrPropertyWithValue("brand", "BMW");
     }
@@ -154,8 +199,14 @@ public class VehicleControllerIT {
     @Test
     void whenUpdateNonExistentVehicle_thenReturnNotFound() throws Exception {
         VehicleDTO newDetails = new VehicleDTO(null, "BMW", null, null, null, null, null);
+        token = "Bearer " + JWT.create()
+            .withSubject( "-1" )
+            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
 
-        mvc.perform(put("/api/vehicle/"+String.valueOf(-1)).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
+        mvc.perform(put("/api/private/vehicle/-1").contentType(MediaType.APPLICATION_JSON)
+                .content(JsonUtil.toJson(newDetails))
+                .header("Authorization", token ))
                 .andExpect(status().isNotFound());
     }
 
@@ -170,12 +221,19 @@ public class VehicleControllerIT {
         vehicle.setRider(rider);
         repository.save(vehicle);
 
-        mvc.perform(delete("/api/vehicle/"+String.valueOf(vehicle.getId()))).andExpect(status().isOk());
+        token = "Bearer " + JWT.create()
+            .withSubject( String.valueOf(rider.getId()) )
+            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+
+        mvc.perform(delete("/api/private/vehicle/"+String.valueOf(vehicle.getId())).header("Authorization", token ))
+            .andExpect(status().isOk());
         assertThat(repository.existsById(vehicle.getId())).isFalse();
     }
 
     @Test
     void whenDeletingNotExistentVehicle_thenReturnNotFound() throws Exception {
-        mvc.perform(delete("/api/vehicle/"+String.valueOf(0L))).andExpect(status().isNotFound());
+        mvc.perform(delete("/api/private/vehicle/"+String.valueOf(0L)).header("Authorization", token ))
+            .andExpect(status().isNotFound());
     }
 }
