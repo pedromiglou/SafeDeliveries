@@ -44,7 +44,7 @@ public class OrderController {
     @Autowired
     private NotificationService notificationService;
 
-    private static final String message = "message";
+    private static final String MESSAGE = "message";
 
     private static final Map<String, String> APP_NAMES = Stream.of(new String[][] {
         { "SafeDeliveries", "http://localhost:8081" }, 
@@ -64,15 +64,15 @@ public class OrderController {
     public ResponseEntity<Object> createOrder(@Valid @RequestBody OrderDTO o) throws IOException, InterruptedException {
         HashMap<String, String> response = new HashMap<>();
         if (o.getDeliver_lat() == null || o.getDeliver_lng() == null || o.getPick_up_lat() == null || o.getPick_up_lng() == null) {
-            response.put(message, "Error. Invalid coords.");
+            response.put(MESSAGE, "Error. Invalid coords.");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         if (o.getWeight()<=0) {
-            response.put(message, "Error. Invalid Weight.");
+            response.put(MESSAGE, "Error. Invalid Weight.");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         if (!APP_NAMES.containsKey(o.getApp_name())) {
-            response.put(message, "Error. Invalid App name.");
+            response.put(MESSAGE, "Error. Invalid App name.");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         Order o1 = new Order(0, o.getPick_up_lat(), o.getPick_up_lng(), o.getDeliver_lat(), o.getDeliver_lng(), o.getWeight(), o.getApp_name());
@@ -99,7 +99,7 @@ public class OrderController {
 
         if (!id.equals(String.valueOf(rider_id))) {
             HashMap<String, String> response = new HashMap<>();
-            response.put(message, "Unauthorized");
+            response.put(MESSAGE, "Unauthorized");
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
 
@@ -116,7 +116,7 @@ public class OrderController {
 
         if (!id.equals(String.valueOf(rider_id))) {
             HashMap<String, String> response = new HashMap<>();
-            response.put(message, "Unauthorized");
+            response.put(MESSAGE, "Unauthorized");
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
         
