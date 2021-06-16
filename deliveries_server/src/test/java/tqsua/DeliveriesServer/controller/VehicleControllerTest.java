@@ -14,10 +14,15 @@ import tqsua.DeliveriesServer.JsonUtil;
 import tqsua.DeliveriesServer.model.Rider;
 import tqsua.DeliveriesServer.model.Vehicle;
 import tqsua.DeliveriesServer.model.VehicleDTO;
+import tqsua.DeliveriesServer.security.SecurityConstants;
 import tqsua.DeliveriesServer.service.RiderService;
 import tqsua.DeliveriesServer.service.VehicleService;
 
 import java.util.ArrayList;
+import java.util.Date;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -43,6 +48,11 @@ public class VehicleControllerTest {
     @MockBean
     private RiderService riderService;
 
+    String token = "Bearer " + JWT.create()
+        .withSubject( "1" )
+        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+
     @AfterEach
     void tearDown() {
         reset(service);
@@ -66,7 +76,7 @@ public class VehicleControllerTest {
         response.add(v2);
         given(service.getAllVehicles()).willReturn(response);
 
-        mvc.perform(get("/api/vehicles").contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/api/private/vehicles").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[*].id").isNotEmpty());
@@ -76,23 +86,25 @@ public class VehicleControllerTest {
     @Test
     void whenGetVehicleById_thenReturnVehicle() throws Exception {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setId(1);
         rider.setLat(12.0);
         rider.setLng(93.0);
         Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
+        response.setId(2);
         response.setRider(rider);
-        given(service.getVehicleById(response.getId())).willReturn(response);
+        given(service.getVehicleById(2)).willReturn(response);
 
-        mvc.perform(get("/api/vehicle?id="+String.valueOf(response.getId())).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/api/private/vehicle?id="+2).contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is((int) response.getId())));
-        verify(service, VerificationModeFactory.times(1)).getVehicleById(response.getId());
+                .andExpect(jsonPath("$.id", is(2)));
+        verify(service, VerificationModeFactory.times(1)).getVehicleById(2);
     }
 
     @Test
     void whenGetVehicleByInvalidId_thenReturnNotFound() throws Exception {
         given(service.getVehicleById(-1L)).willReturn(null);
 
-        mvc.perform(get("/api/vehicle?id=-1").contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/api/private/vehicle?id=-1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
                 .andExpect(status().isNotFound());
         verify(service, VerificationModeFactory.times(1)).getVehicleById(-1);
     }
@@ -100,6 +112,7 @@ public class VehicleControllerTest {
     @Test
     void whenGetVehiclesByRiderId_thenReturnVehicles() throws Exception {
         Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 4.0, "Offline");
+        rider.setId(1);
         rider.setLat(12.0);
         rider.setLng(93.0);
         Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
@@ -110,28 +123,30 @@ public class VehicleControllerTest {
         vehicles.add(v1);
         vehicles.add(v2);
 
-        given(service.getVehiclesByRiderId(rider.getId())).willReturn(vehicles);
+        given(service.getVehiclesByRiderId(1)).willReturn(vehicles);
 
-        mvc.perform(get("/api/vehiclesbyrider?id="+rider.getId()).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/api/private/rider/1/vehicles").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));
-        verify(service, VerificationModeFactory.times(1)).getVehiclesByRiderId(anyLong());
+        verify(service, VerificationModeFactory.times(1)).getVehiclesByRiderId(1);
     }
 
 
     @Test
     void whenPostNewVehicle_thenCreateIt() throws Exception {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setId(1);
         rider.setLat(12.0);
         rider.setLng(93.0);
         VehicleDTO vehicle = new VehicleDTO(null, "Audi", "A5", "Carro", 365.0, 0L, "AAAAAA");
+        vehicle.setRider(1L);
         Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         response.setRider(rider);
 
         given(service.saveVehicle(vehicle)).willReturn(response);
-        given(riderService.saveRider(response.getRider())).willReturn(null);
+        given(riderService.saveRider(rider)).willReturn(null);
 
-        mvc.perform(post("/api/vehicle").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/private/vehicle").contentType(MediaType.APPLICATION_JSON).header("Authorization", token )
             .content(JsonUtil.toJson(vehicle)))
                 .andExpect(status().isCreated());
         verify(service, VerificationModeFactory.times(1)).saveVehicle(vehicle);
@@ -141,9 +156,10 @@ public class VehicleControllerTest {
     void whenPostNewInvalidVehicle_thenReturnBadRequest() throws Exception {
         //missing rider
         VehicleDTO vehicle = new VehicleDTO(null, "Audi", "A5", "Carro", 365.0, null,"AAAAAAA");
+        vehicle.setRider(1L);
 
         given(service.saveVehicle(vehicle)).willReturn(null);
-        mvc.perform(post("/api/vehicle").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(vehicle)))
+        mvc.perform(post("/api/private/vehicle").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ).content(JsonUtil.toJson(vehicle)))
                 .andExpect(status().isBadRequest());
         verify(service, VerificationModeFactory.times(1)).saveVehicle(vehicle);
     }
@@ -151,15 +167,18 @@ public class VehicleControllerTest {
     @Test
     void whenUpdateVehicle_thenUpdateIt() throws Exception {
         Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setId(1);
         rider.setLat(12.0);
         rider.setLng(93.0);
         Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         vehicle.setRider(rider);
 
         VehicleDTO newDetails = new VehicleDTO(null, "BMW", null, null, null, 0L, "AAAAAA");
+        newDetails.setRider(1L);
+        given(service.getVehicleById(vehicle.getId())).willReturn(vehicle);
         given(service.updateVehicle(vehicle.getId(), newDetails)).willReturn(vehicle);
 
-        mvc.perform(put("/api/vehicle/"+String.valueOf(vehicle.getId())).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
+        mvc.perform(put("/api/private/vehicle/"+String.valueOf(vehicle.getId())).header("Authorization", token ).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
                 .andExpect(status().isOk());
         verify(service, VerificationModeFactory.times(1)).updateVehicle(vehicle.getId(), newDetails);
     }
@@ -167,27 +186,37 @@ public class VehicleControllerTest {
     @Test
     void whenUpdateNonExistentVehicle_thenReturnNotFound() throws Exception {
         VehicleDTO newDetails = new VehicleDTO(null, "BMW", null, null, null, 0L, "AAAAAA");
+        newDetails.setRider(1L);
         given(service.updateVehicle(-1, newDetails)).willReturn(null);
 
-        mvc.perform(put("/api/vehicle/"+String.valueOf(-1)).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
+        mvc.perform(put("/api/private/vehicle/"+String.valueOf(-1)).contentType(MediaType.APPLICATION_JSON).header("Authorization", token ).content(JsonUtil.toJson(newDetails)))
                 .andExpect(status().isNotFound());
-        verify(service, VerificationModeFactory.times(1)).updateVehicle(-1, newDetails);
+        verify(service, VerificationModeFactory.times(0)).updateVehicle(-1, newDetails);
+        verify(service, VerificationModeFactory.times(1)).getVehicleById(-1);
     }
 
     
     @Test
     void whenDeletingVehicle_thenDeleteIt() throws Exception {
-        given(service.deleteVehicle(0L)).willReturn(0L);
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setId(1);
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
+        vehicle.setRider(rider);
 
-        mvc.perform(delete("/api/vehicle/"+String.valueOf(0L))).andExpect(status().isOk());
-        verify(service, VerificationModeFactory.times(1)).deleteVehicle(0L);
+        given(service.getVehicleById(2L)).willReturn(vehicle);
+        given(service.deleteVehicle(2L)).willReturn(0L);
+
+        mvc.perform(delete("/api/private/vehicle/2").header("Authorization", token )).andExpect(status().isOk());
+        verify(service, VerificationModeFactory.times(1)).deleteVehicle(2L);
     }
 
     @Test
     void whenDeletingNotExistentVehicle_thenReturnNotFound() throws Exception {
-        given(service.deleteVehicle(0L)).willReturn(null);
+        given(service.getVehicleById(0L)).willReturn(null);
 
-        mvc.perform(delete("/api/vehicle/"+String.valueOf(0L))).andExpect(status().isNotFound());
-        verify(service, VerificationModeFactory.times(1)).deleteVehicle(0L);
+        mvc.perform(delete("/api/private/vehicle/"+String.valueOf(0L)).header("Authorization", token )).andExpect(status().isNotFound());
+        verify(service, VerificationModeFactory.times(1)).getVehicleById(0L);
     }
 }

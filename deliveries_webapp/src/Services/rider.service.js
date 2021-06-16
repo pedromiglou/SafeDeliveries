@@ -3,14 +3,18 @@ import {urlAPI} from './../data/data';
 class RiderService {
 
         async getRiderById(riderId) {
-            var url = urlAPI + 'api/rider?id=' + riderId;
-            var res = await fetch(url);
+            var url = urlAPI + 'api/private/rider?id=' + riderId;
+            var res = await fetch(url, {
+                method: 'GET',
+                headers:{'Content-type':'application/json',
+                         'Authorization': 'Bearer ' + JSON.parse(sessionStorage.getItem("user"))["token"]}
+            });
             return res.json();
         }
 
 
         async changeStatus(id, newStatus) {
-            var url =  'http://localhost:8080/api/rider/' +id;
+            var url =  'http://localhost:8080/api/private/rider/' +id;
     
             let rider = {
                 status: newStatus
@@ -18,7 +22,8 @@ class RiderService {
 
             await fetch(url, {
                 method:'PUT',
-                headers:{'Content-type':'application/json'},
+                headers:{'Content-type':'application/json',
+                         'Authorization': 'Bearer ' + JSON.parse(sessionStorage.getItem("user"))["token"]},
                 body: JSON.stringify(rider)
             });
     
@@ -28,7 +33,7 @@ class RiderService {
         async changeRider(id, fname, lname, email) {
             let rider= {}
 
-            var url = urlAPI + 'api/rider/'+id
+            var url = urlAPI + 'api/private/rider/'+id
 
             if (fname !== undefined && fname !== null && fname !== "") {
                 rider.firstname = fname
@@ -44,7 +49,8 @@ class RiderService {
     
             await fetch(url, {
                 method:'PUT',
-                headers:{'Content-type':'application/json'},
+                headers:{'Content-type':'application/json',
+                         'Authorization': 'Bearer ' + JSON.parse(sessionStorage.getItem("user"))["token"]},
                 body: JSON.stringify(rider)
             });
     

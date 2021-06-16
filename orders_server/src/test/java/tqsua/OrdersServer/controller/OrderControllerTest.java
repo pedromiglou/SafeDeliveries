@@ -16,6 +16,7 @@ import tqsua.OrdersServer.JsonUtil;
 import tqsua.OrdersServer.model.Item;
 import tqsua.OrdersServer.model.Order;
 import tqsua.OrdersServer.model.OrderDTO;
+import tqsua.OrdersServer.security.SecurityConstants;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
@@ -27,8 +28,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 
 //@WebMvcTest(OrderController.class)
 @AutoConfigureMockMvc
@@ -40,6 +45,11 @@ class OrderControllerTest {
 
     @MockBean
     private OrderService service;
+
+    String token = "Bearer " + JWT.create()
+        .withSubject( "1" )
+        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
 
     @Test
     void whenGetAllOrders_thenReturnResult() throws Exception {
@@ -61,8 +71,8 @@ class OrderControllerTest {
 
     @Test
     void whenCreateOrder_thenReturnResult() throws Exception {
-        Order order = new Order(40.0, 30.0, 40.1, 31.1, "PREPROCESSING", 12);
-        OrderDTO order1 = new OrderDTO(40.0, 30.0, 40.1, 31.1, "PREPROCESSING", 12);
+        Order order = new Order(40.0, 30.0, 40.1, 31.1, "PREPROCESSING", 1);
+        OrderDTO order1 = new OrderDTO(40.0, 30.0, 40.1, 31.1, "PREPROCESSING", 1);
         Set<Item> items = new HashSet<>();
         Item item1 = new Item("Casaco", "Roupa", 12.0);
         Item item2 = new Item("Telemovel", "Eletronica", 0.7);
@@ -74,7 +84,7 @@ class OrderControllerTest {
         given(service.saveOrder(Mockito.any())).willReturn(order);
         given(service.deliveryRequest(Mockito.any())).willReturn("1");
 
-        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/private/orders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token )
         .content(JsonUtil.toJson(order1)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.pick_up_lat", is(order.getPick_up_lat())))
@@ -92,7 +102,7 @@ class OrderControllerTest {
 
     @Test
     void whenCreateOrderWithInvalidCoords_thenReturnError() throws Exception {
-        OrderDTO order1 = new OrderDTO(null, 30.0, 40.1, 31.1, "PREPROCESSING", 12);
+        OrderDTO order1 = new OrderDTO(null, 30.0, 40.1, 31.1, "PREPROCESSING", 1);
         Set<Item> items = new HashSet<>();
         Item item1 = new Item("Casaco", "Roupa", 12.0);
         Item item2 = new Item("Telemovel", "Eletronica", 0.7);
@@ -100,7 +110,7 @@ class OrderControllerTest {
         items.add(item2);
         order1.setItems(items);
 
-        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/private/orders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token )
         .content(JsonUtil.toJson(order1)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is("Error. Invalid coords.")));
@@ -109,7 +119,7 @@ class OrderControllerTest {
         order1 = new OrderDTO(40.2, null, 40.1, 31.1, "PREPROCESSING", 12);
         order1.setItems(items);
 
-        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/private/orders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token )
         .content(JsonUtil.toJson(order1)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is("Error. Invalid coords.")));
@@ -118,7 +128,7 @@ class OrderControllerTest {
         order1 = new OrderDTO(40.2, 43.3, null, 31.1, "PREPROCESSING", 12);
         order1.setItems(items);
 
-        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/private/orders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token )
         .content(JsonUtil.toJson(order1)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is("Error. Invalid coords.")));
@@ -127,7 +137,7 @@ class OrderControllerTest {
         order1 = new OrderDTO(40.2, 34.2, 40.1, null, "PREPROCESSING", 12);
         order1.setItems(items);
 
-        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/private/orders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token )
         .content(JsonUtil.toJson(order1)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is("Error. Invalid coords.")));
@@ -136,9 +146,9 @@ class OrderControllerTest {
 
     @Test
     void whenCreateOrderWithNoItems_thenReturnError() throws Exception {
-        OrderDTO order1 = new OrderDTO(30.2, 30.0, 40.1, 31.1, "PREPROCESSING", 12);
+        OrderDTO order1 = new OrderDTO(30.2, 30.0, 40.1, 31.1, "PREPROCESSING", 1);
 
-        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/private/orders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token )
         .content(JsonUtil.toJson(order1)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is("Error. Order with 0 items.")));
@@ -155,7 +165,7 @@ class OrderControllerTest {
         items.add(item2);
         order1.setItems(items);
 
-        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/private/orders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token )
         .content(JsonUtil.toJson(order1)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is("Error. No user specified.")));
@@ -164,7 +174,7 @@ class OrderControllerTest {
 
     @Test
     void whenCreateOrderWithErrorConnectionDeliveries_thenReturnError() throws Exception {
-        OrderDTO order1 = new OrderDTO(40.2, 30.0, 40.1, 31.1, "PREPROCESSING", 12);
+        OrderDTO order1 = new OrderDTO(40.2, 30.0, 40.1, 31.1, "PREPROCESSING", 1);
         Set<Item> items = new HashSet<>();
         Item item1 = new Item("Casaco", "Roupa", 12.0);
         Item item2 = new Item("Telemovel", "Eletronica", 0.7);
@@ -174,7 +184,7 @@ class OrderControllerTest {
 
         given(service.deliveryRequest(Mockito.any())).willReturn(null);
 
-        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/private/orders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token )
         .content(JsonUtil.toJson(order1)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is("Error. Some error occured while connecting to Safe Deliveries.")));

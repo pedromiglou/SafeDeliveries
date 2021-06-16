@@ -1,8 +1,12 @@
 class NotificationService {
 
     async getNotificationByUserId(riderId) {
-        var url = 'http://localhost:8080/api/notifications?id=' + riderId;
-        var res = await fetch(url);
+        var url = 'http://localhost:8080/api/private/notifications?id=' + riderId;
+        var res = await fetch(url, {
+            method:'GET',
+            headers:{'Content-type':'application/json',
+                    'Authorization': 'Bearer ' + JSON.parse(sessionStorage.getItem("user"))["token"]}
+        });
         if (res.status === 404) {
             return []
         }

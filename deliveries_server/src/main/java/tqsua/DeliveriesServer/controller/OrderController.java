@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import tqsua.DeliveriesServer.model.Notification;
@@ -49,8 +50,10 @@ public class OrderController {
 
 
     //@CrossOrigin(origins = "http://localhost:4200")
-    @GetMapping(path="/orders")
+    @GetMapping(path="/private/orders")
     public ArrayList<Order> getAllOrders() throws IOException, InterruptedException {
+        // TODO:
+        // Verify admin
         return orderService.getAllOrders();
     }
 
@@ -88,18 +91,34 @@ public class OrderController {
     }
 
 
-    @PostMapping(path="/acceptorder")
+    @PostMapping(path="/private/acceptorder")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Object> acceptOrder(@RequestParam(name="order_id") long order_id, @RequestParam(name="rider_id") long rider_id) {
+    public ResponseEntity<Object> acceptOrder(Authentication authentication ,@RequestParam(name="order_id") long order_id, @RequestParam(name="rider_id") long rider_id) {
+        String id = authentication.getName();
+
+        if (!id.equals(String.valueOf(rider_id))) {
+            HashMap<String, String> response = new HashMap<>();
+            response.put("message", "Unauthorized");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
         notificationService.delete(rider_id);
         Order order = orderService.updateRider(order_id, rider_id);
         riderService.changeStatus(rider_id, "Delivering");
         return new ResponseEntity<>(order, HttpStatus.OK);
     }
 
-    @PostMapping(path="/declineorder")
+    @PostMapping(path="/private/declineorder")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Object> declineOrder(@RequestParam(name="order_id") long order_id, @RequestParam(name="rider_id") long rider_id) throws IOException, InterruptedException {
+    public ResponseEntity<Object> declineOrder(Authentication authentication ,@RequestParam(name="order_id") long order_id, @RequestParam(name="rider_id") long rider_id) throws IOException, InterruptedException {
+        String id = authentication.getName();
+
+        if (!id.equals(String.valueOf(rider_id))) {
+            HashMap<String, String> response = new HashMap<>();
+            response.put("message", "Unauthorized");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+        
         notificationService.delete(rider_id);
 
         Order o = orderService.getOrderById(order_id);
@@ -108,8 +127,8 @@ public class OrderController {
         o.setRefused_riders(refused_riders);
         orderService.saveOrder(o);
         ArrayList<Rider> riders = riderService.getAvailableRiders(o.getWeight());
-        for (Long id: refused_riders) {
-            riders.removeIf(item -> item.getId() == id);
+        for (Long idRider: refused_riders) {
+            riders.removeIf(item -> item.getId() == idRider);
         }
         if (riders.size() != 0) {
             Rider final_rider = getFinalRider(o, riders);

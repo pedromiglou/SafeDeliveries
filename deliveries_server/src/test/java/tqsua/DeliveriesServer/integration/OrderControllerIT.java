@@ -17,11 +17,19 @@ import tqsua.DeliveriesServer.model.Rider;
 import tqsua.DeliveriesServer.repository.NotificationRepository;
 import tqsua.DeliveriesServer.repository.OrderRepository;
 import tqsua.DeliveriesServer.repository.RiderRepository;
+import tqsua.DeliveriesServer.repository.VehicleRepository;
+import tqsua.DeliveriesServer.security.SecurityConstants;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Date;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+
 import static org.hamcrest.Matchers.*;
 
 
@@ -39,10 +47,19 @@ public class OrderControllerIT {
     private RiderRepository riderRepository;
 
     @Autowired
+    private VehicleRepository vehicleRepository;
+
+    @Autowired
     private NotificationRepository notificationRepository;
+
+    String token = "Bearer " + JWT.create()
+        .withSubject( "1" )
+        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
 
     @BeforeEach
     void setUp() {
+        vehicleRepository.deleteAll();
         orderRepository.deleteAll();
     }
 
@@ -53,7 +70,7 @@ public class OrderControllerIT {
         orderRepository.save(order1);
         orderRepository.save(order2);
 
-        mvc.perform(get("/api/orders").contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/api/private/orders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));
     }
@@ -109,7 +126,14 @@ public class OrderControllerIT {
         Notification notification = new Notification(rider.getId(), order.getOrder_id());
         notificationRepository.save(notification);
 
-        mvc.perform(post("/api/acceptorder?order_id=" + order.getOrder_id() + "&rider_id=" + rider.getId()).contentType(MediaType.APPLICATION_JSON))
+        token = "Bearer " + JWT.create()
+        .withSubject( String.valueOf(rider.getId()) )
+        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+
+        mvc.perform(post("/api/private/acceptorder?order_id=" + order.getOrder_id() + "&rider_id=" + rider.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", token ))
                 .andExpect(status().isOk());
     } 
 
@@ -124,7 +148,14 @@ public class OrderControllerIT {
         Notification notification = new Notification(rider.getId(), order.getOrder_id());
         notificationRepository.save(notification);
 
-        mvc.perform(post("/api/acceptorder?order_id=" + order.getOrder_id() + "&rider_id=" + rider.getId()).contentType(MediaType.APPLICATION_JSON))
+        token = "Bearer " + JWT.create()
+        .withSubject( String.valueOf(rider.getId()) )
+        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+
+        mvc.perform(post("/api/private/acceptorder?order_id=" + order.getOrder_id() + "&rider_id=" + rider.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", token ))
                 .andExpect(status().isOk());
     } 
 }

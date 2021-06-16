@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -43,7 +44,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
             cors.setAllowedHeaders(List.of("*")); return cors;
         }).and().authorizeRequests()
                 //.antMatchers(HttpMethod.GET, SecurityConstants.PRIVATE_URL+"/**").authenticated()
-                //.antMatchers(HttpMethod.POST, SecurityConstants.PRIVATE_URL+"/**").authenticated()
+                .antMatchers(HttpMethod.POST, SecurityConstants.PRIVATE_URL+"/**").authenticated()
                 //.antMatchers(HttpMethod.PUT, SecurityConstants.PRIVATE_URL+"/**").authenticated()
                 //.antMatchers(HttpMethod.DELETE, SecurityConstants.PRIVATE_URL+"/**").authenticated()
                 .anyRequest().permitAll()

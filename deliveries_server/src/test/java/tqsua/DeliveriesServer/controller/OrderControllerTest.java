@@ -20,6 +20,7 @@ import tqsua.DeliveriesServer.model.Notification;
 import tqsua.DeliveriesServer.model.Order;
 import tqsua.DeliveriesServer.model.OrderDTO;
 import tqsua.DeliveriesServer.model.Rider;
+import tqsua.DeliveriesServer.security.SecurityConstants;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
@@ -31,6 +32,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Date;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 
 //@WebMvcTest(OrderController.class)
 @AutoConfigureMockMvc
@@ -49,6 +54,11 @@ class OrderControllerTest {
     @MockBean
     private RiderService rider_service;
 
+    String token = "Bearer " + JWT.create()
+        .withSubject( "1" )
+        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+
     @Test
     void whenGetAllOrders_thenReturnResult() throws Exception {
         ArrayList<Order> response = new ArrayList<>();
@@ -58,7 +68,7 @@ class OrderControllerTest {
         response.add(order2);
         given(service.getAllOrders()).willReturn(response);
 
-        mvc.perform(get("/api/orders").contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/api/private/orders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));
         verify(service, VerificationModeFactory.times(1)).getAllOrders();
@@ -169,7 +179,7 @@ class OrderControllerTest {
         
         given(service.updateRider(2, 1)).willReturn(order);
 
-        mvc.perform(post("/api/acceptorder?order_id=2&rider_id=1").contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(post("/api/private/acceptorder?order_id=2&rider_id=1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
                 .andExpect(status().isOk());
         verify(service, VerificationModeFactory.times(1)).updateRider(2, 1);
         reset(service);
@@ -197,12 +207,12 @@ class OrderControllerTest {
         response.add(rider2);
         response.add(rider3);
 
-        given(service.getOrderById(1)).willReturn(order);
+        given(service.getOrderById(2)).willReturn(order);
         given(rider_service.getAvailableRiders(36.3)).willReturn(response);
 
-        mvc.perform(post("/api/declineorder?order_id=1&rider_id=2").contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(post("/api/private/declineorder?order_id=2&rider_id=1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
                 .andExpect(status().isOk());
-        verify(service, VerificationModeFactory.times(1)).getOrderById(1);
+        verify(service, VerificationModeFactory.times(1)).getOrderById(2);
         verify(notification_service, VerificationModeFactory.times(1)).save(Mockito.any());
         reset(service);
         reset(notification_service);
