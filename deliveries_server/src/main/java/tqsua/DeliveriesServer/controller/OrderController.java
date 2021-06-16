@@ -44,6 +44,8 @@ public class OrderController {
     @Autowired
     private NotificationService notificationService;
 
+    private static final String message = "message";
+
     private static final Map<String, String> APP_NAMES = Stream.of(new String[][] {
         { "SafeDeliveries", "http://localhost:8081" }, 
       }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
@@ -60,7 +62,6 @@ public class OrderController {
     @PostMapping(path="/orders")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Object> createOrder(@Valid @RequestBody OrderDTO o) throws IOException, InterruptedException {
-        String message = "message";
         HashMap<String, String> response = new HashMap<>();
         if (o.getDeliver_lat() == null || o.getDeliver_lng() == null || o.getPick_up_lat() == null || o.getPick_up_lng() == null) {
             response.put(message, "Error. Invalid coords.");
@@ -98,7 +99,7 @@ public class OrderController {
 
         if (!id.equals(String.valueOf(rider_id))) {
             HashMap<String, String> response = new HashMap<>();
-            response.put("message", "Unauthorized");
+            response.put(message, "Unauthorized");
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
 
@@ -115,7 +116,7 @@ public class OrderController {
 
         if (!id.equals(String.valueOf(rider_id))) {
             HashMap<String, String> response = new HashMap<>();
-            response.put("message", "Unauthorized");
+            response.put(message, "Unauthorized");
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
         

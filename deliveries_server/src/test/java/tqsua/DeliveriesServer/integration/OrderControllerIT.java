@@ -57,6 +57,11 @@ public class OrderControllerIT {
         .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
         .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
 
+    String invalidtoken = "Bearer " + JWT.create()
+        .withSubject( "5" )
+        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+
     @BeforeEach
     void setUp() {
         vehicleRepository.deleteAll();
@@ -135,8 +140,8 @@ public class OrderControllerIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", token ))
                 .andExpect(status().isOk());
-    } 
-
+    }
+    
     @Test
     void whenDeclineOrder_thenReturnResult() throws Exception {
         Order order = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
@@ -153,7 +158,7 @@ public class OrderControllerIT {
         .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
         .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
 
-        mvc.perform(post("/api/private/acceptorder?order_id=" + order.getOrder_id() + "&rider_id=" + rider.getId())
+        mvc.perform(post("/api/private/declineorder?order_id=" + order.getOrder_id() + "&rider_id=" + rider.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", token ))
                 .andExpect(status().isOk());

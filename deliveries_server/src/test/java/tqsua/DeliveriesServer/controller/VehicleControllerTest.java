@@ -53,6 +53,11 @@ public class VehicleControllerTest {
         .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
         .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
 
+    String invalidtoken = "Bearer " + JWT.create()
+        .withSubject( "5" )
+        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+
     @AfterEach
     void tearDown() {
         reset(service);
@@ -101,6 +106,23 @@ public class VehicleControllerTest {
     }
 
     @Test
+    void whenGetVehicleByIdWithInvalidToken_thenReturnUnauthorized() throws Exception {
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setId(1);
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
+        response.setId(2);
+        response.setRider(rider);
+        given(service.getVehicleById(2)).willReturn(response);
+
+        mvc.perform(get("/api/private/vehicle?id="+2).contentType(MediaType.APPLICATION_JSON).header("Authorization", invalidtoken ))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+        verify(service, VerificationModeFactory.times(1)).getVehicleById(2);
+    }
+
+    @Test
     void whenGetVehicleByInvalidId_thenReturnNotFound() throws Exception {
         given(service.getVehicleById(-1L)).willReturn(null);
 
@@ -131,6 +153,27 @@ public class VehicleControllerTest {
         verify(service, VerificationModeFactory.times(1)).getVehiclesByRiderId(1);
     }
 
+    @Test
+    void whenGetVehiclesByRiderIdWithDifferentToken_thenReturnUnauthorized() throws Exception {
+        Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 4.0, "Offline");
+        rider.setId(1);
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
+        Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 365.0, "AAAAAA");
+        v1.setRider(rider);
+        v2.setRider(rider);
+        ArrayList<Vehicle> vehicles = new ArrayList<>();
+        vehicles.add(v1);
+        vehicles.add(v2);
+
+        given(service.getVehiclesByRiderId(1)).willReturn(vehicles);
+
+        mvc.perform(get("/api/private/rider/1/vehicles").contentType(MediaType.APPLICATION_JSON).header("Authorization", invalidtoken ))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+        verify(service, VerificationModeFactory.times(0)).getVehiclesByRiderId(1);
+    }
 
     @Test
     void whenPostNewVehicle_thenCreateIt() throws Exception {
@@ -150,6 +193,27 @@ public class VehicleControllerTest {
             .content(JsonUtil.toJson(vehicle)))
                 .andExpect(status().isCreated());
         verify(service, VerificationModeFactory.times(1)).saveVehicle(vehicle);
+    }
+
+    @Test
+    void whenPostNewVehicleWithDifferentToken_thenReturnUnauthorized() throws Exception {
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setId(1);
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        VehicleDTO vehicle = new VehicleDTO(null, "Audi", "A5", "Carro", 365.0, 0L, "AAAAAA");
+        vehicle.setRider(1L);
+        Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
+        response.setRider(rider);
+
+        given(service.saveVehicle(vehicle)).willReturn(response);
+        given(riderService.saveRider(rider)).willReturn(null);
+
+        mvc.perform(post("/api/private/vehicle").contentType(MediaType.APPLICATION_JSON).header("Authorization", invalidtoken )
+            .content(JsonUtil.toJson(vehicle)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+        verify(service, VerificationModeFactory.times(0)).saveVehicle(vehicle);
     }
 
     @Test
@@ -184,6 +248,26 @@ public class VehicleControllerTest {
     }
 
     @Test
+    void whenUpdateVehicleWithDifferentToken_thenReturnUnauthorized() throws Exception {
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setId(1);
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
+        vehicle.setRider(rider);
+
+        VehicleDTO newDetails = new VehicleDTO(null, "BMW", null, null, null, 0L, "AAAAAA");
+        newDetails.setRider(1L);
+        given(service.getVehicleById(vehicle.getId())).willReturn(vehicle);
+        given(service.updateVehicle(vehicle.getId(), newDetails)).willReturn(vehicle);
+
+        mvc.perform(put("/api/private/vehicle/"+String.valueOf(vehicle.getId())).header("Authorization", invalidtoken ).contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+        verify(service, VerificationModeFactory.times(0)).updateVehicle(vehicle.getId(), newDetails);
+    }
+
+    @Test
     void whenUpdateNonExistentVehicle_thenReturnNotFound() throws Exception {
         VehicleDTO newDetails = new VehicleDTO(null, "BMW", null, null, null, 0L, "AAAAAA");
         newDetails.setRider(1L);
@@ -210,6 +294,25 @@ public class VehicleControllerTest {
 
         mvc.perform(delete("/api/private/vehicle/2").header("Authorization", token )).andExpect(status().isOk());
         verify(service, VerificationModeFactory.times(1)).deleteVehicle(2L);
+    }
+
+    @Test
+    void whenDeletingVehicleWithDifferentToken_thenReturnUnauthorized() throws Exception {
+        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        rider.setId(1);
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
+        vehicle.setRider(rider);
+
+        given(service.getVehicleById(2L)).willReturn(vehicle);
+        given(service.deleteVehicle(2L)).willReturn(0L);
+
+        mvc.perform(delete("/api/private/vehicle/2").header("Authorization", invalidtoken ))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.message", is("Unauthorized")));
+        verify(service, VerificationModeFactory.times(0)).deleteVehicle(2L);
+        verify(service, VerificationModeFactory.times(1)).getVehicleById(2L);
     }
 
     @Test

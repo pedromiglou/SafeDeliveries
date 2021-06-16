@@ -23,6 +23,9 @@ public class VehicleController {
     @Autowired
     private VehicleService vehicleService;
 
+    private static final String message = "message";
+    private static final String unauthorized = "Unauthorized";
+
     @GetMapping(path="/private/vehicles")
     public ArrayList<VehicleDTO> getVehicles(Authentication authentication) throws IOException, InterruptedException {
         // TODO:
@@ -41,12 +44,12 @@ public class VehicleController {
 
         if (vehicle == null) {
             HashMap<String, String> response = new HashMap<>();
-            response.put("message", "Not found.");
+            response.put(message, "Not found.");
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
         if (!rider_id.equals(String.valueOf(vehicle.getRider().getId()))) {
             HashMap<String, String> response = new HashMap<>();
-            response.put("message", "Unauthorized");
+            response.put(message, unauthorized);
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
         VehicleDTO response = new VehicleDTO(vehicle.getId(), vehicle.getBrand(), vehicle.getModel(), vehicle.getCategory(), vehicle.getCapacity(), vehicle.getRider().getId(), vehicle.getRegistration());
@@ -59,7 +62,7 @@ public class VehicleController {
 
         if (!rider_id.equals(String.valueOf(id))) {
             HashMap<String, String> response = new HashMap<>();
-            response.put("message", "Unauthorized");
+            response.put(message, unauthorized);
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
 
@@ -78,7 +81,7 @@ public class VehicleController {
 
         if (!id.equals(String.valueOf(v.getRider()))) {
             HashMap<String, String> response = new HashMap<>();
-            response.put("message", "Unauthorized");
+            response.put(message, unauthorized);
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
         Vehicle vehicle = this.vehicleService.saveVehicle(v);
@@ -93,13 +96,13 @@ public class VehicleController {
         Vehicle vehicle_found = vehicleService.getVehicleById(id);
         if (vehicle_found == null) {
             HashMap<String, String> response = new HashMap<>();
-            response.put("message", "Not found");
+            response.put(message, "Not found");
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
 
         if (!rider_id.equals(String.valueOf(vehicle_found.getRider().getId()))) {
             HashMap<String, String> response = new HashMap<>();
-            response.put("message", "Unauthorized");
+            response.put(message, unauthorized);
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
         
@@ -114,12 +117,12 @@ public class VehicleController {
         Vehicle v = this.vehicleService.getVehicleById(id);
         if (v == null) {
             HashMap<String, String> response = new HashMap<>();
-            response.put("message", "Not found.");
+            response.put(message, "Not found.");
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
         if (!rider_id.equals(String.valueOf(v.getRider().getId()))) {
             HashMap<String, String> response = new HashMap<>();
-            response.put("message", "Unauthorized");
+            response.put(message, unauthorized);
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
         if (this.vehicleService.deleteVehicle(id)==null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);

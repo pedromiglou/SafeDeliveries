@@ -58,6 +58,11 @@ class RiderControllerTest {
         .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
         .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
 
+    String invalidtoken = "Bearer " + JWT.create()
+        .withSubject( "5" )
+        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+
     @AfterEach
     void tearDown() {
         reset(service);
@@ -100,6 +105,21 @@ class RiderControllerTest {
     }
 
     @Test
+    void whenGetRiderByIdWithDifferentToken_thenReturnUnauthorized() throws Exception {
+        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        response.setId(1);
+        response.setLat(12.0);
+        response.setLng(93.0);
+        given(service.getRiderById(1)).willReturn(response);
+
+        mvc.perform(get("/api/private/rider?id="+1).contentType(MediaType.APPLICATION_JSON).header("Authorization", invalidtoken )
+                .content(JsonUtil.toJson(response)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+        verify(service, VerificationModeFactory.times(0)).getRiderById(1);
+    }
+
+    @Test
     void whenGetRiderByInvalidId_thenReturnRider() throws Exception {
         given(service.getRiderById(1)).willReturn(null);
 
@@ -130,6 +150,32 @@ class RiderControllerTest {
         mvc.perform(put("/api/private/rider/1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ).content(JsonUtil.toJson(newDetails)))
                 .andExpect(status().isOk());
         verify(service, VerificationModeFactory.times(1)).updateRider(1, newDetails);
+    }
+
+    @Test
+    void whenUpdateRiderWithDifferentToken_thenReturnUnauthorized() throws Exception {
+        RiderDTO newDetails = new RiderDTO("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
+        newDetails.setLat(12.0);
+        newDetails.setLng(93.0);
+        Rider rider = new Rider("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        given(service.updateRider(1, newDetails)).willReturn(rider);
+        //with all arguments
+        mvc.perform(put("/api/private/rider/1").contentType(MediaType.APPLICATION_JSON).header("Authorization", invalidtoken ).content(JsonUtil.toJson(newDetails)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+        verify(service, VerificationModeFactory.times(0)).updateRider(1, newDetails);
+
+        //with less arguments
+        newDetails = new RiderDTO(null, "B", "a@b.c", null, 5.0, "Offline");
+        newDetails.setLat(12.0);
+        newDetails.setLng(93.0);
+        given(service.updateRider(1, newDetails)).willReturn(rider);
+        mvc.perform(put("/api/private/rider/1").contentType(MediaType.APPLICATION_JSON).header("Authorization", invalidtoken ).content(JsonUtil.toJson(newDetails)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+        verify(service, VerificationModeFactory.times(0)).updateRider(1, newDetails);
     }
 
     @Test

@@ -51,6 +51,11 @@ class OrderControllerTest {
         .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
         .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
 
+    String invalidtoken = "Bearer " + JWT.create()
+        .withSubject( "5" )
+        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+
     @Test
     void whenGetAllOrders_thenReturnResult() throws Exception {
         ArrayList<Order> response = new ArrayList<>();
@@ -97,6 +102,29 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.items", hasSize(2)))
                 .andExpect(jsonPath("$.id").isNotEmpty());
         verify(service, VerificationModeFactory.times(1)).saveOrder(Mockito.any());
+        reset(service);
+    }
+
+    @Test
+    void whenCreateOrderWithDifferentToken_thenReturnUnauthorized() throws Exception {
+        Order order = new Order(40.0, 30.0, 40.1, 31.1, "PREPROCESSING", 1);
+        OrderDTO order1 = new OrderDTO(40.0, 30.0, 40.1, 31.1, "PREPROCESSING", 1);
+        Set<Item> items = new HashSet<>();
+        Item item1 = new Item("Casaco", "Roupa", 12.0);
+        Item item2 = new Item("Telemovel", "Eletronica", 0.7);
+        items.add(item1);
+        items.add(item2);
+        order.setItems(items);
+        order1.setItems(items);
+        
+        given(service.saveOrder(Mockito.any())).willReturn(order);
+        given(service.deliveryRequest(Mockito.any())).willReturn("1");
+
+        mvc.perform(post("/api/private/orders").contentType(MediaType.APPLICATION_JSON).header("Authorization", invalidtoken )
+        .content(JsonUtil.toJson(order1)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+        verify(service, VerificationModeFactory.times(0)).saveOrder(Mockito.any());
         reset(service);
     }
 

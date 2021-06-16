@@ -55,6 +55,11 @@ class NotificationControllerTest {
         .withSubject( "1" )
         .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
         .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+
+    String invalidtoken = "Bearer " + JWT.create()
+        .withSubject( "5" )
+        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
     
 
     @Test
@@ -73,6 +78,20 @@ class NotificationControllerTest {
                 .andExpect(jsonPath("$.deliver_lng", is(31.3)))
                 .andExpect(jsonPath("$.weight", is(36.3)));
         verify(service, VerificationModeFactory.times(1)).getNotificationByRider(1);
+        reset(service);
+    }
+
+    @Test
+    void whenGetNotificationByRiderIdDifferentToken_thenReturnResult() throws Exception {
+        Notification notification1 = new Notification(1, 2);
+        Order order = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        given(service.getNotificationByRider(1)).willReturn(notification1);
+        given(order_service.getOrderById(2)).willReturn(order);
+
+        mvc.perform(get("/api/private/notifications?id=1").contentType(MediaType.APPLICATION_JSON).header("Authorization", invalidtoken ))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+        verify(service, VerificationModeFactory.times(0)).getNotificationByRider(1);
         reset(service);
     }
 
