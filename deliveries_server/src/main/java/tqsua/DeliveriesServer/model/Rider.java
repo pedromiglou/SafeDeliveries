@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.io.Serializable;
 import java.util.*;
 
 
@@ -19,7 +18,7 @@ import javax.persistence.Table;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name = "Riders")
-public class Rider implements Serializable, UserDetails {
+public class Rider implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.server.ResponseStatusException;
@@ -34,14 +35,28 @@ public class RiderController {
     private NotificationService notificationService;
 
     //@CrossOrigin(origins = "http://localhost:4200")
-    @GetMapping(path="/riders")
-    public ArrayList<Rider> getAllRiders() throws IOException, InterruptedException {
-        return riderService.getAllRiders();
+    @GetMapping(path="/private/riders")
+    public ResponseEntity<Object> getAllRiders(Authentication authentication) throws IOException, InterruptedException {
+        HashMap<String, Object> response = new HashMap<>();
+        Rider rider = riderService.getRiderById(Long.parseLong(authentication.getName()));
+        if (!rider.getAccountType().equals("Admin")) {
+            response.put("message", "Unauthorized");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(riderService.getAllRiders(), HttpStatus.OK);
     }
 
-    @GetMapping(path="/riders/statistics")
-    public ResponseEntity<Object> getRidersStatistics() throws IOException, InterruptedException {
+    @GetMapping(path="/private/riders/statistics")
+    public ResponseEntity<Object> getRidersStatistics(Authentication authentication) throws IOException, InterruptedException {
         HashMap<String, Object> response = new HashMap<>();
+        
+        Rider rider = riderService.getRiderById(Long.parseLong(authentication.getName()));
+        System.out.println(rider);
+        if (!rider.getAccountType().equals("Admin")) {
+            response.put("message", "Unauthorized");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
         int onlineRiders = riderService.getRidersByState("Online");
         int offlineRiders = riderService.getRidersByState("Offline");
         int deliveringRiders = riderService.getRidersByState("Delivering");
@@ -55,15 +70,31 @@ public class RiderController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping(path="/rider")
-    public Rider getRiderById(@RequestParam(name="id") long id) {
+    @GetMapping(path="/private/rider")
+    public ResponseEntity<Object> getRiderById(Authentication authentication ,@RequestParam(name="id") long id) {
+        String rider_id = authentication.getName();
+
+        if (!rider_id.equals(String.valueOf(id))) {
+            HashMap<String, String> response = new HashMap<>();
+            response.put("message", "Unauthorized");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
         Rider r = riderService.getRiderById(id);
         if (r==null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        return r;
+        return new ResponseEntity<>(r, HttpStatus.OK);
     }
 
-    @PutMapping(path="/rider/{id}")
-    public ResponseEntity<Object> updateRider(@PathVariable(value="id") Long id, @Valid @RequestBody RiderDTO rider) throws IOException, InterruptedException {
+    @PutMapping(path="/private/rider/{id}")
+    public ResponseEntity<Object> updateRider(Authentication authentication ,@PathVariable(value="id") Long id, @Valid @RequestBody RiderDTO rider) throws IOException, InterruptedException {
+        
+        String rider_id = authentication.getName();
+
+        if (!rider_id.equals(String.valueOf(id))) {
+            HashMap<String, String> response = new HashMap<>();
+            response.put("message", "Unauthorized");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
         Rider r = riderService.updateRider(id, rider);
         if (r == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         

@@ -15,7 +15,6 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long>{
 
     Vehicle findById(long id);
 
-
     @Query(value = "Select * from vehicles where rider_id like :id", nativeQuery = true)
     ArrayList<Vehicle> findByRider(@Param("id") Long id);
 }

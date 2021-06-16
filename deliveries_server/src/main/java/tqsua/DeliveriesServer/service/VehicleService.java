@@ -8,9 +8,9 @@ import tqsua.DeliveriesServer.repository.VehicleRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -67,7 +67,7 @@ public class VehicleService {
 
     public ArrayList<Integer> getVehiclesByCapacity() {
         ArrayList<Integer> vehiclesByCapacity = new ArrayList<Integer>();
-        Map<Double, Double> capacity = new HashMap<Double, Double>();
+        Map<Double, Double> capacity = new TreeMap<Double, Double>();
         capacity.put(0.0, 5.0);
         capacity.put(5.0, 15.0);
         capacity.put(15.0, 30.0);
@@ -83,6 +83,7 @@ public class VehicleService {
 
             int contador = 0;
             for (Vehicle o : vehicles) {
+
                 if (initialCapacity < o.getCapacity() && o.getCapacity() <= finalCapacity ) {
                     contador += 1;
                     vehiclesVerified.add(o);

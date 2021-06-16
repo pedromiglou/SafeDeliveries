@@ -1,11 +1,7 @@
 package tqsua.DeliveriesServer.controller;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import tqsua.DeliveriesServer.model.Notification;
@@ -47,26 +44,44 @@ public class OrderController {
     @Autowired
     private NotificationService notificationService;
 
+    private static final String MESSAGE = "message";
+
     private static final Map<String, String> APP_NAMES = Stream.of(new String[][] {
         { "SafeDeliveries", "http://localhost:8081" }, 
       }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
 
 
-    @GetMapping(path="/orders")
-    public ArrayList<Order> getAllOrders() throws IOException, InterruptedException {
-        return orderService.getAllOrders();
+    //@CrossOrigin(origins = "http://localhost:4200")
+    @GetMapping(path="/private/orders")
+    public ResponseEntity<Object> getAllOrders(Authentication authentication) throws IOException, InterruptedException {
+        HashMap<String, Object> response = new HashMap<>();
+        Rider rider = riderService.getRiderById(Long.parseLong(authentication.getName()));
+        if (!rider.getAccountType().equals("Admin")) {
+            response.put(MESSAGE, "Unauthorized");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(orderService.getAllOrders(), HttpStatus.OK);
     }
 
-    @GetMapping(path="/orders/statistics")
-    public ResponseEntity<Object> getStatisticsOrders() throws IOException, InterruptedException {
+    @GetMapping(path="/private/orders/statistics")
+    public ResponseEntity<Object> getStatisticsOrders(Authentication authentication) throws IOException, InterruptedException {
         HashMap<String, Object> response = new HashMap<>();
+        Rider rider = riderService.getRiderById(Long.parseLong(authentication.getName()));
+        if (!rider.getAccountType().equals("Admin")) {
+            response.put(MESSAGE, "Unauthorized");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
+        
         int numOrders = orderService.getTotalOrders();
         int numPendingOrders = orderService.getPendingOrders().size();
+        int numDeliveringOrders = numOrders - numPendingOrders;
         ArrayList<Integer> ordersLast7Days = orderService.getOrdersLast7Days();
         ArrayList<Integer> ordersByWeight = orderService.getOrdersByWeight();
 
         response.put("total_orders", numOrders);
         response.put("pending_orders", numPendingOrders);
+        response.put("delivering_orders", numDeliveringOrders);
         response.put("orders_7_days", ordersLast7Days);
         response.put("orders_by_weight", ordersByWeight);
 
@@ -76,18 +91,17 @@ public class OrderController {
     @PostMapping(path="/orders")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Object> createOrder(@Valid @RequestBody OrderDTO o) throws IOException, InterruptedException {
-        String message = "message";
         HashMap<String, String> response = new HashMap<>();
         if (o.getDeliver_lat() == null || o.getDeliver_lng() == null || o.getPick_up_lat() == null || o.getPick_up_lng() == null) {
-            response.put(message, "Error. Invalid coords.");
+            response.put(MESSAGE, "Error. Invalid coords.");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         if (o.getWeight()<=0) {
-            response.put(message, "Error. Invalid Weight.");
+            response.put(MESSAGE, "Error. Invalid Weight.");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         if (!APP_NAMES.containsKey(o.getApp_name())) {
-            response.put(message, "Error. Invalid App name.");
+            response.put(MESSAGE, "Error. Invalid App name.");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         Order o1 = new Order(0, o.getPick_up_lat(), o.getPick_up_lng(), o.getDeliver_lat(), o.getDeliver_lng(), o.getWeight(), o.getApp_name());
@@ -107,18 +121,34 @@ public class OrderController {
     }
 
 
-    @PostMapping(path="/acceptorder")
+    @PostMapping(path="/private/acceptorder")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Object> acceptOrder(@RequestParam(name="order_id") long order_id, @RequestParam(name="rider_id") long rider_id) {
+    public ResponseEntity<Object> acceptOrder(Authentication authentication ,@RequestParam(name="order_id") long order_id, @RequestParam(name="rider_id") long rider_id) {
+        String id = authentication.getName();
+
+        if (!id.equals(String.valueOf(rider_id))) {
+            HashMap<String, String> response = new HashMap<>();
+            response.put(MESSAGE, "Unauthorized");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
         notificationService.delete(rider_id);
         Order order = orderService.updateRider(order_id, rider_id);
         riderService.changeStatus(rider_id, "Delivering");
         return new ResponseEntity<>(order, HttpStatus.OK);
     }
 
-    @PostMapping(path="/declineorder")
+    @PostMapping(path="/private/declineorder")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Object> declineOrder(@RequestParam(name="order_id") long order_id, @RequestParam(name="rider_id") long rider_id) throws IOException, InterruptedException {
+    public ResponseEntity<Object> declineOrder(Authentication authentication ,@RequestParam(name="order_id") long order_id, @RequestParam(name="rider_id") long rider_id) throws IOException, InterruptedException {
+        String id = authentication.getName();
+
+        if (!id.equals(String.valueOf(rider_id))) {
+            HashMap<String, String> response = new HashMap<>();
+            response.put(MESSAGE, "Unauthorized");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+        
         notificationService.delete(rider_id);
 
         Order o = orderService.getOrderById(order_id);
@@ -127,8 +157,8 @@ public class OrderController {
         o.setRefused_riders(refused_riders);
         orderService.saveOrder(o);
         ArrayList<Rider> riders = riderService.getAvailableRiders(o.getWeight());
-        for (Long id: refused_riders) {
-            riders.removeIf(item -> item.getId() == id);
+        for (Long idRider: refused_riders) {
+            riders.removeIf(item -> item.getId() == idRider);
         }
         if (riders.size() != 0) {
             Rider final_rider = getFinalRider(o, riders);

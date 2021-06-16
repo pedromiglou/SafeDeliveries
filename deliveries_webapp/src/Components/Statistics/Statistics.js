@@ -13,6 +13,7 @@ function Statistics() {
     const [ordersLast7Days, setOrdersLast7Days] = useState([]);
     const [totalOrders, setTotalOrders] = useState(0);
     const [pendingOrders, setPendingOrders] = useState(0);
+    const [deliveringOrders, setDeliveringOrders] = useState(0);
     const [ordersWeight, setOrdersWeight] = useState([]);
 
     const [totalRiders, setTotalRiders] = useState(0);
@@ -30,6 +31,7 @@ function Statistics() {
                 setTotalOrders(response.total_orders);
                 setPendingOrders(response.pending_orders);
                 setOrdersWeight(response.orders_by_weight);
+                setDeliveringOrders(response.delivering_orders);
             }
         }
 
@@ -66,7 +68,7 @@ function Statistics() {
                 </div>
                 <div className="collumn-item">
                     <h5>Delivering Orders</h5>
-                    <h6>539</h6>
+                    <h6>{deliveringOrders}</h6>
                 </div>
                 <div className="collumn-item">
                     <h5>Waiting Orders</h5>

@@ -5,9 +5,9 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,7 @@ public class OrderService {
 
     public ArrayList<Integer> getOrdersLast7Days() throws IOException, InterruptedException {
         ArrayList<Integer> ordersLast7Days = new ArrayList<Integer>();
-        Map<Date, Date> dicionarioDias = new HashMap<Date, Date>();
+        Map<Date, Date> dicionarioDias = new TreeMap<Date, Date>();
 
         Calendar cal = Calendar.getInstance();
         Calendar cal2 = Calendar.getInstance();
@@ -43,6 +43,7 @@ public class OrderService {
         cal2.set(Calendar.SECOND, 59);
 
         Date date = cal.getTime();
+        
         Date date_fim = cal2.getTime();
         dicionarioDias.put(date, date_fim);
         for (int i = 1; i < 7; i++) {
@@ -55,10 +56,10 @@ public class OrderService {
         ArrayList<Order> orders = orderRepository.findAll();
 
         List<Order> ordersVerified = new ArrayList<>();
-
+        
         for (Date dia : dicionarioDias.keySet()) {
             Date data_fim_dia = dicionarioDias.get(dia);
-
+            
             int contador = 0;
             for (Order o : orders) {
                 Date dateFromLocalDT = Date.from(o.getCreation_date().atZone(ZoneId.systemDefault()).toInstant());
@@ -67,18 +68,20 @@ public class OrderService {
                     ordersVerified.add(o);
                 }
             }
+            
             for (Order o: ordersVerified) {
                 orders.remove(o);
             }
             ordersVerified = new ArrayList<>();
             ordersLast7Days.add(contador);
         }
+        
         return ordersLast7Days;
     }
 
     public ArrayList<Integer> getOrdersByWeight() throws IOException, InterruptedException {
         ArrayList<Integer> ordersByWeight = new ArrayList<Integer>();
-        Map<Double, Double> weights = new HashMap<Double, Double>();
+        Map<Double, Double> weights = new TreeMap<Double, Double>();
         weights.put(0.0, 5.0);
         weights.put(5.0, 15.0);
         weights.put(15.0, 30.0);

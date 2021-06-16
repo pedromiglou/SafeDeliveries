@@ -4,13 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import tqsua.DeliveriesServer.model.Rider;
-import tqsua.DeliveriesServer.repository.RiderRepository;
 import tqsua.DeliveriesServer.security.UserDetailsServiceImpl;
 import tqsua.DeliveriesServer.service.RiderService;
 
 @SpringBootApplication
+@ComponentScan
 public class DeliveriesServerApplication {
 
 	@Bean

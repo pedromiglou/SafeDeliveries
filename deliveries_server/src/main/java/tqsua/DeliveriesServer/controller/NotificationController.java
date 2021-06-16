@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.server.ResponseStatusException;
@@ -24,8 +25,16 @@ public class NotificationController {
     @Autowired
     private OrderService orderService;
 
-    @GetMapping(path="/notifications")
-    public ResponseEntity<Object> getNotificationByUserId(@RequestParam(name="id") long id) throws IOException, InterruptedException {
+    @GetMapping(path="/private/notifications")
+    public ResponseEntity<Object> getNotificationByUserId(Authentication authentication ,@RequestParam(name="id") long id) throws IOException, InterruptedException {
+        String rider_id = authentication.getName();
+        
+        if (!rider_id.equals(String.valueOf(id))) {
+            HashMap<String, String> response = new HashMap<>();
+            response.put("message", "Unauthorized");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+        
         Notification r = notificationService.getNotificationByRider(id);
         if (r==null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         Order order = orderService.getOrderById(r.getOrder_id());

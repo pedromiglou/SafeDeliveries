@@ -3,8 +3,12 @@ import {urlAPI} from "./../data/data";
 class VehicleService {
 
     async getVehiclesByRiderId(riderId) {
-        var url = urlAPI + 'api/vehiclesbyrider?id=' + riderId;
-        var res = await fetch(url);
+        var url = urlAPI + 'api/private/rider/' + riderId + '/vehicles';
+        var res = await fetch(url, {
+            method: "GET",
+            headers:{'Content-type':'application/json',
+                    'Authorization': 'Bearer ' + JSON.parse(sessionStorage.getItem("user"))["token"]}
+        });
         return res.json();
     }
 
@@ -19,11 +23,12 @@ class VehicleService {
             rider: idRider
         }
 
-        var url = urlAPI + 'api/vehicle'
+        var url = urlAPI + 'api/private/vehicle'
 
         await fetch(url, {
             method:'POST',
-            headers:{'Content-type':'application/json'},
+            headers:{'Content-type':'application/json',
+                    'Authorization': 'Bearer ' + JSON.parse(sessionStorage.getItem("user"))["token"]},
             body: JSON.stringify(vehicle)
         });
 
@@ -41,11 +46,12 @@ class VehicleService {
             capacity: capacity,
         }
 
-        var url = urlAPI + 'api/vehicle/'+id
+        var url = urlAPI + 'api/private/vehicle/'+id
 
         await fetch(url, {
             method:'PUT',
-            headers:{'Content-type':'application/json'},
+            headers:{'Content-type':'application/json',
+                    'Authorization': 'Bearer ' + JSON.parse(sessionStorage.getItem("user"))["token"]},
             body: JSON.stringify(vehicle)
         });
 
@@ -55,11 +61,12 @@ class VehicleService {
 
     async removeVehicle(id) {
 
-        var url = urlAPI + 'api/vehicle/'+id
+        var url = urlAPI + 'api/private/vehicle/'+id
 
         await fetch(url, {
             method:'DELETE',
-            headers:{'Content-type':'application/json'},
+            headers:{'Content-type':'application/json',
+                    'Authorization': 'Bearer ' + JSON.parse(sessionStorage.getItem("user"))["token"]},
         });
 
         return;       
@@ -67,8 +74,11 @@ class VehicleService {
     }
 
     async getVehiclesStatistics() {
-        var url = 'http://localhost:8080/api/vehicles/statistics';
-        var res = await fetch(url);
+        var url = 'http://localhost:8080/api/private/vehicles/statistics';
+        var res = await fetch(url, {
+            method:'GET',
+            headers:{'Content-type':'application/json',
+                'Authorization': 'Bearer ' + JSON.parse(sessionStorage.getItem("user"))["token"]}});
         if (res.status !== 200) {
             return {error: true};
         }

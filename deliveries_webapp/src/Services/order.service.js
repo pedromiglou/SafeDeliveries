@@ -1,26 +1,31 @@
 class OrderService {
 
     async acceptOrder(order_id, rider_id) {
-        var url = 'http://localhost:8080/api/acceptorder?order_id=' + order_id + '&rider_id=' + rider_id;
+        var url = 'http://localhost:8080/api/private/acceptorder?order_id=' + order_id + '&rider_id=' + rider_id;
         var res = await fetch(url, {
             method:'POST',
-            headers:{'Content-type':'application/json'}
+            headers:{'Content-type':'application/json',
+                    'Authorization': 'Bearer ' + JSON.parse(sessionStorage.getItem("user"))["token"]}
         });
         return res.json();
     }
 
     async declineOrder(order_id, rider_id) {
-        var url = 'http://localhost:8080/api/declineorder?order_id=' + order_id + '&rider_id=' + rider_id;
+        var url = 'http://localhost:8080/api/private/declineorder?order_id=' + order_id + '&rider_id=' + rider_id;
         await fetch(url, {
             method:'POST',
-            headers:{'Content-type':'application/json'}
+            headers:{'Content-type':'application/json',
+                    'Authorization': 'Bearer ' + JSON.parse(sessionStorage.getItem("user"))["token"]}
         });
         return;
     }
 
     async getOrderStatistics() {
-        var url = 'http://localhost:8080/api/orders/statistics';
-        var res = await fetch(url);
+        var url = 'http://localhost:8080/api/private/orders/statistics';
+        var res = await fetch(url, {
+            method:'GET',
+            headers:{'Content-type':'application/json',
+                'Authorization': 'Bearer ' + JSON.parse(sessionStorage.getItem("user"))["token"]}});
         if (res.status !== 200) {
             return {error: true};
         }

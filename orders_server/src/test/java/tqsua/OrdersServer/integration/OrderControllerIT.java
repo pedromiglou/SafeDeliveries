@@ -1,7 +1,11 @@
 package tqsua.OrdersServer.integration;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -16,6 +20,8 @@ import tqsua.OrdersServer.JsonUtil;
 import tqsua.OrdersServer.OrdersServerApplication;
 import tqsua.OrdersServer.model.Item;
 import tqsua.OrdersServer.model.OrderDTO;
+import tqsua.OrdersServer.security.SecurityConstants;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,10 +33,15 @@ public class OrderControllerIT {
     @Autowired
     private MockMvc mvc;
 
+    String token = "Bearer " + JWT.create()
+        .withSubject( "1" )
+        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+
     @Disabled("Unable to run in CI")
     @Test
     void whenCreatingOrderWithValidParams_thenCreateWithSucess() throws Exception {
-        OrderDTO order1 = new OrderDTO(40.0, 30.0, 40.1, 31.1, "PREPROCESSING", 12);
+        OrderDTO order1 = new OrderDTO(40.0, 30.0, 40.1, 31.1, "PREPROCESSING", 1);
         Set<Item> items = new HashSet<>();
         Item item1 = new Item("Casaco", "Roupa", 12.0);
         Item item2 = new Item("Telemovel", "Eletronica", 0.7);
@@ -38,7 +49,8 @@ public class OrderControllerIT {
         items.add(item2);
         order1.setItems(items);
         
-        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/private/orders").contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", token )
                 .content(JsonUtil.toJson(order1)))
                 .andExpect(jsonPath("$.pick_up_lat", is(order1.getPick_up_lat())))
                 .andExpect(jsonPath("$.pick_up_lng", is(order1.getPick_up_lng())))
@@ -53,7 +65,7 @@ public class OrderControllerIT {
 
     @Test
     void whenCreatingOrderWithInvalidCoords_thenReturnErrorMessage() throws Exception {
-        OrderDTO order1 = new OrderDTO(null, 30.0, 40.1, 31.1, "PREPROCESSING", 12);
+        OrderDTO order1 = new OrderDTO(null, 30.0, 40.1, 31.1, "PREPROCESSING", 1);
         Set<Item> items = new HashSet<>();
         Item item1 = new Item("Casaco", "Roupa", 12.0);
         Item item2 = new Item("Telemovel", "Eletronica", 0.7);
@@ -61,8 +73,9 @@ public class OrderControllerIT {
         items.add(item2);
         order1.setItems(items);
 
-        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
-        .content(JsonUtil.toJson(order1)))
+        mvc.perform(post("/api/private/orders").contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", token )
+                .content(JsonUtil.toJson(order1)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is("Error. Invalid coords.")));
 
@@ -79,8 +92,9 @@ public class OrderControllerIT {
         items.add(item2);
         order1.setItems(items);
 
-        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
-        .content(JsonUtil.toJson(order1)))
+        mvc.perform(post("/api/private/orders").contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", token )
+                .content(JsonUtil.toJson(order1)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is("Error. No user specified.")));
 
@@ -89,10 +103,11 @@ public class OrderControllerIT {
 
     @Test
     void whenCreatingOrderWithNoItems_thenReturnErrorMessage() throws Exception {
-        OrderDTO order1 = new OrderDTO(40.0, 30.0, 40.1, 31.1, "PREPROCESSING", 0);
+        OrderDTO order1 = new OrderDTO(40.0, 30.0, 40.1, 31.1, "PREPROCESSING", 1);
         
-        mvc.perform(post("/api/orders").contentType(MediaType.APPLICATION_JSON)
-        .content(JsonUtil.toJson(order1)))
+        mvc.perform(post("/api/private/orders").contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", token )
+                .content(JsonUtil.toJson(order1)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is("Error. Order with 0 items.")));
 

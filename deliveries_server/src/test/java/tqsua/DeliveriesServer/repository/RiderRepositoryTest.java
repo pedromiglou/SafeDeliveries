@@ -24,7 +24,10 @@ class RiderRepositoryTest {
     private RiderRepository repository;
 
     @BeforeEach
-    void setUp() { }
+    void setUp() {
+        entityManager.clear();
+        repository.deleteAll();
+    }
 
     @AfterEach
     void tearDown() {
@@ -33,12 +36,8 @@ class RiderRepositoryTest {
 
     @Test
     void whenGetAllRiders_thenReturnCorrectResults() throws IOException, InterruptedException {
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        rider1.setLat(12.0);
-        rider1.setLng(93.0);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
-        rider2.setLat(12.0);
-        rider2.setLng(93.0);
+        Rider rider1 = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider2 = createRider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
         entityManager.persistAndFlush(rider1);
         entityManager.persistAndFlush(rider2);
 
@@ -49,12 +48,8 @@ class RiderRepositoryTest {
 
     @Test
     void whenGetRiderById_thenReturnRider() {
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        rider1.setLat(12.0);
-        rider1.setLng(93.0);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
-        rider2.setLat(12.0);
-        rider2.setLng(93.0);
+        Rider rider1 = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider2 = createRider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
         entityManager.persistAndFlush(rider1);
         entityManager.persistAndFlush(rider2);
 
@@ -64,12 +59,8 @@ class RiderRepositoryTest {
 
     @Test
     void whenGetRiderByInvalidId_thenReturnNull() {
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        rider1.setLat(12.0);
-        rider1.setLng(93.0);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
-        rider2.setLat(12.0);
-        rider2.setLng(93.0);
+        Rider rider1 = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider2 = createRider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
         entityManager.persistAndFlush(rider1);
         entityManager.persistAndFlush(rider2);
 
@@ -79,9 +70,7 @@ class RiderRepositoryTest {
 
     @Test
     void whenSearchRiderExistsByEmail_ifRiderExists_thenReturnTrue() {
-        Rider rider1 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
-        rider1.setLat(12.0);
-        rider1.setLng(93.0);
+        Rider rider1 = createRider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
         entityManager.persistAndFlush(rider1);
 
         assertThat(repository.existsRiderByEmail("diogo@gmail.com")).isTrue();
@@ -89,12 +78,30 @@ class RiderRepositoryTest {
 
     @Test
     void whenSearchRiderExistsByEmail_ifRiderNotExists_thenReturnFalse() {
-        Rider rider1 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
-        rider1.setLat(12.0);
-        rider1.setLng(93.0);
+        Rider rider1 = createRider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
         entityManager.persistAndFlush(rider1);
 
         assertThat(repository.existsRiderByEmail("ricardo@gmail.com")).isFalse();
+    }
+
+    @Test
+    void whenCountRidersByStatus_thenReturnExpectedResult() {
+        Rider rider1 = createRider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
+        Rider rider2 = createRider("Diogo", "Carvalho", "diogo2@gmail.com", "password1234", 3.9, "Online");
+        Rider rider3 = createRider("Diogo", "Carvalho", "diogo3@gmail.com", "password1234", 3.9, "Online");
+        entityManager.persistAndFlush(rider1);
+        entityManager.persistAndFlush(rider2);
+        entityManager.persistAndFlush(rider3);
+
+        assertThat(repository.countByState("Online")).isEqualTo(2);
+    }
+
+    public Rider createRider(String firstname, String lastname, String email, String password, double rating, String status) {
+        Rider rider = new Rider(firstname, lastname, email, password, rating, status);
+        rider.setAccountType("User");
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        return rider;
     }
 
 }

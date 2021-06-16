@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import tqsua.OrdersServer.model.Order;
@@ -34,9 +35,9 @@ public class OrderController {
         return orderService.getAllOrders();
     }
 
-    @PostMapping(path="/orders")
+    @PostMapping(path="/private/orders")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Object> createOrder(@Valid @RequestBody OrderDTO o) throws IOException, InterruptedException {
+    public ResponseEntity<Object> createOrder(Authentication authentication ,@Valid @RequestBody OrderDTO o) throws IOException, InterruptedException {
         o.setStatus("PREPROCESSING");
         var message = "message";
         HashMap<String, String> response = new HashMap<>();
@@ -51,6 +52,11 @@ public class OrderController {
         if (o.getUser_id()==0) {
             response.put(message, "Error. No user specified.");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        String rider_id = authentication.getName();
+        if (!rider_id.equals(String.valueOf(o.getUser_id()))) {
+            response.put("message", "Unauthorized");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
         var o1 = new Order(o.getPick_up_lat(), o.getPick_up_lng(), o.getDeliver_lat(), o.getDeliver_lng(), o.getStatus(), o.getUser_id());
         o1.setItems(o.getItems());

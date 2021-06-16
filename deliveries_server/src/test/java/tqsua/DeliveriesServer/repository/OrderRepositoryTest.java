@@ -62,4 +62,15 @@ class OrderRepositoryTest {
         assertThat(found.get(0)).isEqualTo(order1);
     }
 
+    @Test
+    void whenCountAllOrders_thenReturnCorrectResults() throws IOException, InterruptedException {
+        Order order1 = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        Order order2 = new Order(0, 41.3, 31.4, 43.2, 33.3, 12.3, "SafeDeliveries");
+        entityManager.persistAndFlush(order1);
+        entityManager.persistAndFlush(order2);
+        
+        int found = repository.countAll();
+        assertThat(found).isEqualTo(2);
+    }
+
 }
