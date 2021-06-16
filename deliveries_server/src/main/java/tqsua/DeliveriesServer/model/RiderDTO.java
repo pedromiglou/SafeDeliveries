@@ -10,6 +10,8 @@ public class RiderDTO {
     private String password;
     private Double rating;
     private String status;
+    private Double lat;
+    private Double lng;
 
     public RiderDTO() {
     }
@@ -78,6 +80,22 @@ public class RiderDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Double getLat() {
+        return this.lat;
+    }
+
+    public void setLat(Double lat) {
+        this.lat = lat;
+    }
+
+    public Double getLng() {
+        return this.lng;
+    }
+
+    public void setLng(Double lng) {
+        this.lng = lng;
     }
 
 

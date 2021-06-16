@@ -31,7 +31,7 @@ public class Rider implements Serializable, UserDetails {
     @Column(name = "lastname", nullable = false)
     private String lastname;
 
-    @Column(name = "email", nullable = false)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "password", nullable = false)
@@ -45,6 +45,13 @@ public class Rider implements Serializable, UserDetails {
 
     @Column(name = "accountType", nullable = false)
     private String accountType;
+
+    @Column(name = "lat", nullable = false)
+    private Double lat;
+
+    @Column(name = "lng", nullable = false)
+    private Double lng;
+
 
 /*    // tem varios vehicles
     @OneToMany
@@ -118,7 +125,15 @@ public class Rider implements Serializable, UserDetails {
     public void setStatus(String status) {
         this.status = status;
     }
-/*
+
+    public String getAccountType(){
+        return accountType;
+    }
+
+    public void setAccountType(String accountType){
+        this.accountType = accountType;
+    }
+    /*
     public Set<Vehicle> getVehicles() {
         return vehicles;
     }
@@ -135,6 +150,24 @@ public class Rider implements Serializable, UserDetails {
         this.vehicles.remove(vehicle);
     }
 */
+
+    public Double getLat() {
+        return this.lat;
+    }
+
+    public void setLat(Double lat) {
+        this.lat = lat;
+    }
+
+    public Double getLng() {
+        return this.lng;
+    }
+
+    public void setLng(Double lng) {
+        this.lng = lng;
+    }
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return new ArrayList<>();

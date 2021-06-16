@@ -1,10 +1,14 @@
 package tqsua.DeliveriesServer;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import tqsua.DeliveriesServer.model.Rider;
+import tqsua.DeliveriesServer.repository.RiderRepository;
 import tqsua.DeliveriesServer.security.UserDetailsServiceImpl;
+import tqsua.DeliveriesServer.service.RiderService;
 
 @SpringBootApplication
 public class DeliveriesServerApplication {
@@ -19,8 +23,26 @@ public class DeliveriesServerApplication {
 		return new UserDetailsServiceImpl();
 	}
 
-	public static void main(String[] args) {
-		SpringApplication.run(DeliveriesServerApplication.class, args);
+	@Autowired
+	public RiderService service;
+
+	@Bean
+	public Rider initializeAdmin(){
+		if (!service.existsRiderByEmail("admin@gmail.com")) {
+			var rider = new Rider("admin", "admin", "admin@gmail.com", "admin123", 5.0, "Online");
+			rider.setAccountType("Admin");
+			rider.setLat(48.0);
+			rider.setLng(-8.0);
+			service.saveRider(rider);
+			return rider;
+		} else {
+			return null;
+		}
+
 	}
 
+	public static void main(String[] args) {
+		SpringApplication application = new SpringApplication(DeliveriesServerApplication.class);
+		application.run(args);
+	}
 }
