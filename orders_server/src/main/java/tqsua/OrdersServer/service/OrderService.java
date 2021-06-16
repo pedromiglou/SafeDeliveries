@@ -1,10 +1,8 @@
 package tqsua.OrdersServer.service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
 import org.json.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -83,4 +81,8 @@ public class OrderService {
         return order;
     }
 
+    public Order getOrderById(long order_id){
+        Order order = orderRepository.getOrderByDeliverId(order_id);
+        return order;
+    }
 }

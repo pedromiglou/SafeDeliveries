@@ -45,6 +45,11 @@ function Delivery() {
     const [deliver_lat, setDeliverLat] = useState(41.5322699);
     const [deliver_lng, setDeliverLng] = useState(-8.737535200000002);
 
+    const [orderInfo, setOrderInfo] = useState(null);
+    const [orderId, setOrderId] = useState();
+    const [pickUpAddress, setPickUpAddress] = useState();
+    const [deliveryAddress, setDeliveryAddress] = useState();
+
     const current_user = AuthService.getCurrentUser();
 
     // const pickUpMapCallBack = useCallback((msg) => { 
@@ -108,7 +113,6 @@ function Delivery() {
     async function getAddressCoord(lat,long){
         const response = await Geocode.fromLatLng(lat, long);
 
-        
         let address_components = response.results[0].formatted_address.split(",");
         
         let address = address_components[0];
@@ -117,19 +121,30 @@ function Delivery() {
         let country = address_components[2];
 
         return [address, zip, city, country];
-
-        // Geocode.fromLatLng("48.8583701", "2.2922926").then(
-            
-        // (response) => {
-        //     const address = response.results[0].formatted_address;
-        //     console.log(address);
-        //     return address;
-        // },
-        // (error) => {
-        // console.error(error);
-        // }
-        // );
     }
+
+    useEffect(() => {
+
+        async function confirmAddress(lat,long,id_address){
+            const response = await Geocode.fromLatLng(lat, long);
+    
+            let address = response.results[0].formatted_address;
+    
+            if (id_address === "pickup"){
+                setPickUpAddress(address)
+            } else {
+                setDeliveryAddress(address)
+            }
+        }
+        
+        if (current_user !== null) {
+          if (state === "confirmed"){
+            confirmAddress(orderInfo.pick_up_lat, orderInfo.pick_up_lng, "pickup")
+            confirmAddress(orderInfo.deliver_lat, orderInfo.deliver_lng, "delivery")
+          }
+        } 
+    
+      }, [state]);
 
     const location = useLocation();
 
@@ -214,9 +229,40 @@ function Delivery() {
         } else {
             setErrorOrder(false);
             setSucessOrder(true);
+            setState("waiting_rider");
+            setOrderId(res.deliver_id);
         }
     }
 
+    useEffect(() => {
+
+        async function getOrderInfo(orderid) {
+          let orderInfo = await OrdersService.getOrderInfo(orderid);
+          console.log("blablablab")
+          console.log(orderInfo);
+          if (!orderInfo["error"] && orderInfo.status === "DELIVERING") {
+            setOrderInfo(orderInfo)
+            setState("confirmed")
+          }
+          
+        }
+        
+        if (current_user !== null) {
+          if (state === "waiting_rider"){
+            if (orderInfo === null) {
+                getOrderInfo(orderId);
+                const interval = setInterval(() => {
+                    getOrderInfo(orderId);
+                }, 8000);
+        
+                return () => clearInterval(interval);
+            }
+          }
+          
+        
+        } 
+    
+      }, [state, current_user, orderId, orderInfo]);
 
     function removeItem(item_id) {
         items.splice(item_id, 1);
@@ -293,9 +339,6 @@ function Delivery() {
         (error) => {
             console.error(error);
         });
-
-
-
     }
 
     return (
@@ -477,6 +520,7 @@ function Delivery() {
                     {<MapLoader 
                     googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco"
                     loadingElement={<div style={{ height: "100%"}}/>}
+                    state={ {pick_up_lat:orderInfo.pick_up_lat, pick_up_lng: orderInfo.pick_up_lng, del_lat: orderInfo.deliver_lat, del_lng: orderInfo.deliver_lng}}
                     />
                     }
                 </div>
@@ -485,30 +529,51 @@ function Delivery() {
                     <div>
                         <h2>Pick Up Address</h2>
                         <h3>
-                            xxxx
+                           { pickUpAddress }
                         </h3>
                     </div>
                     <div>
                         <h2>Destin Address</h2>
                         <h3>
-                            xxxx
+                            { deliveryAddress }
                         </h3>
                     </div>
                     
                     <div>
-                        <h2>Item type</h2>
-                        <h3>
-                            xxxx
-                        </h3>
-                    </div>
-                    
-                    <div>
-                        <h2>Estimated Weight</h2>
-                        <h3>
-                            xxxx
-                        </h3>
-                    </div>
-                    
+                    <ul className="listP-group">
+                        <li className="listP-item">
+                            <div>
+                                Name
+                            </div>
+                            <div>
+                                Category
+                            </div>
+                            <div>
+                                Weight
+                            </div>
+                        </li>
+
+                        {  ( (orderInfo.items.length === 0) ) && 
+                            <p style={{margin: "2em auto", }}>0 items on the list yet.</p>
+                        }
+                        
+                        {Object.entries(orderInfo.items).map(([key,value]) => (
+                            <li key={key} className="listP-item" id={"id_" + value["name"]}>
+                                <div>
+                                    <input type="text" id={"name_" + value["id"]}  readOnly placeholder={value["name"]}></input>
+                                </div>
+
+                                <div>
+                                    <input type="text" id={"category_" + value["id"]} readOnly placeholder={value["category"]}></input>
+                                </div>
+                                
+                                <div>
+                                    <input type="text" id={"weight_" + value["id"]} readOnly placeholder={value["weight"]}></input>
+                                </div>
+                            </li>
+                        )) }
+                    </ul>
+                    </div>        
                 </div>
             </div>
         }

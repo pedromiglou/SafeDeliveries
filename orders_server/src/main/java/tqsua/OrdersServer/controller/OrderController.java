@@ -4,17 +4,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.coyote.Response;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import tqsua.OrdersServer.model.Order;
 import tqsua.OrdersServer.model.OrderDTO;
@@ -25,6 +22,8 @@ import tqsua.OrdersServer.service.OrderService;
 @RestController
 @RequestMapping("/api")
 public class OrderController {
+    private static final String MESSAGE = "message";
+    private static final String UNAUTHORIZED = "Unauthorized";
 
     @Autowired
     private OrderService orderService;
@@ -54,6 +53,7 @@ public class OrderController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         String rider_id = authentication.getName();
+        System.out.println(rider_id + " " + o.getUser_id());
         if (!rider_id.equals(String.valueOf(o.getUser_id()))) {
             response.put("message", "Unauthorized");
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
@@ -75,6 +75,42 @@ public class OrderController {
 
         if (order == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(order, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/orders/notificate")
+    public ResponseEntity<Object> notificate(@RequestBody String order_id){
+        System.out.println(order_id);
+        var order_json = new JSONObject(order_id);
+        var order = orderService.getOrderById(order_json.getLong("order_id"));
+        var message = "message";
+        HashMap<String, String> response = new HashMap<>();
+        if (order == null){
+            response.put(message, "Error.");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        order.setStatus("DELIVERING");
+        orderService.saveOrder(order);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/orders/{id}")
+    public ResponseEntity<Object> getOrderById(Authentication authentication, @PathVariable(value="id") Long id){
+        String user_id = authentication.getName();
+        var order_found = orderService.getOrderById(id);
+
+        if (order_found == null) {
+            HashMap<String, String> response = new HashMap<>();
+            response.put(MESSAGE, "Not found");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+
+        if (!user_id.equals(String.valueOf(order_found.getUser_id()))) {
+            HashMap<String, String> response = new HashMap<>();
+            response.put(MESSAGE, UNAUTHORIZED);
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
+        return new ResponseEntity<>(order_found, HttpStatus.OK);
     }
 
 }

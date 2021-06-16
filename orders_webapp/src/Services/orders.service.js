@@ -29,6 +29,24 @@ class OrdersService {
         return json
 
     }
+
+    async getOrderInfo(order_id){
+        try {
+            var res = await fetch(urlAPI + 'api/orders/' + order_id, {
+                method:'GET',
+                headers:{'Content-type':'application/json',
+                    'Authorization': 'Bearer ' + JSON.parse(sessionStorage.getItem("user_orders"))["token"]}
+            })
+        } catch {
+            return {error: true, message: "An error occured during the request."};
+        }
+        var json = await res.json();
+        if (res.status !== 200) {
+            return {error: true, message: json.message};
+        }
+        return json
+
+    }
 }
 
 export default new OrdersService()

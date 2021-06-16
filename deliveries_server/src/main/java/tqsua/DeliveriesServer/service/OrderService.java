@@ -1,8 +1,15 @@
 package tqsua.DeliveriesServer.service;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,5 +49,24 @@ public class OrderService {
         Order order = this.orderRepository.findByPk(order_id);
         order.setRider_id(rider_id);
         return this.orderRepository.save(order);
+    }
+
+    public void notificate(String url, long order_id) throws IOException, InterruptedException{
+        Map<Object, Object> data = new HashMap<>();
+        data.put("order_id", order_id);
+        var objectMapper = new ObjectMapper();
+        var requestBody = objectMapper
+                .writerWithDefaultPrettyPrinter()
+                .writeValueAsString(data);
+
+        System.out.println(url + "/api/orders/notificate");
+        HttpRequest request = HttpRequest.newBuilder()
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .uri(URI.create(url + "/api/orders/notificate"))
+                .header("Content-type", "application/json")
+                .build();
+
+        System.out.println(request);
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
     }
 }

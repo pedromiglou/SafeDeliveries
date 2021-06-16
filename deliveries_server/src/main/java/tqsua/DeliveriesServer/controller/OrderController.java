@@ -94,7 +94,7 @@ public class OrderController {
 
     @PostMapping(path="/private/acceptorder")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Object> acceptOrder(Authentication authentication ,@RequestParam(name="order_id") long order_id, @RequestParam(name="rider_id") long rider_id) {
+    public ResponseEntity<Object> acceptOrder(Authentication authentication ,@RequestParam(name="order_id") long order_id, @RequestParam(name="rider_id") long rider_id) throws IOException, InterruptedException {
         String id = authentication.getName();
 
         if (!id.equals(String.valueOf(rider_id))) {
@@ -103,8 +103,10 @@ public class OrderController {
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
 
+
         notificationService.delete(rider_id);
         Order order = orderService.updateRider(order_id, rider_id);
+        orderService.notificate(APP_NAMES.get(order.getApp_name()), order_id) ;
         riderService.changeStatus(rider_id, "Delivering");
         return new ResponseEntity<>(order, HttpStatus.OK);
     }
