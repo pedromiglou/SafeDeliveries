@@ -1,0 +1,40 @@
+.admin-statistics{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.admin-statistics > * {
+    flex: 1 1 50%;
+}
+
+.admin-orders{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.admin-collumn{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1em;
+}
+
+.collumn-item{
+    background-color: rgb(202, 202, 199);
+    width: 20em;
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 1em;
+}
+
+.graph{
+    width: 600px;
+}

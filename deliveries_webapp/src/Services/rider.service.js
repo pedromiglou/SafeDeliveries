@@ -49,11 +49,7 @@ class RiderService {
             });
     
             return;       
-
         }
-    
-    
-     
     }
     
 export default new RiderService();

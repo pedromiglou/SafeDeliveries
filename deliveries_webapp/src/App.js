@@ -17,6 +17,7 @@ import Deliveries from './Components/Deliveries/Deliveries';
 import History from './Components/History/History';
 import Login from './Components/Login/Login';
 import Profile from './Components/Profile/Profile';
+import Statistics from './Components/Statistics/Statistics';
 
 /* React */
 import { useEffect, useState } from 'react';
@@ -187,14 +188,31 @@ function App() {
         <ul className="nav-list">
           <li className="nav-item">
             <Link to="/" id="logo">
+              {current_user !== null && current_user["accountType"] === "Admin" ? 
+              <>
+              <FiIcons.FiPackage/><span>SafeDeliveries - Admin</span>
+              </>
+              :
+              <>
               <FiIcons.FiPackage/><span>SafeDeliveries</span>
+              </>
+              }
             </Link>
+            
           </li>
           <li className="nav-item">
             <Link to="/" id="home-tab">
               Home
             </Link>
           </li>
+
+          {current_user !== null && current_user["accountType"] === "Admin" && 
+            <li className="nav-item">
+              <Link to="/statistics" id="statistics-tab">
+                Statistics
+              </Link>
+            </li>
+          }
 
           {current_user !== null && 
           <>
@@ -284,6 +302,7 @@ function App() {
             {/* <Route exact path='/aboutus' component={withRouter(AboutUs)} /> */}
             <Route exact path='/login' component={withRouter(Login)} />
             <Route exact path='/profile' component={withRouter(Profile)} />
+            <Route exact path='/statistics' component={withRouter(Statistics)} />
         </Switch>
     </div>
 
