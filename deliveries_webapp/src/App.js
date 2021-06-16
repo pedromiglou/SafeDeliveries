@@ -190,7 +190,7 @@ function App() {
             <Link to="/" id="logo">
               {current_user !== null && current_user["accountType"] === "Admin" ? 
               <>
-              <FiIcons.FiPackage/><span>SafeDeliveries - Admin</span>
+              <FiIcons.FiPackage/><span id="admin_text">SafeDeliveries - Admin</span>
               </>
               :
               <>

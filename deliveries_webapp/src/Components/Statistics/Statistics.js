@@ -63,15 +63,15 @@ function Statistics() {
         <div className="admin-orders">
             <div className="admin-collumn">
                 <div className="collumn-item">
-                    <h5>Total Orders</h5>
+                    <h5 id="total_orders">Total Orders</h5>
                     <h6>{totalOrders}</h6>
                 </div>
                 <div className="collumn-item">
-                    <h5>Delivering Orders</h5>
+                    <h5 id="delivering_orders">Delivering Orders</h5>
                     <h6>{deliveringOrders}</h6>
                 </div>
                 <div className="collumn-item">
-                    <h5>Waiting Orders</h5>
+                    <h5 id="waiting_orders">Waiting Orders</h5>
                     <h6>{pendingOrders}</h6>
                 </div>
             </div>
@@ -86,20 +86,20 @@ function Statistics() {
         <div className="admin-riders">
             <div className="admin-collumn">
                 <div className="collumn-item">
-                    <h4>Total Number of Riders</h4>
+                    <h4 id="total_riders">Total Number of Riders</h4>
                     <h5>{totalRiders}</h5>
                 </div>
                 <div className="riders-subsection">
                     <div className="subsection-item">
-                        <h4>Riders Online</h4>
+                        <h4 id="online_riders">Riders Online</h4>
                         <h5>{onlineRiders}</h5>
                     </div>
                     <div className="subsection-item">
-                        <h4>Riders Offline</h4>
+                        <h4 id="offline_riders">Riders Offline</h4>
                         <h5>{offlineRiders}</h5>
                     </div>
                     <div className="subsection-item">
-                        <h4>Riders delivering</h4>
+                        <h4 id="delivering_riders">Riders delivering</h4>
                         <h5>{deliveringRiders}</h5>
                     </div>
                 </div>
