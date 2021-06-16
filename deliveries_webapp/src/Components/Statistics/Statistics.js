@@ -12,16 +12,16 @@ function Statistics() {
         <div className="admin-orders">
             <div className="admin-collumn">
                 <div className="collumn-item">
-                    <h4>Total Orders</h4>
-                    <h5>540</h5>
+                    <h5>Total Orders</h5>
+                    <h6>540</h6>
                 </div>
                 <div className="collumn-item">
-                    <h4>Delivering Orders</h4>
-                    <h5>539</h5>
+                    <h5>Delivering Orders</h5>
+                    <h6>539</h6>
                 </div>
                 <div className="collumn-item">
-                    <h4>Waiting Orders</h4>
-                    <h5>1</h5>
+                    <h5>Waiting Orders</h5>
+                    <h6>1</h6>
                 </div>
             </div>
             <div className="graph">
@@ -33,7 +33,26 @@ function Statistics() {
             
         </div>
         <div className="admin-riders">
-
+            <div className="admin-collumn">
+                <div className="collumn-item">
+                    <h4>Total Number of Riders</h4>
+                    <h5>540</h5>
+                </div>
+                <div className="riders-subsection">
+                    <div className="subsection-item">
+                        <h4>Riders Online</h4>
+                        <h5>540</h5>
+                    </div>
+                    <div className="subsection-item">
+                        <h4>Riders Offline</h4>
+                        <h5>540</h5>
+                    </div>
+                    <div className="subsection-item">
+                        <h4>Riders delivering</h4>
+                        <h5>540</h5>
+                    </div>
+                </div>
+            </div>
         </div>
         <div className="admin-vehicles">
             <Bar chart="Bar"/>
