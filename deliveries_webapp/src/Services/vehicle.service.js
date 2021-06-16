@@ -40,7 +40,6 @@ class VehicleService {
             category: category,
             capacity: capacity,
         }
-        console.log(vehicle)
 
         var url = urlAPI + 'api/vehicle/'+id
 
@@ -67,6 +66,14 @@ class VehicleService {
 
     }
 
+    async getVehiclesStatistics() {
+        var url = 'http://localhost:8080/api/vehicles/statistics';
+        var res = await fetch(url);
+        if (res.status !== 200) {
+            return {error: true};
+        }
+        return res.json();
+    }
 
  
 }

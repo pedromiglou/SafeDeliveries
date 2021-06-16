@@ -1,7 +1,11 @@
 package tqsua.DeliveriesServer.controller;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,10 +52,25 @@ public class OrderController {
       }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
 
 
-    //@CrossOrigin(origins = "http://localhost:4200")
     @GetMapping(path="/orders")
     public ArrayList<Order> getAllOrders() throws IOException, InterruptedException {
         return orderService.getAllOrders();
+    }
+
+    @GetMapping(path="/orders/statistics")
+    public ResponseEntity<Object> getStatisticsOrders() throws IOException, InterruptedException {
+        HashMap<String, Object> response = new HashMap<>();
+        int numOrders = orderService.getTotalOrders();
+        int numPendingOrders = orderService.getPendingOrders().size();
+        ArrayList<Integer> ordersLast7Days = orderService.getOrdersLast7Days();
+        ArrayList<Integer> ordersByWeight = orderService.getOrdersByWeight();
+
+        response.put("total_orders", numOrders);
+        response.put("pending_orders", numPendingOrders);
+        response.put("orders_7_days", ordersLast7Days);
+        response.put("orders_by_weight", ordersByWeight);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping(path="/orders")

@@ -18,6 +18,15 @@ class OrderService {
         return;
     }
 
+    async getOrderStatistics() {
+        var url = 'http://localhost:8080/api/orders/statistics';
+        var res = await fetch(url);
+        if (res.status !== 200) {
+            return {error: true};
+        }
+        return res.json();
+    }
+
 }
 
 export default new OrderService();

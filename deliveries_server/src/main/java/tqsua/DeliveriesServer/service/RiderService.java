@@ -60,4 +60,11 @@ public class RiderService {
         rider.setStatus(status);
         return this.riderRepository.save(rider);
     }
+
+    public int getRidersByState(String state) {
+        if (!state.equals("Online") && !state.equals("Offline") && !state.equals("Delivering")) {
+            return 0;
+        }
+        return this.riderRepository.countByState(state);
+    }
 }

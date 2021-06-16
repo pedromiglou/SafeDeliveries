@@ -13,6 +13,7 @@ import tqsua.DeliveriesServer.service.VehicleService;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api")
@@ -28,6 +29,16 @@ public class VehicleController {
             vehicles.add(new VehicleDTO(vehicle.getId(), vehicle.getBrand(), vehicle.getModel(), vehicle.getCategory(), vehicle.getCapacity(), vehicle.getRider().getId(), vehicle.getRegistration()));
         }
         return vehicles;
+    }
+
+    @GetMapping(path="/vehicles/statistics")
+    public ResponseEntity<Object> getVehiclesStatistics() throws IOException, InterruptedException {
+        HashMap<String, Object> response = new HashMap<>();
+        ArrayList<Integer> vehiclesByCapacity = vehicleService.getVehiclesByCapacity();
+        
+        response.put("vehicles_by_capacity", vehiclesByCapacity);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(path="/vehicle")

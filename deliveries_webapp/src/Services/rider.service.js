@@ -50,6 +50,15 @@ class RiderService {
     
             return;       
         }
+
+        async getRiderStatistics() {
+            var url = 'http://localhost:8080/api/riders/statistics';
+            var res = await fetch(url);
+            if (res.status !== 200) {
+                return {error: true};
+            }
+            return res.json();
+        }
     }
     
 export default new RiderService();

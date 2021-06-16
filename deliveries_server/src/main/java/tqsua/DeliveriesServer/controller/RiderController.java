@@ -2,6 +2,7 @@ package tqsua.DeliveriesServer.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,22 @@ public class RiderController {
     @GetMapping(path="/riders")
     public ArrayList<Rider> getAllRiders() throws IOException, InterruptedException {
         return riderService.getAllRiders();
+    }
+
+    @GetMapping(path="/riders/statistics")
+    public ResponseEntity<Object> getRidersStatistics() throws IOException, InterruptedException {
+        HashMap<String, Object> response = new HashMap<>();
+        int onlineRiders = riderService.getRidersByState("Online");
+        int offlineRiders = riderService.getRidersByState("Offline");
+        int deliveringRiders = riderService.getRidersByState("Delivering");
+        int totalRiders = onlineRiders + offlineRiders + deliveringRiders;
+        
+        response.put("total_riders", totalRiders);
+        response.put("online_riders", onlineRiders);
+        response.put("offline_riders", offlineRiders);
+        response.put("delivering_riders", deliveringRiders);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping(path="/rider")
