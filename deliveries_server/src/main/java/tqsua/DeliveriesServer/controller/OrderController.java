@@ -45,7 +45,7 @@ public class OrderController {
     private NotificationService notificationService;
 
     private static final String MESSAGE = "message";
-    private static final String UNAUTHORIZED = "unauthorized";
+    private static final String UNAUTHORIZED = "Unauthorized";
 
     private static final Map<String, String> APP_NAMES = Stream.of(new String[][] {
         { "SafeDeliveries", "http://localhost:8081" }, 
