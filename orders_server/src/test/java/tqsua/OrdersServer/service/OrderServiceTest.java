@@ -4,17 +4,21 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
-import java.net.http.HttpResponse;
 
+import org.springframework.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.net.http.HttpClient;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+
+import java.net.URI;
 
 import tqsua.OrdersServer.model.Item;
 import tqsua.OrdersServer.model.Order;
@@ -34,6 +38,9 @@ class OrderServiceTest {
 
     @InjectMocks
     private OrderService service;
+
+    @Mock
+    private RestTemplate restTemplate;
 
     @Test
     void whenGetAllOrders_thenReturnCorrectResults() throws Exception {
@@ -140,16 +147,33 @@ class OrderServiceTest {
 
     }
 
-    /* for teacher
+    
     @Test
     void whendeliveryRequest_thenReturnCorrectResults() throws Exception {
         Order order = new Order(40.0, 30.0, 40.1, 31.1, "Entregue", 12);
-        HttpResponse<String> response = new HttpResponse();
-        when(HttpClient.newHttpClient().send(Mockito.any(), Mockito.any())).thenReturn(response);
+        Set<Item> items = new HashSet<>();
+        Item item1 = new Item("Casaco", "Roupa", 12.0);
+        Item item2 = new Item("Telemovel", "Eletronica", 0.7);
+        items.add(item1);
+        items.add(item2);
+        order.setItems(items);
 
-        assertThat(service.deliveryRequest(order)).isEqualTo(null);
+        Map<Object, Object> data = new HashMap<>();
+        data.put("pick_up_lat", order.getPick_up_lat());
+        data.put("pick_up_lng", order.getPick_up_lng());
+        data.put("deliver_lat", order.getDeliver_lat());
+        data.put("deliver_lng", order.getDeliver_lng());
+        data.put("weight", order.getItems().stream().mapToDouble(Item::getWeight).sum());
+        data.put("app_name", "SafeDeliveries");
+
+        URI uri = new URI("http://localhost:8080/api/orders");
+
+        when(restTemplate.postForEntity(uri, data, String.class))
+            .thenReturn(new ResponseEntity<String>("{\"deliver_id\": \"332\"}", HttpStatus.CREATED));
+
+        assertThat(service.deliveryRequest(order,restTemplate)).isEqualTo("332");
         reset(repository);
     }
-    */
+    
     
 }

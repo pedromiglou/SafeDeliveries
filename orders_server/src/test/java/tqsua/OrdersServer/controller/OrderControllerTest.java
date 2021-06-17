@@ -5,7 +5,6 @@ import org.mockito.Mockito;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -87,7 +86,7 @@ class OrderControllerTest {
         order1.setItems(items);
         
         given(service.saveOrder(Mockito.any())).willReturn(order);
-        given(service.deliveryRequest(Mockito.any())).willReturn("1");
+        given(service.deliveryRequest(Mockito.any(), Mockito.any())).willReturn("1");
 
         mvc.perform(post("/api/private/orders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token )
         .content(JsonUtil.toJson(order1)))
@@ -118,7 +117,7 @@ class OrderControllerTest {
         order1.setItems(items);
         
         given(service.saveOrder(Mockito.any())).willReturn(order);
-        given(service.deliveryRequest(Mockito.any())).willReturn("1");
+        given(service.deliveryRequest(Mockito.any(), Mockito.any())).willReturn("1");
 
         mvc.perform(post("/api/private/orders").contentType(MediaType.APPLICATION_JSON).header("Authorization", invalidtoken )
         .content(JsonUtil.toJson(order1)))
@@ -210,13 +209,13 @@ class OrderControllerTest {
         items.add(item2);
         order1.setItems(items);
 
-        given(service.deliveryRequest(Mockito.any())).willReturn(null);
+        given(service.deliveryRequest(Mockito.any(), Mockito.any())).willReturn(null);
 
         mvc.perform(post("/api/private/orders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token )
         .content(JsonUtil.toJson(order1)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is("Error. Some error occured while connecting to Safe Deliveries.")));
-        verify(service, VerificationModeFactory.times(1)).deliveryRequest(Mockito.any());
+        verify(service, VerificationModeFactory.times(1)).deliveryRequest(Mockito.any(), Mockito.any());
         reset(service);
     }
 
