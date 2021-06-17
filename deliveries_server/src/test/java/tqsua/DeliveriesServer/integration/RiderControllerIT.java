@@ -39,10 +39,7 @@ public class RiderControllerIT {
     @Autowired
     private VehicleRepository vehicleRepository;
 
-    String token = "Bearer " + JWT.create()
-        .withSubject( "1" )
-        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+    String token = this.getToken("1");
 
     @BeforeEach
     void setUp() {
@@ -52,14 +49,12 @@ public class RiderControllerIT {
     
     @Test
     void whenGetAllRiders_thenReturnResult() throws Exception {
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        rider1.setLat(12.0);
-        rider1.setLng(93.0);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
-        rider2.setLat(12.0);
-        rider2.setLng(93.0);
+        Rider rider1 = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "Admin");
+        Rider rider2 = createRider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline", "User");
         riderRepository.save(rider1);
         riderRepository.save(rider2);
+
+        token = getToken(String.valueOf(rider1.getId()));
 
         mvc.perform(get("/api/private/riders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
                 .andExpect(status().isOk())
@@ -68,19 +63,68 @@ public class RiderControllerIT {
     }
 
     @Test
-    void whenGetRiderById_thenReturnRider() throws Exception {
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        rider1.setLat(12.0);
-        rider1.setLng(93.0);
-        rider1 = riderRepository.save(rider1);
+    void whenGetAllRidersWithoutPermission_thenReturnUnauthorized() throws Exception {
+        Rider rider1 = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
+        riderRepository.save(rider1);
 
-        String updatedtoken = "Bearer " + JWT.create()
-            .withSubject( String.valueOf(rider1.getId()) )
-            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+        token = getToken(String.valueOf(rider1.getId()));
+
+        mvc.perform(get("/api/private/riders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+    }
+
+    @Test
+    void whenGetRidersStatistics_thenReturnResult() throws Exception {
+        // 1 Online
+        Rider rider = createRider("Rafael", "Baptista", "rafael@ua.pt", "1234", 5.0, "Online", "Admin");
+        riderRepository.save(rider);
+
+        token = getToken(String.valueOf(rider.getId()));
+
+        // 2 Offline
+        Rider rider1 = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
+        Rider rider2 = createRider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline", "User");
+        riderRepository.save(rider1);
+        riderRepository.save(rider2);
+
+        // 1 Online
+        Rider rider3 = createRider("Ricardo", "Cruz", "ricardo2@gmail.com", "password1234", 4.0, "Online", "User");
+        riderRepository.save(rider3);
+
+        // 1 Delivering
+        Rider rider4 = createRider("Ricardo", "Cruz", "ricardo3@gmail.com", "password1234", 4.0, "Delivering", "User");
+        riderRepository.save(rider4);
+
+        mvc.perform(get("/api/private/riders/statistics").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total_riders", is(5)))
+                .andExpect(jsonPath("$.online_riders", is(2)))
+                .andExpect(jsonPath("$.offline_riders", is(2)))
+                .andExpect(jsonPath("$.delivering_riders", is(1)));
+    }
+
+    @Test
+    void whenGetRidersStatisticsWithoutPermissions_thenReturnUnauthorized() throws Exception {
+        Rider rider = createRider("Rafael", "Baptista", "rafael@ua.pt", "1234", 5.0, "Online", "User");
+        riderRepository.save(rider);
+
+        token = getToken(String.valueOf(rider.getId()));
+
+        mvc.perform(get("/api/private/riders/statistics").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+    }
+
+    @Test
+    void whenGetRiderById_thenReturnRider() throws Exception {
+        Rider rider1 = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
+        riderRepository.save(rider1);
+
+        token = getToken(String.valueOf(rider1.getId()));
 
         mvc.perform(get("/api/private/rider?id="+String.valueOf(rider1.getId())).contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", updatedtoken )
+                .header("Authorization", token )
                 .content(JsonUtil.toJson(rider1)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is((int) rider1.getId())));
@@ -89,61 +133,68 @@ public class RiderControllerIT {
 
     @Test
     void whenGetRiderByInvalidId_thenReturnRider() throws Exception {
-        String updatedtoken = "Bearer " + JWT.create()
-            .withSubject( "-1" )
-            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+        token = getToken("-1");
 
         mvc.perform(get("/api/private/rider?id=-1").contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", updatedtoken ))
+                .header("Authorization", token ))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void whenUpdateRider_thenReturnOk() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        rider.setLat(12.0);
-        rider.setLng(93.0);
-        rider = riderRepository.save(rider);
-        RiderDTO newDetails = new RiderDTO("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
-        newDetails.setLat(12.0);
-        newDetails.setLng(93.0);
+        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
+        riderRepository.save(rider);
+        RiderDTO newDetails = createRiderDTO("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
 
-        String updatedtoken = "Bearer " + JWT.create()
-            .withSubject( String.valueOf(rider.getId()) )
-            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+        token = getToken(String.valueOf(rider.getId()));
 
         //with all arguments
         mvc.perform(put("/api/private/rider/"+String.valueOf(rider.getId())).contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.toJson(newDetails))
-                .header("Authorization", updatedtoken ))
+                .header("Authorization", token ))
                 .andExpect(status().isOk());
 
         //with less arguments
-        newDetails = new RiderDTO(null, "B", "a@b.c", null, 5.0, "Offline");
-        newDetails.setLat(12.0);
-        newDetails.setLng(93.0);
+        newDetails = createRiderDTO(null, "B", "a@b.c", null, 5.0, "Offline");
+
         mvc.perform(put("/api/private/rider/"+String.valueOf(rider.getId())).contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.toJson(newDetails))
-                .header("Authorization", updatedtoken ))
+                .header("Authorization", token ))
                 .andExpect(status().isOk());
     }
 
     @Test
     void whenUpdateNotExistentRider_thenReturnNotFound() throws Exception {
-        RiderDTO newDetails = new RiderDTO("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
-        newDetails.setLat(12.0);
-        newDetails.setLng(93.0);
+        RiderDTO newDetails = createRiderDTO("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
 
-        String updatedtoken = "Bearer " + JWT.create()
-            .withSubject( "0" )
-            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+        token = getToken("0");
 
         mvc.perform(put("/api/private/rider/0").contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.toJson(newDetails))
-                .header("Authorization", updatedtoken ))
+                .header("Authorization", token ))
                 .andExpect(status().isNotFound());
+    }
+
+    public Rider createRider(String firstname, String lastname, String email, String password, double rating, String status, String account_type) {
+        Rider rider = new Rider(firstname, lastname, email, password, rating, status);
+        rider.setAccountType(account_type);
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        return rider;
+    }
+
+    public RiderDTO createRiderDTO(String firstname, String lastname, String email, String password, Double rating, String status) {
+        RiderDTO rider = new RiderDTO(firstname, lastname, email, password, rating, status);
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        return rider;
+    }
+
+    public String getToken(String id) {
+        String token = "Bearer " + JWT.create()
+            .withSubject( id )
+            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+        return token;
     }
 }

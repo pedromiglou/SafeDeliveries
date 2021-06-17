@@ -1,13 +1,19 @@
 package tqsua.OrdersServer.controller;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.apache.coyote.Response;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +42,7 @@ public class OrderController {
 
     @PostMapping(path="/private/orders")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Object> createOrder(Authentication authentication ,@Valid @RequestBody OrderDTO o) throws IOException, InterruptedException {
+    public ResponseEntity<Object> createOrder(Authentication authentication ,@Valid @RequestBody OrderDTO o) throws IOException, InterruptedException, URISyntaxException {
         o.setStatus("PREPROCESSING");
         var message = "message";
         HashMap<String, String> response = new HashMap<>();
@@ -62,7 +68,7 @@ public class OrderController {
         o1.setItems(o.getItems());
         
         // Get deliver id
-        String deliverId = orderService.deliveryRequest(o1);
+        String deliverId = orderService.deliveryRequest(o1, new RestTemplate());
         if (deliverId == null) {
             response.put(message, "Error. Some error occured while connecting to Safe Deliveries.");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);

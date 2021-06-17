@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.io.Serializable;
 import java.util.*;
 
 
@@ -19,7 +18,7 @@ import javax.persistence.Table;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name = "Riders")
-public class Rider implements Serializable, UserDetails {
+public class Rider implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -31,7 +30,7 @@ public class Rider implements Serializable, UserDetails {
     @Column(name = "lastname", nullable = false)
     private String lastname;
 
-    @Column(name = "email", nullable = false)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "password", nullable = false)
@@ -43,11 +42,15 @@ public class Rider implements Serializable, UserDetails {
     @Column(name = "status", nullable = false)
     private String status;
 
+    @Column(name = "accountType", nullable = false)
+    private String accountType;
+
     @Column(name = "lat", nullable = false)
     private Double lat;
 
     @Column(name = "lng", nullable = false)
     private Double lng;
+
 
 /*    // tem varios vehicles
     @OneToMany
@@ -121,7 +124,15 @@ public class Rider implements Serializable, UserDetails {
     public void setStatus(String status) {
         this.status = status;
     }
-/*
+
+    public String getAccountType(){
+        return accountType;
+    }
+
+    public void setAccountType(String accountType){
+        this.accountType = accountType;
+    }
+    /*
     public Set<Vehicle> getVehicles() {
         return vehicles;
     }

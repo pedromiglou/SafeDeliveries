@@ -9,18 +9,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import tqsua.DeliveriesServer.DeliveriesServerApplication;
-import tqsua.DeliveriesServer.JsonUtil;
 import tqsua.DeliveriesServer.model.Notification;
 import tqsua.DeliveriesServer.model.Order;
-import tqsua.DeliveriesServer.model.OrderDTO;
-import tqsua.DeliveriesServer.model.Rider;
 import tqsua.DeliveriesServer.repository.NotificationRepository;
 import tqsua.DeliveriesServer.repository.OrderRepository;
-import tqsua.DeliveriesServer.repository.RiderRepository;
 import tqsua.DeliveriesServer.security.SecurityConstants;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -45,10 +40,7 @@ public class NotificationControllerIT {
     @Autowired
     private OrderRepository orderRepository;
 
-    String token = "Bearer " + JWT.create()
-        .withSubject( "1" )
-        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+    String token = this.getToken("1");
 
     @BeforeEach
     void setUp() {
@@ -59,6 +51,7 @@ public class NotificationControllerIT {
     void whenGetNotificationByRiderId_thenReturnResult() throws Exception {
         
         Order order = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order.setStatus("Pending");
         order = orderRepository.save(order);
         Notification notification1 = new Notification(1, order.getOrder_id());
         notificationRepository.save(notification1); 
@@ -75,10 +68,7 @@ public class NotificationControllerIT {
 
     @Test
     void whenGetNotificationByInvalidRiderId_thenReturnError() throws Exception {
-        token = "Bearer " + JWT.create()
-            .withSubject( "-1" )
-            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+        token = getToken("-1");
 
         mvc.perform(get("/api/private/notifications?id=-1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
                 .andExpect(status().isNotFound());
@@ -90,5 +80,13 @@ public class NotificationControllerIT {
         notificationRepository.save(notification1);
         mvc.perform(get("/api/private/notifications?id=1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
                 .andExpect(status().isNotFound());
+    }
+
+    public String getToken(String id) {
+        String token = "Bearer " + JWT.create()
+            .withSubject( id )
+            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+        return token;
     }
 }

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -26,7 +25,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -48,15 +46,9 @@ public class VehicleControllerTest {
     @MockBean
     private RiderService riderService;
 
-    String token = "Bearer " + JWT.create()
-        .withSubject( "1" )
-        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+    String token = this.getToken("1");
 
-    String invalidtoken = "Bearer " + JWT.create()
-        .withSubject( "5" )
-        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+    String invalidtoken = this.getToken("5");
 
     @AfterEach
     void tearDown() {
@@ -66,12 +58,8 @@ public class VehicleControllerTest {
     @Test
     void whenGetAllVehicles_thenReturnResult() throws Exception {
         ArrayList<Vehicle> response = new ArrayList<>();
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        rider1.setLat(12.0);
-        rider1.setLng(93.0);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
-        rider2.setLat(12.0);
-        rider2.setLng(93.0);
+        Rider rider1 = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "Admin");
+        Rider rider2 = createRider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline", "User");
 
         Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 320.0, "BBBBBB");
@@ -79,6 +67,7 @@ public class VehicleControllerTest {
         v2.setRider(rider2);
         response.add(v1);
         response.add(v2);
+        given(riderService.getRiderById(1)).willReturn(rider1);
         given(service.getAllVehicles()).willReturn(response);
 
         mvc.perform(get("/api/private/vehicles").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
@@ -86,14 +75,58 @@ public class VehicleControllerTest {
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[*].id").isNotEmpty());
         verify(service, VerificationModeFactory.times(1)).getAllVehicles();
+        verify(riderService, VerificationModeFactory.times(1)).getRiderById(1);
+    }
+
+    @Test
+    void whenGetAllVehiclesWithoutPermission_thenReturnUnauthorized() throws Exception {
+        Rider rider1 = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
+
+        given(riderService.getRiderById(1)).willReturn(rider1);
+
+        mvc.perform(get("/api/private/vehicles").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+        verify(riderService, VerificationModeFactory.times(1)).getRiderById(1);
+        verify(service, VerificationModeFactory.times(0)).getAllVehicles();
+    }
+
+
+    @Test
+    void whenGetVehiclesStatistics_thenReturnResult() throws Exception {
+        Rider rider = createRider("Rafael", "Baptista", "rafael@ua.pt", "1234", 5.0, "Online", "Admin");
+
+        ArrayList<Integer> response = new ArrayList<>();
+        response.add(1);
+        response.add(2);
+        response.add(3);
+        response.add(4);
+
+        given(riderService.getRiderById(1)).willReturn(rider);
+        given(service.getVehiclesByCapacity()).willReturn(response);
+
+        mvc.perform(get("/api/private/vehicles/statistics").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.vehicles_by_capacity", is(response)));
+        verify(service, VerificationModeFactory.times(1)).getVehiclesByCapacity(); 
+        verify(riderService, VerificationModeFactory.times(1)).getRiderById(1);        
+    }
+
+    @Test
+    void whenGetVehiclesStatisticsWithoutPermissions_thenReturnUnauthorized() throws Exception {
+        Rider rider = createRider("Rafael", "Baptista", "rafael@ua.pt", "1234", 5.0, "Online", "User");
+
+        given(riderService.getRiderById(1)).willReturn(rider);
+
+        mvc.perform(get("/api/private/vehicles/statistics").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
     }
 
     @Test
     void whenGetVehicleById_thenReturnVehicle() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
         rider.setId(1);
-        rider.setLat(12.0);
-        rider.setLng(93.0);
         Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         response.setId(2);
         response.setRider(rider);
@@ -107,10 +140,8 @@ public class VehicleControllerTest {
 
     @Test
     void whenGetVehicleByIdWithInvalidToken_thenReturnUnauthorized() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
         rider.setId(1);
-        rider.setLat(12.0);
-        rider.setLng(93.0);
         Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         response.setId(2);
         response.setRider(rider);
@@ -133,10 +164,8 @@ public class VehicleControllerTest {
 
     @Test
     void whenGetVehiclesByRiderId_thenReturnVehicles() throws Exception {
-        Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 4.0, "Offline");
+        Rider rider = createRider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 4.0, "Offline", "User");
         rider.setId(1);
-        rider.setLat(12.0);
-        rider.setLng(93.0);
         Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 365.0, "AAAAAA");
         v1.setRider(rider);
@@ -155,10 +184,8 @@ public class VehicleControllerTest {
 
     @Test
     void whenGetVehiclesByRiderIdWithDifferentToken_thenReturnUnauthorized() throws Exception {
-        Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 4.0, "Offline");
+        Rider rider = createRider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 4.0, "Offline", "User");
         rider.setId(1);
-        rider.setLat(12.0);
-        rider.setLng(93.0);
         Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 365.0, "AAAAAA");
         v1.setRider(rider);
@@ -177,10 +204,8 @@ public class VehicleControllerTest {
 
     @Test
     void whenPostNewVehicle_thenCreateIt() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
         rider.setId(1);
-        rider.setLat(12.0);
-        rider.setLng(93.0);
         VehicleDTO vehicle = new VehicleDTO(null, "Audi", "A5", "Carro", 365.0, 0L, "AAAAAA");
         vehicle.setRider(1L);
         Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
@@ -197,10 +222,8 @@ public class VehicleControllerTest {
 
     @Test
     void whenPostNewVehicleWithDifferentToken_thenReturnUnauthorized() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
         rider.setId(1);
-        rider.setLat(12.0);
-        rider.setLng(93.0);
         VehicleDTO vehicle = new VehicleDTO(null, "Audi", "A5", "Carro", 365.0, 0L, "AAAAAA");
         vehicle.setRider(1L);
         Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
@@ -230,10 +253,8 @@ public class VehicleControllerTest {
 
     @Test
     void whenUpdateVehicle_thenUpdateIt() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
         rider.setId(1);
-        rider.setLat(12.0);
-        rider.setLng(93.0);
         Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         vehicle.setRider(rider);
 
@@ -249,10 +270,8 @@ public class VehicleControllerTest {
 
     @Test
     void whenUpdateVehicleWithDifferentToken_thenReturnUnauthorized() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
         rider.setId(1);
-        rider.setLat(12.0);
-        rider.setLng(93.0);
         Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         vehicle.setRider(rider);
 
@@ -282,10 +301,8 @@ public class VehicleControllerTest {
     
     @Test
     void whenDeletingVehicle_thenDeleteIt() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
         rider.setId(1);
-        rider.setLat(12.0);
-        rider.setLng(93.0);
         Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         vehicle.setRider(rider);
 
@@ -298,10 +315,8 @@ public class VehicleControllerTest {
 
     @Test
     void whenDeletingVehicleWithDifferentToken_thenReturnUnauthorized() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
+        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
         rider.setId(1);
-        rider.setLat(12.0);
-        rider.setLng(93.0);
         Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         vehicle.setRider(rider);
 
@@ -321,5 +336,21 @@ public class VehicleControllerTest {
 
         mvc.perform(delete("/api/private/vehicle/"+String.valueOf(0L)).header("Authorization", token )).andExpect(status().isNotFound());
         verify(service, VerificationModeFactory.times(1)).getVehicleById(0L);
+    }
+
+    public String getToken(String id) {
+        String token = "Bearer " + JWT.create()
+            .withSubject( id )
+            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+        return token;
+    }
+
+    public Rider createRider(String firstname, String lastname, String email, String password, double rating, String status, String account_type) {
+        Rider rider = new Rider(firstname, lastname, email, password, rating, status);
+        rider.setAccountType(account_type);
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        return rider;
     }
 }

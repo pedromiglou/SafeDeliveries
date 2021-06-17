@@ -42,6 +42,7 @@ public class AuthController {
         Rider rider = new ObjectMapper().readValue(req.getInputStream(), Rider.class);
         rider.setRating(0.0);
         rider.setStatus("Offline");
+        rider.setAccountType("User");
 
         // Verify if email is already in use
         if (Boolean.TRUE == riderService.existsRiderByEmail(rider.getEmail())) {

@@ -55,11 +55,19 @@ class RiderService {
             });
     
             return;       
-
         }
-    
-    
-     
+
+        async getRiderStatistics() {
+            var url = 'http://localhost:8080/api/private/riders/statistics';
+            var res = await fetch(url, {
+                method:'GET',
+                headers:{'Content-type':'application/json',
+                    'Authorization': 'Bearer ' + JSON.parse(sessionStorage.getItem("user"))["token"]}});
+            if (res.status !== 200) {
+                return {error: true};
+            }
+            return res.json();
+        }
     }
     
 export default new RiderService();

@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import com.auth0.jwt.JWT;
@@ -41,10 +42,7 @@ public class VehicleControllerIT {
     @Autowired
     private RiderRepository riderRepository;
 
-    String token = "Bearer " + JWT.create()
-        .withSubject( "1" )
-        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+    String token = this.getToken("1");
 
     @BeforeEach
     void setUp() {
@@ -54,14 +52,12 @@ public class VehicleControllerIT {
 
     @Test
     void whenGetAllVehicles_thenReturnResult() throws Exception {
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        rider1.setLat(12.0);
-        rider1.setLng(93.0);
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
-        rider2.setLat(12.0);
-        rider2.setLng(93.0);
+        Rider rider1 = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "Admin");
+        Rider rider2 = createRider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline", "User");
         riderRepository.save(rider1);
         riderRepository.save(rider2);
+
+        token = getToken(String.valueOf(rider1.getId()));
 
         Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 320.0, "BBBBBB");
@@ -78,19 +74,75 @@ public class VehicleControllerIT {
     }
 
     @Test
+    void whenGetAllVehiclesWithoutPermission_thenReturnUnauthorized() throws Exception {
+        Rider rider1 = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
+        riderRepository.save(rider1);
+        token = getToken(String.valueOf(rider1.getId()));
+
+        mvc.perform(get("/api/private/vehicles").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+    }
+
+    @Test
+    void whenGetVehiclesStatistics_thenReturnResult() throws Exception {
+        Rider rider = createRider("Rafael", "Baptista", "rafael@ua.pt", "1234", 5.0, "Online", "Admin");
+        riderRepository.save(rider);
+
+        token = getToken(String.valueOf(rider.getId()));
+
+        Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 223.0, "AAAAAA");
+        v1.setRider(rider);
+        Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 250.0, "BBBBBB");
+        v2.setRider(rider);
+        Vehicle v3 = new Vehicle("Mercedes", "C63", "Carro", 102.0, "CCCCCC");
+        v3.setRider(rider);
+        Vehicle v4 = new Vehicle("Tesla", "Model 3", "Carro", 70.0, "DDDDDD");
+        v4.setRider(rider);
+        Vehicle v5 = new Vehicle("Jaguar", "F-type", "Carro", 20.0, "EEEEEE");
+        v5.setRider(rider);
+        Vehicle v6 = new Vehicle("BMW", "I8", "Carro", 30.0, "FFFFFF");
+        v6.setRider(rider);
+        repository.save(v1);
+        repository.save(v2);
+        repository.save(v3);
+        repository.save(v4);
+        repository.save(v5);
+        repository.save(v6);
+
+        ArrayList<Integer> response = new ArrayList<>();
+        response.add(0);
+        response.add(0);
+        response.add(2);
+        response.add(1);
+        response.add(3);
+
+        mvc.perform(get("/api/private/vehicles/statistics").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.vehicles_by_capacity", is(response)));      
+    }
+
+    @Test
+    void whenGetVehiclesStatisticsWithoutPermissions_thenReturnUnauthorized() throws Exception {
+        Rider rider = createRider("Rafael", "Baptista", "rafael@ua.pt", "1234", 5.0, "Online", "User");
+        riderRepository.save(rider);
+
+        token = getToken(String.valueOf(rider.getId()));
+
+        mvc.perform(get("/api/private/vehicles/statistics").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+    }
+
+    @Test
     void whenGetVehicleById_thenReturnVehicle() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        rider.setLat(12.0);
-        rider.setLng(93.0);
+        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
         rider = riderRepository.save(rider);
         Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         vehicle.setRider(rider);
         repository.save(vehicle);
 
-        token = "Bearer " + JWT.create()
-        .withSubject( String.valueOf(rider.getId()) )
-        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+        token = getToken(String.valueOf(rider.getId()));
 
         mvc.perform(get("/api/private/vehicle?id="+String.valueOf(vehicle.getId())).contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", token ))
@@ -100,10 +152,7 @@ public class VehicleControllerIT {
 
     @Test
     void whenGetVehicleByInvalidId_thenReturnNotFound() throws Exception {
-        token = "Bearer " + JWT.create()
-            .withSubject( "-1" )
-            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+        token = getToken("-1");
 
         mvc.perform(get("/api/private/vehicle?id=-1").contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", token ))
@@ -113,9 +162,7 @@ public class VehicleControllerIT {
 
     @Test
     void whenGetVehiclesByRiderId_thenReturnVehicles() throws Exception {
-        Rider rider = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 4.0, "Offline");
-        rider.setLat(12.0);
-        rider.setLng(93.0);
+        Rider rider = createRider("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", 4.0, "Offline", "User");
         riderRepository.save(rider);
         Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 365.0, "BBBBBB");
@@ -124,11 +171,7 @@ public class VehicleControllerIT {
         repository.save(v1);
         repository.save(v2);
 
-        token = "Bearer " + JWT.create()
-        .withSubject( String.valueOf(rider.getId()) )
-        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
-
+        token = getToken(String.valueOf(rider.getId()));
 
         mvc.perform(get("/api/private/rider/"+ rider.getId() +"/vehicles").contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", token ))
@@ -139,18 +182,13 @@ public class VehicleControllerIT {
 
     @Test
     void whenPostNewVehicle_thenCreateIt() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        rider.setLat(12.0);
-        rider.setLng(93.0);
+        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
         riderRepository.save(rider);
         VehicleDTO vehicle = new VehicleDTO(null, "Audi", "A5", "Carro", 365.0, rider.getId(), "AAAAAA");
         Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         response.setRider(rider);
 
-        token = "Bearer " + JWT.create()
-        .withSubject( String.valueOf(rider.getId()) )
-        .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-        .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+        token = getToken(String.valueOf(rider.getId()));
 
         mvc.perform(post("/api/private/vehicle").contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.toJson(vehicle))
@@ -173,21 +211,16 @@ public class VehicleControllerIT {
 
     @Test
     void whenUpdateVehicle_thenUpdateIt() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        rider.setLat(12.0);
-        rider.setLng(93.0);
-        rider = riderRepository.save(rider);
+        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
+        riderRepository.save(rider);
 
         Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
         vehicle.setRider(rider);
-        vehicle = repository.save(vehicle);
+        repository.save(vehicle);
 
         VehicleDTO newDetails = new VehicleDTO(null, "BMW", null, null, null, null, null);
 
-        token = "Bearer " + JWT.create()
-            .withSubject( String.valueOf(rider.getId()) )
-            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+        token = getToken(String.valueOf(rider.getId()));
 
         mvc.perform(put("/api/private/vehicle/"+String.valueOf(vehicle.getId())).contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.toJson(newDetails))
@@ -199,10 +232,7 @@ public class VehicleControllerIT {
     @Test
     void whenUpdateNonExistentVehicle_thenReturnNotFound() throws Exception {
         VehicleDTO newDetails = new VehicleDTO(null, "BMW", null, null, null, null, null);
-        token = "Bearer " + JWT.create()
-            .withSubject( "-1" )
-            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+        token = getToken("-1");
 
         mvc.perform(put("/api/private/vehicle/-1").contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.toJson(newDetails))
@@ -212,19 +242,14 @@ public class VehicleControllerIT {
 
     @Test
     void whenDeletingVehicle_thenDeleteIt() throws Exception {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        rider.setLat(12.0);
-        rider.setLng(93.0);
+        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
         riderRepository.save(rider);
 
         Vehicle vehicle = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAAA");
         vehicle.setRider(rider);
         repository.save(vehicle);
 
-        token = "Bearer " + JWT.create()
-            .withSubject( String.valueOf(rider.getId()) )
-            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+        token = getToken(String.valueOf(rider.getId()));
 
         mvc.perform(delete("/api/private/vehicle/"+String.valueOf(vehicle.getId())).header("Authorization", token ))
             .andExpect(status().isOk());
@@ -235,5 +260,21 @@ public class VehicleControllerIT {
     void whenDeletingNotExistentVehicle_thenReturnNotFound() throws Exception {
         mvc.perform(delete("/api/private/vehicle/"+String.valueOf(0L)).header("Authorization", token ))
             .andExpect(status().isNotFound());
+    }
+
+    public Rider createRider(String firstname, String lastname, String email, String password, double rating, String status, String account_type) {
+        Rider rider = new Rider(firstname, lastname, email, password, rating, status);
+        rider.setAccountType(account_type);
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        return rider;
+    }
+
+    public String getToken(String id) {
+        String token = "Bearer " + JWT.create()
+            .withSubject( id )
+            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+        return token;
     }
 }

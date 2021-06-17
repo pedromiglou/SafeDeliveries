@@ -45,18 +45,49 @@ public class OrderController {
     private NotificationService notificationService;
 
     private static final String MESSAGE = "message";
+    private static final String UNAUTHORIZED = "Unauthorized";
 
     private static final Map<String, String> APP_NAMES = Stream.of(new String[][] {
         { "SafeDeliveries", "http://localhost:8081" }, 
       }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
 
-
     //@CrossOrigin(origins = "http://localhost:4200")
     @GetMapping(path="/private/orders")
-    public ArrayList<Order> getAllOrders() throws IOException, InterruptedException {
-        // TODO:
-        // Verify admin
-        return orderService.getAllOrders();
+    public ResponseEntity<Object> getAllOrders(Authentication authentication) throws IOException, InterruptedException {
+        HashMap<String, Object> response = new HashMap<>();
+        Rider rider = riderService.getRiderById(Long.parseLong(authentication.getName()));
+        if (!rider.getAccountType().equals("Admin")) {
+            response.put(MESSAGE, UNAUTHORIZED);
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(orderService.getAllOrders(), HttpStatus.OK);
+    }
+
+    @GetMapping(path="/private/orders/statistics")
+    public ResponseEntity<Object> getStatisticsOrders(Authentication authentication) throws IOException, InterruptedException {
+        HashMap<String, Object> response = new HashMap<>();
+        Rider rider = riderService.getRiderById(Long.parseLong(authentication.getName()));
+        if (!rider.getAccountType().equals("Admin")) {
+            response.put(MESSAGE, UNAUTHORIZED);
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
+        
+        int numOrders = orderService.getTotalOrders();
+        int numPendingOrders = orderService.countOrders("Pending");
+        int numDeliveringOrders = orderService.countOrders("Delivering");
+        int numCompletedOrders = numOrders - numDeliveringOrders - numPendingOrders;
+        ArrayList<Integer> ordersLast7Days = orderService.getOrdersLast7Days();
+        ArrayList<Integer> ordersByWeight = orderService.getOrdersByWeight();
+
+        response.put("total_orders", numOrders);
+        response.put("pending_orders", numPendingOrders);
+        response.put("delivering_orders", numDeliveringOrders);
+        response.put("completed_orders", numCompletedOrders);
+        response.put("orders_7_days", ordersLast7Days);
+        response.put("orders_by_weight", ordersByWeight);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping(path="/orders")
@@ -76,7 +107,7 @@ public class OrderController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         Order o1 = new Order(0, o.getPick_up_lat(), o.getPick_up_lng(), o.getDeliver_lat(), o.getDeliver_lng(), o.getWeight(), o.getApp_name());
-        
+        o1.setStatus("Pending");
         Order order = orderService.saveOrder(o1);
 
         ArrayList<Rider> riders = riderService.getAvailableRiders(o.getWeight());
@@ -99,7 +130,7 @@ public class OrderController {
 
         if (!id.equals(String.valueOf(rider_id))) {
             HashMap<String, String> response = new HashMap<>();
-            response.put(MESSAGE, "Unauthorized");
+            response.put(MESSAGE, UNAUTHORIZED);
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
 
@@ -118,7 +149,7 @@ public class OrderController {
 
         if (!id.equals(String.valueOf(rider_id))) {
             HashMap<String, String> response = new HashMap<>();
-            response.put(MESSAGE, "Unauthorized");
+            response.put(MESSAGE, UNAUTHORIZED);
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
         

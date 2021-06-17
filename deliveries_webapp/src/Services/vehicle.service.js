@@ -45,7 +45,6 @@ class VehicleService {
             category: category,
             capacity: capacity,
         }
-        console.log(vehicle)
 
         var url = urlAPI + 'api/private/vehicle/'+id
 
@@ -74,6 +73,17 @@ class VehicleService {
 
     }
 
+    async getVehiclesStatistics() {
+        var url = 'http://localhost:8080/api/private/vehicles/statistics';
+        var res = await fetch(url, {
+            method:'GET',
+            headers:{'Content-type':'application/json',
+                'Authorization': 'Bearer ' + JSON.parse(sessionStorage.getItem("user"))["token"]}});
+        if (res.status !== 200) {
+            return {error: true};
+        }
+        return res.json();
+    }
 
  
 }
