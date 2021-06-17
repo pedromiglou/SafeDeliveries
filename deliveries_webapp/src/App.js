@@ -102,8 +102,8 @@ function App() {
               }
             </Modal.Body>
             <Modal.Footer>
-              <button onClick={() => {acceptOrder(props.order_id); props.onHide();}} className="btn">Accept</button>
-              <button onClick={() => {declineOrder(props.order_id); props.onHide();}} className="btn">Decline</button>
+              <button id="accept_order_button" onClick={() => {acceptOrder(props.order_id); props.onHide();}} className="btn">Accept</button>
+              <button id="decline_order_button" onClick={() => {declineOrder(props.order_id); props.onHide();}} className="btn">Decline</button>
             </Modal.Footer>
           </Modal>
         );

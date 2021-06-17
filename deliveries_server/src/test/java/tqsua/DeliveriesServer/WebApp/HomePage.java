@@ -59,6 +59,12 @@ public class HomePage {
     @FindBy(id = "statistics-tab")
     private WebElement statistics;
 
+    @FindBy(id = "accept_order_button")
+    private WebElement accept_order_button;
+
+    @FindBy(id = "decline_order_button")
+    private WebElement decline_order_button;
+
     @FindBy(id = "logout")
     private WebElement logout;
     private final HttpClient httpClient = HttpClient.newBuilder()
@@ -112,6 +118,14 @@ public class HomePage {
         this.login.click();
     }
 
+    public void clickAccept(){
+        this.accept_order_button.click();
+    }
+
+    public void clickDecline(){
+        this.decline_order_button.click();
+    }
+
     public void clickStatistics(){
         this.statistics.click();
     }
@@ -120,7 +134,7 @@ public class HomePage {
         this.profile.click();
     }
 
-    public void login() throws IOException, InterruptedException, JSONException {
+    public String login() throws IOException, InterruptedException, JSONException {
         // form parameters
         Map<Object, Object> data = new HashMap<>();
         data.put("email", "rafael2@gmail.com");
@@ -143,6 +157,7 @@ public class HomePage {
         js.executeScript(String.format(
         "window.sessionStorage.setItem('%s','%s');", "user", json));
         driver.navigate().refresh();
+        return "Bearer " + json.getString("token");
     }
 
     public void loginWithAdmin() throws IOException, InterruptedException, JSONException {
