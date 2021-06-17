@@ -74,14 +74,16 @@ public class OrderController {
 
         
         int numOrders = orderService.getTotalOrders();
-        int numPendingOrders = orderService.getPendingOrders().size();
-        int numDeliveringOrders = numOrders - numPendingOrders;
+        int numPendingOrders = orderService.countOrders("Pending");
+        int numDeliveringOrders = orderService.countOrders("Delivering");
+        int numCompletedOrders = numOrders - numDeliveringOrders - numPendingOrders;
         ArrayList<Integer> ordersLast7Days = orderService.getOrdersLast7Days();
         ArrayList<Integer> ordersByWeight = orderService.getOrdersByWeight();
 
         response.put("total_orders", numOrders);
         response.put("pending_orders", numPendingOrders);
         response.put("delivering_orders", numDeliveringOrders);
+        response.put("completed_orders", numCompletedOrders);
         response.put("orders_7_days", ordersLast7Days);
         response.put("orders_by_weight", ordersByWeight);
 
@@ -105,7 +107,7 @@ public class OrderController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         Order o1 = new Order(0, o.getPick_up_lat(), o.getPick_up_lng(), o.getDeliver_lat(), o.getDeliver_lng(), o.getWeight(), o.getApp_name());
-        
+        o1.setStatus("Pending");
         Order order = orderService.saveOrder(o1);
 
         ArrayList<Rider> riders = riderService.getAvailableRiders(o.getWeight());

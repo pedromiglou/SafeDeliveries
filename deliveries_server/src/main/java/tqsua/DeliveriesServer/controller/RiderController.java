@@ -16,9 +16,11 @@ import tqsua.DeliveriesServer.model.Notification;
 import tqsua.DeliveriesServer.model.Order;
 import tqsua.DeliveriesServer.model.Rider;
 import tqsua.DeliveriesServer.model.RiderDTO;
+import tqsua.DeliveriesServer.model.Vehicle;
 import tqsua.DeliveriesServer.service.NotificationService;
 import tqsua.DeliveriesServer.service.OrderService;
 import tqsua.DeliveriesServer.service.RiderService;
+import tqsua.DeliveriesServer.service.VehicleService;
 
 import javax.validation.Valid;
 
@@ -30,6 +32,9 @@ public class RiderController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private VehicleService vehicleService;
 
     @Autowired
     private NotificationService notificationService;
@@ -102,13 +107,21 @@ public class RiderController {
         
         // When Rider turns Online, then search for pending orders
         if (rider.getStatus() != null && rider.getStatus().equals("Online")) {
-            ArrayList<Order> orders = orderService.getPendingOrders();
-            ArrayList<Order> refused_orders = orderService.getRefusedOrders(r.getId());
-            orders.removeAll(refused_orders);
-            if (orders.size() != 0) {
-                Order final_order = getBestOrder(orders, r);
-                Notification notification_for_rider = new Notification(r.getId(), final_order.getOrder_id());
-                this.notificationService.save(notification_for_rider);
+            ArrayList<Vehicle> vehicles = vehicleService.getVehiclesByRiderId(r.getId());
+            double max_capacity = -1;
+            for (Vehicle v: vehicles) {
+                if (v.getCapacity() > max_capacity)
+                    max_capacity = v.getCapacity();
+            }
+            if (max_capacity != -1) {
+                ArrayList<Order> orders = orderService.getPendingOrders(max_capacity);
+                ArrayList<Order> refused_orders = orderService.getRefusedOrders(r.getId());
+                orders.removeAll(refused_orders);
+                if (orders.size() != 0) {
+                    Order final_order = getBestOrder(orders, r);
+                    Notification notification_for_rider = new Notification(r.getId(), final_order.getOrder_id());
+                    this.notificationService.save(notification_for_rider);
+                }
             }
         }
         

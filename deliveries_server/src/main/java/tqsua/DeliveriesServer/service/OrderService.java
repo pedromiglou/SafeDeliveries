@@ -113,8 +113,12 @@ public class OrderService {
         return ordersByWeight;
     }
 
-    public ArrayList<Order> getPendingOrders() throws IOException, InterruptedException {
-        return this.orderRepository.findPendingOrders();
+    public ArrayList<Order> getPendingOrders(double max_capacity) throws IOException, InterruptedException {
+        return this.orderRepository.findPendingOrders(max_capacity);
+    }
+
+    public int countOrders(String status) throws IOException, InterruptedException {
+        return this.orderRepository.countOrders(status);
     }
 
     public ArrayList<Order> getRefusedOrders(long id) throws IOException, InterruptedException {
@@ -135,6 +139,7 @@ public class OrderService {
     public Order updateRider(long order_id, long rider_id) {
         Order order = this.orderRepository.findByPk(order_id);
         order.setRider_id(rider_id);
+        order.setStatus("Delivering");
         return this.orderRepository.save(order);
     }
 }

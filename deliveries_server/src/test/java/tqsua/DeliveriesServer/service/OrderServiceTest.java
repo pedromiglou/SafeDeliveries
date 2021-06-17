@@ -103,8 +103,8 @@ class OrderServiceTest {
         response.add(order1);
         response.add(order2);
 
-        when(repository.findPendingOrders()).thenReturn(response);
-        assertThat(service.getPendingOrders()).isEqualTo(response);
+        when(repository.findPendingOrders(10000)).thenReturn(response);
+        assertThat(service.getPendingOrders(10000)).isEqualTo(response);
         reset(repository);
     }
 

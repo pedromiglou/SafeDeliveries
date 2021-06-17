@@ -51,6 +51,7 @@ public class NotificationControllerIT {
     void whenGetNotificationByRiderId_thenReturnResult() throws Exception {
         
         Order order = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order.setStatus("Pending");
         order = orderRepository.save(order);
         Notification notification1 = new Notification(1, order.getOrder_id());
         notificationRepository.save(notification1); 

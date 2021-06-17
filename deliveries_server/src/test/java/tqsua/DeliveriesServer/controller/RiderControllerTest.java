@@ -14,9 +14,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import tqsua.DeliveriesServer.service.NotificationService;
 import tqsua.DeliveriesServer.service.OrderService;
 import tqsua.DeliveriesServer.service.RiderService;
+import tqsua.DeliveriesServer.service.VehicleService;
 import tqsua.DeliveriesServer.model.Order;
 import tqsua.DeliveriesServer.model.Rider;
 import tqsua.DeliveriesServer.model.RiderDTO;
+import tqsua.DeliveriesServer.model.Vehicle;
 import tqsua.DeliveriesServer.security.SecurityConstants;
 import tqsua.DeliveriesServer.JsonUtil;
 
@@ -51,6 +53,9 @@ class RiderControllerTest {
 
     @MockBean
     private NotificationService notification_service;
+
+    @MockBean
+    private VehicleService vehicle_service;
 
     String token = this.getToken("1");
 
@@ -211,6 +216,12 @@ class RiderControllerTest {
     void whenUpdateRiderStateToOnline_thenSearchForOrder_AndReturnOk() throws Exception {
         RiderDTO newDetails = createRiderDTO("A", "B", "a@b.c", "abcdefgh", 5.0, "Online");
         Rider rider = createRider("A", "B", "a@b.c", "abcdefgh", 5.0, "Online", "User");
+        rider.setId(1);
+
+        ArrayList<Vehicle> vehicles =new ArrayList<>();
+        Vehicle v1 = new Vehicle("Mercedes", "A45", "Carro", 320.2, "AA-23-DS");
+        v1.setRider(rider);
+        vehicles.add(v1);
 
         ArrayList<Order> response = new ArrayList<>();
         Order order1 = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
@@ -220,11 +231,13 @@ class RiderControllerTest {
         response.add(order2);
         response.add(order3);
 
-        given(service.updateRider(1L, newDetails)).willReturn(rider);
+        ArrayList<Order> refused_orders = new ArrayList<>();
+        refused_orders.add(order1);
 
-        given(order_service.getPendingOrders()).willReturn(response);
-        response.remove(0);
-        given(order_service.getRefusedOrders(1)).willReturn(response);
+        given(service.updateRider(1L, newDetails)).willReturn(rider);
+        given(vehicle_service.getVehiclesByRiderId(1)).willReturn(vehicles);
+        given(order_service.getPendingOrders(320.2)).willReturn(response);
+        given(order_service.getRefusedOrders(1)).willReturn(refused_orders);
         
         //with all arguments
         mvc.perform(put("/api/private/rider/1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ).content(JsonUtil.toJson(newDetails)))
