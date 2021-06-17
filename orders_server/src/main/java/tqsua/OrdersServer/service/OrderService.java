@@ -37,9 +37,6 @@ public class OrderService {
     }
 
     public String deliveryRequest(Order order, RestTemplate restClient) throws IOException, InterruptedException, URISyntaxException {
-        if (order.getDeliver_lat() == null || order.getDeliver_lng() == null || order.getPick_up_lat()==null || order.getPick_up_lng()==null ||
-             order.getStatus()==null || order.getItems().isEmpty() || order.getUser_id()==0) return null;
-
         Map<Object, Object> data = new HashMap<>();
         data.put("pick_up_lat", order.getPick_up_lat());
         data.put("pick_up_lng", order.getPick_up_lng());

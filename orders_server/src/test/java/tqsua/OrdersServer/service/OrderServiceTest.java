@@ -174,6 +174,33 @@ class OrderServiceTest {
         assertThat(service.deliveryRequest(order,restTemplate)).isEqualTo("332");
         reset(repository);
     }
+
+    @Test
+    void whendeliveryRequestWithNot201StatusCode_thenReturnCorrectResults() throws Exception {
+        Order order = new Order(40.0, 30.0, 40.1, 31.1, "Entregue", 12);
+        Set<Item> items = new HashSet<>();
+        Item item1 = new Item("Casaco", "Roupa", 12.0);
+        Item item2 = new Item("Telemovel", "Eletronica", 0.7);
+        items.add(item1);
+        items.add(item2);
+        order.setItems(items);
+
+        Map<Object, Object> data = new HashMap<>();
+        data.put("pick_up_lat", order.getPick_up_lat());
+        data.put("pick_up_lng", order.getPick_up_lng());
+        data.put("deliver_lat", order.getDeliver_lat());
+        data.put("deliver_lng", order.getDeliver_lng());
+        data.put("weight", order.getItems().stream().mapToDouble(Item::getWeight).sum());
+        data.put("app_name", "SafeDeliveries");
+
+        URI uri = new URI("http://localhost:8080/api/orders");
+
+        when(restTemplate.postForEntity(uri, data, String.class))
+            .thenReturn(new ResponseEntity<String>("{\"deliver_id\": \"332\"}", HttpStatus.INTERNAL_SERVER_ERROR));
+
+        assertThat(service.deliveryRequest(order,restTemplate)).isNull();;
+        reset(repository);
+    }
     
     
 }
