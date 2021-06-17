@@ -1,10 +1,8 @@
 package tqsua.OrdersServer.service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
 import org.json.JSONObject;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,4 +68,7 @@ public class OrderService {
         return order;
     }
 
+    public Order getOrderByDeliverId(long order_id){
+        return orderRepository.getOrderByDeliverId(order_id);
+    }
 }

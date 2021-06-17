@@ -1,16 +1,20 @@
 package tqsua.DeliveriesServer.service;
 
 import java.io.IOException;
-import java.time.ZoneId;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import tqsua.DeliveriesServer.model.Order;
 import tqsua.DeliveriesServer.repository.OrderRepository;
@@ -141,5 +145,15 @@ public class OrderService {
         order.setRider_id(rider_id);
         order.setStatus("Delivering");
         return this.orderRepository.save(order);
+    }
+
+    public void notificate(String url, long order_id, RestTemplate restClient) throws IOException, InterruptedException, URISyntaxException{
+        Map<Object, Object> data = new HashMap<>();
+        data.put("order_id", order_id);
+
+        final String baseUrl = url + "/api/orders/notificate";
+        URI uri = new URI(baseUrl);
+        
+        restClient.postForEntity(uri, data, String.class);
     }
 }

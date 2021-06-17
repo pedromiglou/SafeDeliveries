@@ -45,6 +45,11 @@ function Delivery() {
     const [deliver_lat, setDeliverLat] = useState(41.5322699);
     const [deliver_lng, setDeliverLng] = useState(-8.737535200000002);
 
+    const [orderInfo, setOrderInfo] = useState({pick_up_lat: null,pick_up_lng: null, deliver_lat: null, deliver_lng: null });
+    const [orderId, setOrderId] = useState();
+    const [pickUpAddress, setPickUpAddress] = useState();
+    const [deliveryAddress, setDeliveryAddress] = useState();
+
     const current_user = AuthService.getCurrentUser();
 
     // const pickUpMapCallBack = useCallback((msg) => { 
@@ -108,7 +113,6 @@ function Delivery() {
     async function getAddressCoord(lat,long){
         const response = await Geocode.fromLatLng(lat, long);
 
-        
         let address_components = response.results[0].formatted_address.split(",");
         
         let address = address_components[0];
@@ -117,19 +121,30 @@ function Delivery() {
         let country = address_components[2];
 
         return [address, zip, city, country];
-
-        // Geocode.fromLatLng("48.8583701", "2.2922926").then(
-            
-        // (response) => {
-        //     const address = response.results[0].formatted_address;
-        //     console.log(address);
-        //     return address;
-        // },
-        // (error) => {
-        // console.error(error);
-        // }
-        // );
     }
+
+    useEffect(() => {
+
+        async function confirmAddress(lat,long,id_address){
+            const response = await Geocode.fromLatLng(lat, long);
+    
+            let address = response.results[0].formatted_address;
+    
+            if (id_address === "pickup"){
+                setPickUpAddress(address)
+            } else {
+                setDeliveryAddress(address)
+            }
+        }
+        
+        if (current_user !== null) {
+          if (state === "confirmed"){
+            confirmAddress(orderInfo.pick_up_lat, orderInfo.pick_up_lng, "pickup")
+            confirmAddress(orderInfo.deliver_lat, orderInfo.deliver_lng, "delivery")
+          }
+        } 
+    
+      }, [state, current_user, orderInfo.pick_up_lat, orderInfo.pick_up_lng, orderInfo.deliver_lat, orderInfo.deliver_lng]);
 
     const location = useLocation();
 
@@ -214,9 +229,38 @@ function Delivery() {
         } else {
             setErrorOrder(false);
             setSucessOrder(true);
+            setState("waiting_rider");
+            setOrderId(res.deliver_id);
         }
     }
 
+    useEffect(() => {
+
+        async function getOrderInfo(orderid) {
+          let orderInformation = await OrdersService.getOrderInfo(orderid);
+          if (!orderInformation["error"] && orderInformation.status === "DELIVERING") {
+            setOrderInfo(orderInformation)
+            setState("confirmed")
+          }
+          
+        }
+        
+        if (current_user !== null) {
+          if (state === "waiting_rider"){
+            if (orderInfo.pick_up_lat === null && orderInfo.pick_up_lng === null && orderInfo.deliver_lat === null && orderInfo.deliver_lng === null) {
+                getOrderInfo(orderId);
+                const interval = setInterval(() => {
+                    getOrderInfo(orderId);
+                }, 8000);
+        
+                return () => clearInterval(interval);
+            }
+          }
+          
+        
+        } 
+    
+      }, [state, current_user, orderId, orderInfo]);
 
     function removeItem(item_id) {
         items.splice(item_id, 1);
@@ -293,21 +337,20 @@ function Delivery() {
         (error) => {
             console.error(error);
         });
-
-
-
     }
 
     return (
       <>
 
         {sucessOrder === true 
-          ? <div className="alert alert-success" role="alert" style={{margin:"10px auto", width: "90%", textAlign:"center", fontSize:"22px"}}>
+          ? <><div className="alert alert-success" id="order-success" role="alert" style={{margin:"10px auto", width: "90%", textAlign:"center", fontSize:"22px"}}>
           Order was created successfully!
-          </div> : null}
+          </div> <div className="alert alert-success" role="alert" style={{margin:"10px auto", width: "90%", textAlign:"center", fontSize:"22px"}}>
+          Order number: #<span id="track_id">{orderId}</span>    
+          </div></> : null}
 
         {errorOrder !== false 
-          ? <div className="alert alert-alert" role="alert" style={{margin:"10px auto", width: "90%", textAlign:"center", fontSize:"22px"}}>
+          ? <div className="alert alert-alert" id="order-error" role="alert" style={{margin:"10px auto", width: "90%", textAlign:"center", fontSize:"22px"}}>
           {errorOrder}
           </div> : null}
 
@@ -342,7 +385,7 @@ function Delivery() {
                                 <input id="dzip" type="text" placeholder="Ex: 4740-120"/>
                             </div>
                             <div className="button-check-map">
-                                <button onClick={() => checkMap()} className="confirm-order">Check In Map</button> 
+                                <button onClick={() => checkMap()} id="checkMap" className="confirm-order">Check In Map</button> 
                             </div>
                         </div>
 
@@ -434,11 +477,10 @@ function Delivery() {
                         </div>
                         
                         <div className="button-div" >
-                            {/* <button className="button-add" id="button-add" onClick={() => setNewItem(true)}>Add <RiIcons.RiAddFill/></button> */}
                             <button className="button-add" id="button-add" onClick={() => doNewItem(true)}>Add <RiIcons.RiAddFill/></button>
 
                             <div className="both-buttons" id="both_buttons" style={{display:"none"}}>
-                                <button onClick={() => {addItem(); }} type="button" className="button-details">Confirm</button>
+                                <button id="confirm_item" onClick={() => {addItem(); }} type="button" className="button-details">Confirm</button>
                                 <button onClick={() => doNewItem(false)} className="button-details cancelar">Cancel</button>
                             </div>
                         </div>
@@ -448,14 +490,14 @@ function Delivery() {
                 </div>
                 
                 <div className="button-confirm">
-                    <button onClick={() => submitOrder()} className="confirm-order">Place Order</button> 
+                    <button onClick={() => submitOrder()} className="confirm-order" id="place-order">Place Order</button> 
                 </div>
                
                 
             </div>
         }
         { state === "waiting_rider" && 
-            <div onClick={() => setState("confirmed")} className="DeliveriesSection wait">
+            <div className="DeliveriesSection wait">
                 <div>
                     <div className="bouncer">
                         <div></div>
@@ -466,7 +508,7 @@ function Delivery() {
                 </div>
                 
                 <div>
-                    <h1>Waiting for a rider</h1>
+                    <h1 id="waiting_rider">Waiting for a rider</h1>
                 </div>
                 
             </div>
@@ -477,38 +519,56 @@ function Delivery() {
                     {<MapLoader 
                     googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco"
                     loadingElement={<div style={{ height: "100%"}}/>}
+                    state={ {pick_up_lat:orderInfo.pick_up_lat, pick_up_lng: orderInfo.pick_up_lng, del_lat: orderInfo.deliver_lat, del_lng: orderInfo.deliver_lng}}
                     />
                     }
                 </div>
-                <h1>Order details</h1>
+                <h1 id="order_details">Order details</h1>
                 <div className="ConfirmDeliveryDetails">
                     <div>
                         <h2>Pick Up Address</h2>
-                        <h3>
-                            xxxx
+                        <h3 id="pickup_address">
+                           { pickUpAddress }
                         </h3>
                     </div>
                     <div>
                         <h2>Destin Address</h2>
-                        <h3>
-                            xxxx
+                        <h3 id="delivery_address">
+                            { deliveryAddress }
                         </h3>
                     </div>
                     
                     <div>
-                        <h2>Item type</h2>
-                        <h3>
-                            xxxx
-                        </h3>
-                    </div>
-                    
-                    <div>
-                        <h2>Estimated Weight</h2>
-                        <h3>
-                            xxxx
-                        </h3>
-                    </div>
-                    
+                    <ul className="listP-group">
+                        <li className="listP-item">
+                            <div>
+                                Name
+                            </div>
+                            <div>
+                                Category
+                            </div>
+                            <div>
+                                Weight
+                            </div>
+                        </li>
+
+                        {Object.entries(orderInfo.items).map(([key,value]) => (
+                            <li key={key} className="listP-item" id={"id_" + value["name"]}>
+                                <div>
+                                    <input type="text" id={"name_" + key}  readOnly placeholder={value["name"]}></input>
+                                </div>
+
+                                <div>
+                                    <input type="text" id={"category_" + key} readOnly placeholder={value["category"]}></input>
+                                </div>
+                                
+                                <div>
+                                    <input type="text" id={"weight_" + key} readOnly placeholder={value["weight"]}></input>
+                                </div>
+                            </li>
+                        )) }
+                    </ul>
+                    </div>        
                 </div>
             </div>
         }

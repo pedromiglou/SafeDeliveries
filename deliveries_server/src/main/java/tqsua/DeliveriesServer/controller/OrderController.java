@@ -1,6 +1,7 @@
 package tqsua.DeliveriesServer.controller;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -125,7 +127,7 @@ public class OrderController {
 
     @PostMapping(path="/private/acceptorder")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Object> acceptOrder(Authentication authentication ,@RequestParam(name="order_id") long order_id, @RequestParam(name="rider_id") long rider_id) {
+    public ResponseEntity<Object> acceptOrder(Authentication authentication ,@RequestParam(name="order_id") long order_id, @RequestParam(name="rider_id") long rider_id) throws IOException, InterruptedException, URISyntaxException {
         String id = authentication.getName();
 
         if (!id.equals(String.valueOf(rider_id))) {
@@ -134,8 +136,10 @@ public class OrderController {
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
 
+
         notificationService.delete(rider_id);
         Order order = orderService.updateRider(order_id, rider_id);
+        orderService.notificate(APP_NAMES.get(order.getApp_name()), order_id, new RestTemplate()) ;
         riderService.changeStatus(rider_id, "Delivering");
         return new ResponseEntity<>(order, HttpStatus.OK);
     }
