@@ -1,4 +1,4 @@
-package tqsua.OrdersServer.WebApp;
+package tqsua.OrdersServer.WebApp.Authentication;
 
 import io.cucumber.java.en.*;
 
@@ -10,6 +10,9 @@ import static org.hamcrest.core.Is.is;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import io.github.bonigarcia.seljup.SeleniumJupiter;
+import tqsua.OrdersServer.WebApp.HomePage;
+import tqsua.OrdersServer.WebApp.LoginPage;
+import tqsua.OrdersServer.WebApp.RegisterPage;
 
 @ExtendWith(SeleniumJupiter.class)
 public class AuthenticationSteps {

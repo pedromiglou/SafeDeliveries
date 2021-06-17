@@ -79,7 +79,6 @@ public class OrderController {
 
     @PostMapping("/orders/notificate")
     public ResponseEntity<Object> notificate(@RequestBody String order_id){
-        System.out.println(order_id);
         var order_json = new JSONObject(order_id);
         var order = orderService.getOrderById(order_json.getLong("order_id"));
         var message = "message";

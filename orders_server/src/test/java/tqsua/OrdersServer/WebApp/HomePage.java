@@ -129,4 +129,8 @@ public class HomePage {
         "window.sessionStorage.setItem('%s','%s');", "user_orders", json));
         driver.navigate().refresh();
     }
+
+    public void clickRequest(){
+        this.request_tab.click();
+    }
 }
