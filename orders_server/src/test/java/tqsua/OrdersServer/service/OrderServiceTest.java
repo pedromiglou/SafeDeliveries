@@ -202,5 +202,20 @@ class OrderServiceTest {
         reset(repository);
     }
     
+    @Test
+    void whenGetOrderByDeliverId_thenReturnCorrectResults() throws Exception {
+        Order order1 = new Order(40.0, 30.0, 40.1, 31.1, "Entregue", 12);
+
+        when(repository.getOrderByDeliverId(1)).thenReturn(order1);
+        assertThat(service.getOrderByDeliverId(1)).isEqualTo(order1);
+        reset(repository);
+    }
+
+    @Test
+    void whenGetOrderByDeliverIdNonExistent_thenReturnNull() throws Exception {
+        when(repository.getOrderByDeliverId(1)).thenReturn(null);
+        assertThat(service.getOrderByDeliverId(1)).isEqualTo(null);
+        reset(repository);
+    }
     
 }

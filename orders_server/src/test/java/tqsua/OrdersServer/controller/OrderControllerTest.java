@@ -219,4 +219,93 @@ class OrderControllerTest {
         reset(service);
     }
 
+    @Test
+    void whenNotificateOrder_thenReturnOk() throws Exception {
+        String body = "{\"order_id\": 3}";
+        Order order1 = new Order(40.2, 30.0, 40.1, 31.1, "PREPROCESSING", 1);
+        Set<Item> items = new HashSet<>();
+        Item item1 = new Item("Casaco", "Roupa", 12.0);
+        Item item2 = new Item("Telemovel", "Eletronica", 0.7);
+        items.add(item1);
+        items.add(item2);
+        order1.setItems(items);
+
+        given(service.getOrderByDeliverId(3)).willReturn(order1);
+
+        mvc.perform(post("/api/orders/notificate").contentType(MediaType.APPLICATION_JSON).header("Authorization", token )
+        .content(body))
+                .andExpect(status().isOk());
+        verify(service, VerificationModeFactory.times(1)).getOrderByDeliverId(3);
+        reset(service);
+    }
+
+    @Test
+    void whenNotificateNotExistentOrder_thenReturnBadRequest() throws Exception {
+        String body = "{\"order_id\": 3}";
+
+        given(service.getOrderByDeliverId(3)).willReturn(null);
+
+        mvc.perform(post("/api/orders/notificate").contentType(MediaType.APPLICATION_JSON).header("Authorization", token )
+        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Error.")));
+        verify(service, VerificationModeFactory.times(1)).getOrderByDeliverId(3);
+        reset(service);
+    }
+
+
+    @Test
+    void whenGetOrderByDeliverId_thenReturnOk() throws Exception {
+        Order order1 = new Order(40.2, 30.0, 40.1, 31.1, "PREPROCESSING", 1);
+        order1.setDeliver_id(34);
+        Set<Item> items = new HashSet<>();
+        Item item1 = new Item("Casaco", "Roupa", 12.0);
+        Item item2 = new Item("Telemovel", "Eletronica", 0.7);
+        items.add(item1);
+        items.add(item2);
+        order1.setItems(items);
+
+        given(service.getOrderByDeliverId(34)).willReturn(order1);
+
+        mvc.perform(get("/api/orders/34").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pick_up_lat", is(40.2)))
+                .andExpect(jsonPath("$.pick_up_lng", is(30.0)))
+                .andExpect(jsonPath("$.deliver_lat", is(40.1)))
+                .andExpect(jsonPath("$.deliver_lng", is(31.1)))
+                .andExpect(jsonPath("$.status", is("PREPROCESSING")));
+        verify(service, VerificationModeFactory.times(1)).getOrderByDeliverId(34);
+        reset(service);
+    }
+
+    @Test
+    void whenGetOrderByDeliverIdNotExistent_thenReturnNotFound() throws Exception {
+        given(service.getOrderByDeliverId(34)).willReturn(null);
+
+        mvc.perform(get("/api/orders/34").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", is("Not found")));
+        verify(service, VerificationModeFactory.times(1)).getOrderByDeliverId(34);
+        reset(service);
+    }
+
+    @Test
+    void whenGetOrderByDeliverIdInvalidToken_thenReturnNotFound() throws Exception {
+        Order order1 = new Order(40.2, 30.0, 40.1, 31.1, "PREPROCESSING", 2);
+        order1.setDeliver_id(34);
+        Set<Item> items = new HashSet<>();
+        Item item1 = new Item("Casaco", "Roupa", 12.0);
+        Item item2 = new Item("Telemovel", "Eletronica", 0.7);
+        items.add(item1);
+        items.add(item2);
+        order1.setItems(items);
+
+        given(service.getOrderByDeliverId(34)).willReturn(order1);
+
+        mvc.perform(get("/api/orders/34").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+        verify(service, VerificationModeFactory.times(1)).getOrderByDeliverId(34);
+        reset(service);
+    }
 }

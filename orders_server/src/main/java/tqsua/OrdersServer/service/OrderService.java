@@ -68,8 +68,7 @@ public class OrderService {
         return order;
     }
 
-    public Order getOrderById(long order_id){
-        Order order = orderRepository.getOrderByDeliverId(order_id);
-        return order;
+    public Order getOrderByDeliverId(long order_id){
+        return orderRepository.getOrderByDeliverId(order_id);
     }
 }

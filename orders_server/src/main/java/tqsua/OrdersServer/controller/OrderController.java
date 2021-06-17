@@ -59,9 +59,8 @@ public class OrderController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         String rider_id = authentication.getName();
-        System.out.println(rider_id + " " + o.getUser_id());
         if (!rider_id.equals(String.valueOf(o.getUser_id()))) {
-            response.put("message", "Unauthorized");
+            response.put(message, UNAUTHORIZED);
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
         var o1 = new Order(o.getPick_up_lat(), o.getPick_up_lng(), o.getDeliver_lat(), o.getDeliver_lng(), o.getStatus(), o.getUser_id());
@@ -86,7 +85,7 @@ public class OrderController {
     @PostMapping("/orders/notificate")
     public ResponseEntity<Object> notificate(@RequestBody String order_id){
         var order_json = new JSONObject(order_id);
-        var order = orderService.getOrderById(order_json.getLong("order_id"));
+        var order = orderService.getOrderByDeliverId(order_json.getLong("order_id"));
         var message = "message";
         HashMap<String, String> response = new HashMap<>();
         if (order == null){
@@ -101,7 +100,7 @@ public class OrderController {
     @GetMapping("/orders/{id}")
     public ResponseEntity<Object> getOrderById(Authentication authentication, @PathVariable(value="id") Long id){
         String user_id = authentication.getName();
-        var order_found = orderService.getOrderById(id);
+        var order_found = orderService.getOrderByDeliverId(id);
 
         if (order_found == null) {
             HashMap<String, String> response = new HashMap<>();
