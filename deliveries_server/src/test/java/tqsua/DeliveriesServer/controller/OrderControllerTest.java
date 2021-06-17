@@ -114,22 +114,25 @@ class OrderControllerTest {
         orderWeight.add(4);
 
         given(rider_service.getRiderById(1)).willReturn(rider);
-        given(service.getTotalOrders()).willReturn(3);
-        given(service.getPendingOrders()).willReturn(response);
+        given(service.getTotalOrders()).willReturn(4);
+        given(service.countOrders("Pending")).willReturn(2);
+        given(service.countOrders("Delivering")).willReturn(1);
         given(service.getOrdersLast7Days()).willReturn(orderLast7Days);
         given(service.getOrdersByWeight()).willReturn(orderWeight);
 
         mvc.perform(get("/api/private/orders/statistics").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.total_orders", is(3)))
+                .andExpect(jsonPath("$.total_orders", is(4)))
                 .andExpect(jsonPath("$.pending_orders", is(2)))
                 .andExpect(jsonPath("$.delivering_orders", is(1)))
+                .andExpect(jsonPath("$.completed_orders", is(1)))
                 .andExpect(jsonPath("$.orders_7_days", is(orderLast7Days)))
                 .andExpect(jsonPath("$.orders_by_weight", is(orderWeight)));
 
         verify(rider_service, VerificationModeFactory.times(1)).getRiderById(1);
         verify(service, VerificationModeFactory.times(1)).getTotalOrders();
-        verify(service, VerificationModeFactory.times(1)).getPendingOrders();
+        verify(service, VerificationModeFactory.times(1)).countOrders("Pending");
+        verify(service, VerificationModeFactory.times(1)).countOrders("Delivering");
         verify(service, VerificationModeFactory.times(1)).getOrdersLast7Days();
         verify(service, VerificationModeFactory.times(1)).getOrdersByWeight();
         reset(service);

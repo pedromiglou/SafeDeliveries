@@ -37,6 +37,9 @@ function Login() {
     }
 
     async function register() {
+      setSucessRegister(false);
+      setErrorRegister(false);
+      setErrorLogin(false);
       var response = await AuthService.register(
         document.getElementById("register_firstname_input").value,
         document.getElementById("register_lastname_input").value,
