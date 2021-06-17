@@ -100,27 +100,9 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                     max_capacity = v.getCapacity();
             }
             if (max_capacity != -1) {
-                orders = orderService.getPendingOrders(max_capacity);
-                ArrayList<Order> refused_orders = orderService.getRefusedOrders(rider.getId());
-                for (Order i : refused_orders) {
-                    orders.removeIf(item -> item.getOrder_id() == i.getOrder_id());
-                }
+                orders = getAvailableOrders(max_capacity, rider.getId());
                 if (orders.size() != 0) {
-                    Order final_order = orders.remove(0);
-                    double pick_up_lat = final_order.getPick_up_lat();
-                    double pick_up_lng = final_order.getPick_up_lng();
-                    double x1 = rider.getLat();
-                    double y1 = rider.getLng();
-                    double min_distance = Math.sqrt((pick_up_lat-x1)*(pick_up_lat-x1) + (pick_up_lng-y1)*(pick_up_lng-y1));
-                    for (Order o: orders) {
-                        pick_up_lat = o.getPick_up_lat();
-                        pick_up_lng = o.getPick_up_lng();
-                        double distance = Math.sqrt((pick_up_lat-x1)*(pick_up_lat-x1) + (pick_up_lng-y1)*(pick_up_lng-y1));
-                        if (distance < min_distance) {
-                            final_order = o;
-                            min_distance = distance;
-                        }
-                    }
+                    Order final_order = getBestOrder(orders, rider);
                     Notification notification_for_rider = new Notification(rider.getId(), final_order.getOrder_id());
                     this.notificationService.save(notification_for_rider);
                 }
@@ -140,5 +122,33 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String json = new ObjectMapper().writeValueAsString(map);
         res.getWriter().write(json);
         res.getWriter().flush();
+    }
+
+    public ArrayList<Order> getAvailableOrders(Double max_capacity, long id) throws IOException, InterruptedException {
+        ArrayList<Order> orders = orderService.getPendingOrders(max_capacity);
+        ArrayList<Order> refused_orders = orderService.getRefusedOrders(id);
+        for (Order i : refused_orders) {
+            orders.removeIf(item -> item.getOrder_id() == i.getOrder_id());
+        }
+        return orders;
+    }
+
+    public Order getBestOrder(ArrayList<Order> orders, Rider rider) {
+        Order final_order = orders.remove(0);
+        double pick_up_lat = final_order.getPick_up_lat();
+        double pick_up_lng = final_order.getPick_up_lng();
+        double x1 = rider.getLat();
+        double y1 = rider.getLng();
+        double min_distance = Math.sqrt((pick_up_lat-x1)*(pick_up_lat-x1) + (pick_up_lng-y1)*(pick_up_lng-y1));
+        for (Order o: orders) {
+            pick_up_lat = o.getPick_up_lat();
+            pick_up_lng = o.getPick_up_lng();
+            double distance = Math.sqrt((pick_up_lat-x1)*(pick_up_lat-x1) + (pick_up_lng-y1)*(pick_up_lng-y1));
+            if (distance < min_distance) {
+                final_order = o;
+                min_distance = distance;
+            }
+        }
+        return final_order;
     }
 }
