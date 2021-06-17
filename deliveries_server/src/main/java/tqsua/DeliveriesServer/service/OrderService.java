@@ -2,9 +2,7 @@ package tqsua.DeliveriesServer.service;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,9 +12,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.TreeMap;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import tqsua.DeliveriesServer.model.Order;
 import tqsua.DeliveriesServer.repository.OrderRepository;
@@ -149,22 +147,13 @@ public class OrderService {
         return this.orderRepository.save(order);
     }
 
-    public void notificate(String url, long order_id) throws IOException, InterruptedException{
+    public void notificate(String url, long order_id, RestTemplate restClient) throws IOException, InterruptedException, URISyntaxException{
         Map<Object, Object> data = new HashMap<>();
         data.put("order_id", order_id);
-        var objectMapper = new ObjectMapper();
-        var requestBody = objectMapper
-                .writerWithDefaultPrettyPrinter()
-                .writeValueAsString(data);
 
-        System.out.println(url + "/api/orders/notificate");
-        HttpRequest request = HttpRequest.newBuilder()
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .uri(URI.create(url + "/api/orders/notificate"))
-                .header("Content-type", "application/json")
-                .build();
-
-        System.out.println(request);
-        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        final String baseUrl = url + "/api/orders/notificate";
+        URI uri = new URI(baseUrl);
+        
+        restClient.postForEntity(uri, data, String.class);
     }
 }

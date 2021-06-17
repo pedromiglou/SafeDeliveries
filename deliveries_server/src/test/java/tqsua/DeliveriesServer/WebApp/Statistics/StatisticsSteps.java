@@ -6,7 +6,6 @@ import org.json.JSONException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import tqsua.DeliveriesServer.WebApp.HomePage;
-import tqsua.DeliveriesServer.WebApp.ProfilePage;
 import tqsua.DeliveriesServer.WebApp.StatisticsPage;
 
 import java.io.IOException;

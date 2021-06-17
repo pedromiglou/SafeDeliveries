@@ -203,23 +203,6 @@ public class OrderControllerIT {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is("Error. Invalid App name.")));
     }
-
-    @Test
-    void whenAcceptOrder_thenReturnResult() throws Exception {
-        Order order = createOrder(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
-        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
-        order = orderRepository.save(order);
-        rider = riderRepository.save(rider);
-        Notification notification = new Notification(rider.getId(), order.getOrder_id());
-        notificationRepository.save(notification);
-
-        token = getToken(String.valueOf(rider.getId()));
-
-        mvc.perform(post("/api/private/acceptorder?order_id=" + order.getOrder_id() + "&rider_id=" + rider.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", token ))
-                .andExpect(status().isOk());
-    }
     
     @Test
     void whenDeclineOrder_thenReturnResult() throws Exception {
