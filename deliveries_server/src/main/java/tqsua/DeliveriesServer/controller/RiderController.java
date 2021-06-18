@@ -95,11 +95,18 @@ public class RiderController {
     public ResponseEntity<Object> updateRider(Authentication authentication ,@PathVariable(value="id") Long id, @Valid @RequestBody RiderDTO rider) throws IOException, InterruptedException {
         
         String rider_id = authentication.getName();
+        HashMap<String, String> response = new HashMap<>();
 
         if (!rider_id.equals(String.valueOf(id))) {
-            HashMap<String, String> response = new HashMap<>();
             response.put(MESSAGE, UNAUTHORIZED);
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
+        Order order = orderService.getDeliveringOrderByRiderId(id);
+
+        if ( ((rider.getStatus() != null) && (rider.getStatus().equals("Online") || rider.getStatus().equals("Offline")) && order != null)) {
+            response.put(MESSAGE, "Cannot update status. Rider is delivering a order.");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
         Rider r = riderService.updateRider(id, rider);

@@ -10,7 +10,7 @@ Feature: Orders functionalities
     And I click Accept
     Then My status changed to Delivering
 
-  Scenario: Decline Notification
-    When I receive a notification of a order
-    And I click Decline
-    Then My status stays Online
+  #Scenario: Decline Notification
+  #  When I receive a notification of a order
+  #  And I click Decline
+  #  Then My status stays Online

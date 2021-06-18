@@ -87,38 +87,48 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         HashMap<String, String> map = new HashMap<>();
         
         Rider updatedRider = (Rider) auth.getPrincipal();
+
         RiderDTO r = new RiderDTO(null, null, null, null, null, "Online"); 
+
+        Order order = orderService.getDeliveringOrderByRiderId(updatedRider.getId());
+        // If rider is delivering a order, then the status stay Delivering
+        if (order != null) {
+            r.setStatus("Delivering");
+        }
+
         Rider rider = riderService.updateRider(updatedRider.getId(), r);
 
-        ArrayList<Order> orders;
-        try {
-            // Search for pending orders to assign the rider who just turned online
-            ArrayList<Vehicle> vehicles = vehicleService.getVehiclesByRiderId(rider.getId());
-            double max_capacity = -1;
-            for (Vehicle v: vehicles) {
-                if (v.getCapacity() > max_capacity)
-                    max_capacity = v.getCapacity();
-            }
-            if (max_capacity != -1) {
-                orders = getAvailableOrders(max_capacity, rider.getId());
-                if (orders.size() != 0) {
-                    Order final_order = getBestOrder(orders, rider);
-                    Notification notification_for_rider = new Notification(rider.getId(), final_order.getOrder_id());
-                    this.notificationService.save(notification_for_rider);
+        if (rider.getStatus().equals("Online")) {
+            ArrayList<Order> orders;
+            try {
+                // Search for pending orders to assign the rider who just turned online
+                ArrayList<Vehicle> vehicles = vehicleService.getVehiclesByRiderId(rider.getId());
+                double max_capacity = -1;
+                for (Vehicle v: vehicles) {
+                    if (v.getCapacity() > max_capacity)
+                        max_capacity = v.getCapacity();
                 }
+                if (max_capacity != -1) {
+                    orders = getAvailableOrders(max_capacity, rider.getId());
+                    if (orders.size() != 0) {
+                        Order final_order = getBestOrder(orders, rider);
+                        Notification notification_for_rider = new Notification(rider.getId(), final_order.getOrder_id());
+                        this.notificationService.save(notification_for_rider);
+                    }
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
         }
         
-        map.put("id", String.valueOf(updatedRider.getId()));
-        map.put("firstname", updatedRider.getFirstname());
-        map.put("lastname", updatedRider.getLastname());
-        map.put("email", updatedRider.getEmail());
-        map.put("status", updatedRider.getStatus());
-        map.put("rating", String.valueOf(updatedRider.getRating()));
+        map.put("id", String.valueOf(rider.getId()));
+        map.put("firstname", rider.getFirstname());
+        map.put("lastname", rider.getLastname());
+        map.put("email", rider.getEmail());
+        map.put("status", rider.getStatus());
+        map.put("rating", String.valueOf(rider.getRating()));
         map.put("token", token);
-        map.put("accountType", updatedRider.getAccountType());
+        map.put("accountType", rider.getAccountType());
         String json = new ObjectMapper().writeValueAsString(map);
         res.getWriter().write(json);
         res.getWriter().flush();

@@ -55,6 +55,8 @@ function App() {
                                                                     
   const [notificationInfo, setNotificationInfo] = useState(null);
 
+  const [modalErrorStatusShow, setModalErrorStatusShow] = useState(false);
+
   const MapLoader = withScriptjs(Map);
 
   async function acceptOrder(order_id) {
@@ -109,6 +111,30 @@ function App() {
         );
       }
 
+      function ErrorStatusModal(props) {
+        return (
+          <Modal
+            {...props}
+            size="lg"
+            aria-labelledby="contained-modal-title-vcenter"
+            centered
+          >
+            <Modal.Header>
+              <Modal.Title id="contained-modal-title-vcenter" >
+                Cannot change status!
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <p>You are currently delivering a order.</p>
+            </Modal.Body>
+            <Modal.Footer>
+              <button onClick={props.onHide} className="btn">Ok</button>
+            </Modal.Footer>
+          </Modal>
+        );
+      }
+    
+
   useEffect(() => {
 
     async function getNotification(userid) {
@@ -159,9 +185,14 @@ function App() {
   }
 
   async function changeStatus(id, status) {
-    await RiderService.changeStatus(id, status);
-    current_user.status = status
-    sessionStorage.setItem("user", JSON.stringify(current_user));
+    var res = await RiderService.changeStatus(id, status);
+    if (!res.error) {
+      current_user.status = status
+      sessionStorage.setItem("user", JSON.stringify(current_user));
+      setState(status);
+    } else {
+      setModalErrorStatusShow(true);
+    }
   }
 
   async function logout(){
@@ -184,6 +215,10 @@ function App() {
         order_id={notificationInfo.order_id}
       />
     }
+    <ErrorStatusModal
+      show={modalErrorStatusShow}
+      onHide={() => setModalErrorStatusShow(false)}
+    />
     <navbar>
         <ul className="nav-list">
           <li className="nav-item">
@@ -250,17 +285,17 @@ function App() {
                   <h5>Status</h5>
                   <hr></hr>
                   <div className="Status">
-                    <div id="state-online" className="Status-item" onClick={() => {changeStatus(current_user.id, "Online"); setState("Online")}}>
+                    <div id="state-online" className="Status-item" onClick={() => {changeStatus(current_user.id, "Online");}}>
                       <BsIcons.BsCircleFill className="state-icon online"/>
                       <span>Online</span>
                       
                     </div>
-                    <div id="state-delivering" className="Status-item" onClick={() => {changeStatus(current_user.id, "Delivering"); setState("Delivering")}}>
+                    <div id="state-delivering" className="Status-item" onClick={() => {changeStatus(current_user.id, "Delivering");}}>
                       <BsIcons.BsCircleFill className="state-icon delivering"/>
                       <span>Delivering</span>
                       
                     </div>
-                    <div id="state-off" className="Status-item" onClick={() => {changeStatus(current_user.id, "Offline"); setState("Offline")}}>
+                    <div id="state-off" className="Status-item" onClick={() => {changeStatus(current_user.id, "Offline");}}>
                       <BsIcons.BsCircle className="state-icon off"/>
                       <span>Offline</span>
                       

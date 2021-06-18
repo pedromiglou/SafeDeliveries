@@ -156,4 +156,8 @@ public class OrderService {
         
         restClient.postForEntity(uri, data, String.class);
     }
+
+    public Order getDeliveringOrderByRiderId(long rider_id) {
+        return this.orderRepository.findDeliveringOrderByRiderId(rider_id);
+    }
 }

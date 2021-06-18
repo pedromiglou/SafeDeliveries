@@ -20,14 +20,18 @@ class RiderService {
                 status: newStatus
             }
 
-            await fetch(url, {
+            var res = await fetch(url, {
                 method:'PUT',
                 headers:{'Content-type':'application/json',
                          'Authorization': 'Bearer ' + JSON.parse(sessionStorage.getItem("user"))["token"]},
                 body: JSON.stringify(rider)
             });
+
+            if (res.status !== 200) {
+                return {error: true}
+            }
     
-            return;       
+            return res;       
         }
         
         async changeRider(id, fname, lname, email) {
