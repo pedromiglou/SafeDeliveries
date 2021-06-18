@@ -65,6 +65,9 @@ public class HomePage {
     @FindBy(id = "decline_order_button")
     private WebElement decline_order_button;
 
+    @FindBy(id = "error_status_message")
+    private WebElement error_status_message;
+
     @FindBy(id = "logout")
     private WebElement logout;
     private final HttpClient httpClient = HttpClient.newBuilder()
@@ -91,6 +94,10 @@ public class HomePage {
 
     public String getAdminText(){
         return this.admin_text.getText();
+    }
+
+    public String getErrorStatus(){
+        return this.error_status_message.getText();
     }
 
     public String getHistoryTab(){
@@ -223,5 +230,9 @@ public class HomePage {
                 break;
         }
         driver.findElement(By.id("perfil-dropdown")).click();
+    }
+
+    public void changeStatusToOnlineWhenDelivering() {
+        driver.findElement(By.id("state-online")).click();
     }
 }

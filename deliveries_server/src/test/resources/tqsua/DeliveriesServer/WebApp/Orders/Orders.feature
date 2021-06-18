@@ -10,6 +10,11 @@ Feature: Orders functionalities
     And I click Accept
     Then My status changed to Delivering
 
+  Scenario: Change status
+    And I have status Delivering
+    When I change my status to Online
+    Then Should appear a modal with a error message
+
   #Scenario: Decline Notification
   #  When I receive a notification of a order
   #  And I click Decline

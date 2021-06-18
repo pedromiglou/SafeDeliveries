@@ -125,7 +125,7 @@ function App() {
               </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <p>You are currently delivering a order.</p>
+              <p id="error_status_message">You are currently delivering a order.</p>
             </Modal.Body>
             <Modal.Footer>
               <button onClick={props.onHide} className="btn">Ok</button>
