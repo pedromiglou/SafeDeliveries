@@ -46,6 +46,9 @@ public class Order implements Serializable{
     @Column(name = "status", nullable = false)
     private String status;
 
+    @Column(name = "rating")
+    private int rating;
+
     @CreationTimestamp
     @Column(name="creation_date", updatable = false)
     private LocalDateTime creation_date;
@@ -83,6 +86,15 @@ public class Order implements Serializable{
 
     public void setRider_id(long rider_id) {
         this.rider_id = rider_id;
+    }
+
+
+    public int getRating() {
+        return this.rating;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
     }
 
 
@@ -173,6 +185,7 @@ public class Order implements Serializable{
             ", weight='" + getWeight() + "'" +
             ", app_name='" + getApp_name() + "'" +
             ", status='" + getStatus() + "'" +
+            ", rating='" + getRating() + "'" +
             "}";
     }
 

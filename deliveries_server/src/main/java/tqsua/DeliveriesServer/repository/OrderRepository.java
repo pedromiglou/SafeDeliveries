@@ -30,4 +30,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>{
 
 	@Query(value = "SELECT * FROM orders WHERE status = 'Delivering' AND rider_id = :id", nativeQuery = true)
 	Order findDeliveringOrderByRiderId(long id);
+
+	@Query(value = "SELECT * FROM orders WHERE status = 'Finished' AND rider_id = :rider_id", nativeQuery = true)
+	ArrayList<Order> findFinishedByRiderId(long rider_id);
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.json.JSONObject;
 
 import javax.validation.Valid;
 
@@ -29,6 +30,7 @@ import tqsua.DeliveriesServer.model.Notification;
 import tqsua.DeliveriesServer.model.Order;
 import tqsua.DeliveriesServer.model.OrderDTO;
 import tqsua.DeliveriesServer.model.Rider;
+import tqsua.DeliveriesServer.model.RiderDTO;
 import tqsua.DeliveriesServer.service.NotificationService;
 import tqsua.DeliveriesServer.service.OrderService;
 import tqsua.DeliveriesServer.service.RiderService;
@@ -142,6 +144,41 @@ public class OrderController {
         orderService.notificate(APP_NAMES.get(order.getApp_name()), order_id, new RestTemplate()) ;
         riderService.changeStatus(rider_id, "Delivering");
         return new ResponseEntity<>(order, HttpStatus.OK);
+    }
+
+    @PostMapping(path="/order/confirm")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<Object> confirmDeliveryOrder(@RequestBody String info) throws IOException, InterruptedException, URISyntaxException {
+        HashMap<String, Object> response = new HashMap<>();
+        var json = new JSONObject(info);
+        long order_id = json.getLong("order_id");
+        int rating = json.getInt("rating");
+
+        if (rating < 1 || rating > 5) {
+            response.put(MESSAGE, "Invalid rating value.");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        Order order = orderService.getOrderById(order_id);
+        if (order == null) {
+            response.put(MESSAGE, "Not found");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        // get rider_id
+        long rider_id = order.getRider_id();
+
+        // get all orders finished made by this rider
+        ArrayList<Order> orders = orderService.getFinishedOrdersByRiderId(rider_id);
+        int countOrders = orders.size() + 1;
+        double sumRating = orders.stream().mapToDouble(Order::getRating).sum() + rating;
+        // update Rider status to Online and update Rider Rating
+        riderService.updateRider(rider_id, new RiderDTO(null, null, null, null, sumRating/countOrders, "Online"));
+
+        // update order status to Finished and rating
+        Order updatedOrder = orderService.updateStatus(order_id);
+        updatedOrder = orderService.updateRating(order_id, rating);
+
+        response.put("rating", updatedOrder.getRating());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping(path="/private/declineorder")

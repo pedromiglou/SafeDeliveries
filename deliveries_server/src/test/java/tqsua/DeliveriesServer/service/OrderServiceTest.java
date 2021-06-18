@@ -192,12 +192,41 @@ class OrderServiceTest {
     }
 
     @Test
+    void whenUpdateRating_updateRating() {
+        Order order1 = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+
+        when(repository.findByPk(1)).thenReturn(order1);
+        order1.setRating(5);
+        when(repository.save(order1)).thenReturn(order1);
+
+        assertThat(service.updateRating(1, 5)).isEqualTo(order1);
+        reset(repository);
+    }
+    
+
+    @Test
     void whenGetDeliveringOrderByRiderId_ThenReturnResult() {
         Order order1 = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
         order1.setStatus("Delivering");
 
         when(repository.findDeliveringOrderByRiderId(1)).thenReturn(order1);
         assertThat(service.getDeliveringOrderByRiderId(1)).isEqualTo(order1);
+        reset(repository);
+    }
+
+    @Test
+    void whenGetFinishedOrderByRiderId_ThenReturnResult() {
+        Order order1 = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order1.setStatus("Finished");
+        Order order2 = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order2.setStatus("Finished");
+
+        ArrayList<Order> response = new ArrayList<>();
+        response.add(order1);
+        response.add(order2); 
+
+        when(repository.findFinishedByRiderId(1)).thenReturn(response);
+        assertThat(service.getFinishedOrdersByRiderId(1)).isEqualTo(response);
         reset(repository);
     }
     

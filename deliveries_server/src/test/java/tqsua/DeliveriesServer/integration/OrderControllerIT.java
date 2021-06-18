@@ -221,6 +221,32 @@ public class OrderControllerIT {
                 .andExpect(status().isOk());
     } 
 
+    @Test
+    void whenConfirmDeliveryOrder_thenReturnOk() throws Exception {
+        
+        Order order = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order.setOrder_id(3);
+        order.setStatus("Delivering");
+        order = orderRepository.save(order);
+
+        String body = "{\"order_id\": " + order.getOrder_id() + ", \"rating\": 5}";
+
+        Order order1 = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order1.setStatus("Finished");
+        order1.setRating(5);
+        Order order2 = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order2.setStatus("Finished");
+        order2.setRating(5);
+        orderRepository.save(order1);
+        orderRepository.save(order2);
+
+        mvc.perform(post("/api/order/confirm").contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.rating", is(5)));
+    }
+
+
     public Rider createRider(String firstname, String lastname, String email, String password, double rating, String status, String account_type) {
         Rider rider = new Rider(firstname, lastname, email, password, rating, status);
         rider.setAccountType(account_type);
@@ -240,6 +266,7 @@ public class OrderControllerIT {
     public Order createOrder(int rider_id, Double pick_up_lat, Double pick_up_lng, Double deliver_lat, Double deliver_lng, Double weight, String app_name) {
         Order o1 = new Order(rider_id, pick_up_lat, pick_up_lng, deliver_lat, deliver_lng, weight, app_name);
         o1.setStatus("Pending");
+        o1.setRating(5);
         return o1;
     }
 }

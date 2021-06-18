@@ -83,6 +83,21 @@ class OrderRepositoryTest {
         assertThat(found).isEqualTo(order1);
     }
 
+    @Test
+    void whenFindFinishedByRiderId_thenReturnCorrectResults() throws IOException, InterruptedException {
+        Order order1 = createOrder(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order1.setStatus("Finished");
+        Order order2 = createOrder(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order2.setStatus("Delivering");
+        entityManager.persistAndFlush(order1);
+        entityManager.persistAndFlush(order2);
+
+        ArrayList<Order> response = new ArrayList<>();
+        response.add(order1);
+        
+        ArrayList<Order> found = repository.findFinishedByRiderId(1);
+        assertThat(found).isEqualTo(response);
+    }
 
 
     public Order createOrder(int rider_id, Double pick_up_lat, Double pick_up_lng, Double deliver_lat, Double deliver_lng, Double weight, String app_name ) {
