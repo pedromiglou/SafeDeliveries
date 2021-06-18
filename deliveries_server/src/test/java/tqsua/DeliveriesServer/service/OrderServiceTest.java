@@ -190,5 +190,15 @@ class OrderServiceTest {
         assertThat(service.updateRider(1, 2)).isEqualTo(order1);
         reset(repository);
     }
+
+    @Test
+    void whenGetDeliveringOrderByRiderId_ThenReturnResult() {
+        Order order1 = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order1.setStatus("Delivering");
+
+        when(repository.findDeliveringOrderByRiderId(1)).thenReturn(order1);
+        assertThat(service.getDeliveringOrderByRiderId(1)).isEqualTo(order1);
+        reset(repository);
+    }
     
 }

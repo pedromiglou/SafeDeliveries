@@ -28,4 +28,6 @@ public interface OrderRepository extends JpaRepository<Order, Long>{
 	@Query(value = "SELECT count(*) FROM orders WHERE status = :status", nativeQuery = true)
 	int countOrders(String status);
 
+	@Query(value = "SELECT * FROM orders WHERE status = 'Delivering' AND rider_id = :id", nativeQuery = true)
+	Order findDeliveringOrderByRiderId(long id);
 }

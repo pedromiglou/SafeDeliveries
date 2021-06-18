@@ -9,8 +9,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import tqsua.DeliveriesServer.DeliveriesServerApplication;
 import tqsua.DeliveriesServer.JsonUtil;
+import tqsua.DeliveriesServer.model.Order;
 import tqsua.DeliveriesServer.model.Rider;
 import tqsua.DeliveriesServer.model.RiderDTO;
+import tqsua.DeliveriesServer.repository.OrderRepository;
 import tqsua.DeliveriesServer.repository.RiderRepository;
 import tqsua.DeliveriesServer.repository.VehicleRepository;
 import tqsua.DeliveriesServer.security.SecurityConstants;
@@ -38,6 +40,9 @@ public class RiderControllerIT {
 
     @Autowired
     private VehicleRepository vehicleRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
     String token = this.getToken("1");
 
@@ -161,6 +166,26 @@ public class RiderControllerIT {
                 .content(JsonUtil.toJson(newDetails))
                 .header("Authorization", token ))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void whenUpdateRiderStatusWhenDeliveringAOrder_thenReturnBadRequest() throws Exception {
+        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Delivering", "User");
+        riderRepository.save(rider);
+        Order order = new Order(rider.getId(), 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order.setStatus("Delivering");
+        orderRepository.save(order);
+        RiderDTO newDetails = createRiderDTO(null, null, null, null, null, "Online");
+
+        token = getToken(String.valueOf(rider.getId()));
+
+        //with all arguments
+        mvc.perform(put("/api/private/rider/"+String.valueOf(rider.getId())).contentType(MediaType.APPLICATION_JSON)
+                .content(JsonUtil.toJson(newDetails))
+                .header("Authorization", token ))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Cannot update status. Rider is delivering a order.")));
+
     }
 
     @Test

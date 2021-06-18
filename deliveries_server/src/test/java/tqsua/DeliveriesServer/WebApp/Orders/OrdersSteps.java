@@ -126,4 +126,25 @@ public class OrdersSteps {
         driver.close();
     }
 
+    @And("I have status Delivering")
+    public void status_is_delivering() {
+        assertThat(home.checkStatus("Delivering"), is(true));
+    }
+
+    @And("I change my status to Online")
+    public void change_status_to_online() {
+        home.clickLogo();
+        home.changeStatusToOnlineWhenDelivering();
+    }
+
+    @Then("Should appear a modal with a error message")
+    public void modal_error_message() {
+        {
+            WebDriverWait wait = new WebDriverWait(driver, 30);
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.id("error_status_message")));
+        }
+        assertThat(home.getErrorStatus(), is("You are currently delivering a order."));
+        driver.close();
+    }
+
 }

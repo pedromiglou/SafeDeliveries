@@ -247,6 +247,19 @@ class RiderControllerTest {
 
     }
 
+    @Test
+    void whenUpdateRiderStatusWhenHeIsDeliveringAOrder_thenReturnBadRequest() throws Exception {
+        RiderDTO newDetails = createRiderDTO(null, null, null, null, null, "Online");
+        Order order = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order.setStatus("Delivering");
+
+        given(order_service.getDeliveringOrderByRiderId(1)).willReturn(order);
+        //with all arguments
+        mvc.perform(put("/api/private/rider/1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ).content(JsonUtil.toJson(newDetails)))
+                .andExpect(status().isBadRequest());
+        verify(order_service, VerificationModeFactory.times(1)).getDeliveringOrderByRiderId(1);
+    }
+
     public Rider createRider(String firstname, String lastname, String email, String password, double rating, String status, String account_type) {
         Rider rider = new Rider(firstname, lastname, email, password, rating, status);
         rider.setAccountType(account_type);
