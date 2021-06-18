@@ -41,6 +41,7 @@ public class RiderController {
 
     private static final String MESSAGE = "message";
     private static final String UNAUTHORIZED = "Unauthorized";
+    private static final String ONLINE = "Online";
 
     //@CrossOrigin(origins = "http://localhost:4200")
     @GetMapping(path="/private/riders")
@@ -64,7 +65,7 @@ public class RiderController {
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
 
-        int onlineRiders = riderService.getRidersByState("Online");
+        int onlineRiders = riderService.getRidersByState(ONLINE);
         int offlineRiders = riderService.getRidersByState("Offline");
         int deliveringRiders = riderService.getRidersByState("Delivering");
         int totalRiders = onlineRiders + offlineRiders + deliveringRiders;
@@ -93,7 +94,6 @@ public class RiderController {
 
     @PutMapping(path="/private/rider/{id}")
     public ResponseEntity<Object> updateRider(Authentication authentication ,@PathVariable(value="id") Long id, @Valid @RequestBody RiderDTO rider) throws IOException, InterruptedException {
-        
         String rider_id = authentication.getName();
         HashMap<String, String> response = new HashMap<>();
 
@@ -104,7 +104,7 @@ public class RiderController {
 
         Order order = orderService.getDeliveringOrderByRiderId(id);
 
-        if ( ((rider.getStatus() != null) && (rider.getStatus().equals("Online") || rider.getStatus().equals("Offline")) && order != null)) {
+        if ( ((rider.getStatus() != null) && (rider.getStatus().equals(ONLINE) || rider.getStatus().equals("Offline")) && order != null)) {
             response.put(MESSAGE, "Cannot update status. Rider is delivering a order.");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
@@ -113,13 +113,8 @@ public class RiderController {
         if (r == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         
         // When Rider turns Online, then search for pending orders
-        if (rider.getStatus() != null && rider.getStatus().equals("Online")) {
-            ArrayList<Vehicle> vehicles = vehicleService.getVehiclesByRiderId(r.getId());
-            double max_capacity = -1;
-            for (Vehicle v: vehicles) {
-                if (v.getCapacity() > max_capacity)
-                    max_capacity = v.getCapacity();
-            }
+        if (rider.getStatus() != null && rider.getStatus().equals(ONLINE)) {
+            double max_capacity = getMaxCapacity(r.getId());
             if (max_capacity != -1) {
                 ArrayList<Order> orders = orderService.getPendingOrders(max_capacity);
                 ArrayList<Order> refused_orders = orderService.getRefusedOrders(r.getId());
@@ -152,5 +147,15 @@ public class RiderController {
             }
         }
         return final_order;
+    }
+
+    public double getMaxCapacity(long rider_id) {
+        ArrayList<Vehicle> vehicles = vehicleService.getVehiclesByRiderId(rider_id);
+        double max_capacity = -1;
+        for (Vehicle v: vehicles) {
+            if (v.getCapacity() > max_capacity)
+                max_capacity = v.getCapacity();
+        }
+        return max_capacity;
     }
 }
