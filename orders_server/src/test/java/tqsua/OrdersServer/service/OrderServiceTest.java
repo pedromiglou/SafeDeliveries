@@ -218,4 +218,47 @@ class OrderServiceTest {
         reset(repository);
     }
     
+
+    @Test
+    void whenConfirmDelivery_thenReturnCorrectResults() throws Exception {
+        Map<Object, Object> data = new HashMap<>();
+        data.put("order_id", 3L);
+        data.put("rating", 4);
+
+        URI uri = new URI("http://localhost:8080/api/order/confirm");
+
+        when(restTemplate.postForEntity(uri, data, String.class))
+            .thenReturn(new ResponseEntity<String>("{\"rating\": \"4\"}", HttpStatus.OK));
+
+        assertThat(service.confirm(3, 4, restTemplate)).isEqualTo(4);
+        reset(repository);
+    }
+
+    @Test
+    void whenConfirmDeliveryWithErrorConnectingToSafeDeliveries_thenReturnCorrectResults() throws Exception {
+        Map<Object, Object> data = new HashMap<>();
+        data.put("order_id", 3L);
+        data.put("rating", 4);
+
+        URI uri = new URI("http://localhost:8080/api/order/confirm");
+
+        when(restTemplate.postForEntity(uri, data, String.class))
+            .thenReturn(new ResponseEntity<String>("{\"message\": \"Not found\"}", HttpStatus.NOT_FOUND));
+
+        assertThat(service.confirm(3, 4, restTemplate)).isEqualTo(null);
+        reset(repository);
+    }
+
+    @Test
+    void whenGetOrdersByUserId_thenReturnCorrectResults() throws Exception {
+        ArrayList<Order> response = new ArrayList<>();
+        Order order1 = new Order(40.0, 30.0, 40.1, 31.1, "Entregue", 12);
+        Order order2 = new Order(42.0, 10.0, 30.1, 31.1, "Entregue", 12);
+        response.add(order1);
+        response.add(order2);
+
+        when(repository.getOrdersByUserId(12)).thenReturn(response);
+        assertThat(service.getOrdersByUserId(12)).isEqualTo(response);
+        reset(repository);
+    }
 }

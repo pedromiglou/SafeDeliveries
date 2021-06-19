@@ -23,7 +23,15 @@
 }
 
 .list-item > *{
-    flex-basis: 19%;
+    flex: 1 1 15%;
+}
+
+.list-item > :nth-child(3) {
+    flex: 1 1 17%;
+}
+
+.list-item > :nth-child(4) {
+    flex: 1 1 17%;
 }
 
 .list-item:hover{

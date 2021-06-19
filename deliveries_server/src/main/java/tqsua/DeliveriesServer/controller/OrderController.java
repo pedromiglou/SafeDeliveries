@@ -152,8 +152,7 @@ public class OrderController {
         HashMap<String, Object> response = new HashMap<>();
         var json = new JSONObject(info);
         long order_id = json.getLong("order_id");
-        int rating = json.getInt("rating");
-
+        int rating = (int) json.getLong("rating");
         if (rating < 1 || rating > 5) {
             response.put(MESSAGE, "Invalid rating value.");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -172,7 +171,7 @@ public class OrderController {
         double sumRating = orders.stream().mapToDouble(Order::getRating).sum() + rating;
         // update Rider status to Online and update Rider Rating
         riderService.updateRider(rider_id, new RiderDTO(null, null, null, null, sumRating/countOrders, "Online"));
-
+        
         // update order status to Finished and rating
         Order updatedOrder = orderService.updateStatus(order_id);
         updatedOrder = orderService.updateRating(order_id, rating);
