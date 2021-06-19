@@ -55,7 +55,7 @@ function History() {
           }
         }
         getOrdersByUser();
-      }, []);
+      }, [current_user]);
 
     return (
       <>
