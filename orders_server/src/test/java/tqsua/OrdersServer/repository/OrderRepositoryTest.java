@@ -51,13 +51,12 @@ class OrderRepositoryTest {
     @Test
     void whengetOrdersByUserId_thenReturnCorrectResults() throws IOException, InterruptedException {
         Order order1 = new Order(40.0, 30.0, 40.1, 31.1, "Entregue", 12);
-        Order order2 = new Order(41.0, 31.0, 41.1, 32.1, "Entregue", 12);
+        Order order2 = new Order(41.0, 31.0, 41.1, 32.1, "Entregue", 11);
         entityManager.persistAndFlush(order1);
         entityManager.persistAndFlush(order2);
         
         ArrayList<Order> response = new ArrayList<>();
         response.add(order1);
-        response.add(order2);
 
         ArrayList<Order> found = repository.getOrdersByUserId(12);
         assertThat(found).isEqualTo(response);

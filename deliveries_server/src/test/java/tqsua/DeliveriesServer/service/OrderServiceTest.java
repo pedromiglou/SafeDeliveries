@@ -229,5 +229,19 @@ class OrderServiceTest {
         assertThat(service.getFinishedOrdersByRiderId(1)).isEqualTo(response);
         reset(repository);
     }
+
+    @Test
+    void whenGetOrdersByRiderId_ThenReturnResult() {
+        Order order1 = new Order(12, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        Order order2 = new Order(12, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+
+        ArrayList<Order> response = new ArrayList<>();
+        response.add(order1);
+        response.add(order2); 
+
+        when(repository.getOrdersByRiderId(12)).thenReturn(response);
+        assertThat(service.getOrdersByRiderId(12)).isEqualTo(response);
+        reset(repository);
+    }
     
 }

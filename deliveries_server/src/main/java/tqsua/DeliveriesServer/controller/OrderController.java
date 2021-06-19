@@ -14,6 +14,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -178,6 +179,20 @@ public class OrderController {
 
         response.put("rating", updatedOrder.getRating());
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/private/rider/{id}/orders")
+    public ResponseEntity<Object> getOrdersByUserId(Authentication authentication, @PathVariable(value="id") Long id){
+        String rider_id = authentication.getName();
+        if (!rider_id.equals(String.valueOf(id))) {
+            HashMap<String, String> response = new HashMap<>();
+            response.put(MESSAGE, UNAUTHORIZED);
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
+        ArrayList<Order> orders = orderService.getOrdersByRiderId(id);
+
+        return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
     @PostMapping(path="/private/declineorder")

@@ -246,6 +246,36 @@ public class OrderControllerIT {
                 .andExpect(jsonPath("$.rating", is(5)));
     }
 
+    @Test
+    void whenGetOrdersByRiderId_thenReturnOk() throws Exception {
+        Order order1 = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order1.setStatus("Finished");
+        Order order2 = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order2.setStatus("Finished");
+        orderRepository.save(order1);
+        orderRepository.save(order2);
+
+        mvc.perform(get("/api/private/rider/1/orders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].pick_up_lat", is(order1.getPick_up_lat())))
+                .andExpect(jsonPath("$[0].pick_up_lng", is(order1.getPick_up_lng())))
+                .andExpect(jsonPath("$[0].deliver_lat", is(order1.getDeliver_lat())))
+                .andExpect(jsonPath("$[0].deliver_lng", is(order1.getDeliver_lng())))
+                .andExpect(jsonPath("$[0].status", is(order1.getStatus())))
+                .andExpect(jsonPath("$[1].pick_up_lat", is(order2.getPick_up_lat())))
+                .andExpect(jsonPath("$[1].pick_up_lng", is(order2.getPick_up_lng())))
+                .andExpect(jsonPath("$[1].deliver_lat", is(order2.getDeliver_lat())))
+                .andExpect(jsonPath("$[1].deliver_lng", is(order2.getDeliver_lng())))
+                .andExpect(jsonPath("$[1].status", is(order2.getStatus())));
+    }
+
+    @Test
+    void whenGetOrdersByRiderIdWithInvalidToken_thenReturnUnauthorized() throws Exception {
+        mvc.perform(get("/api/private/rider/3/orders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+    }
+
 
     public Rider createRider(String firstname, String lastname, String email, String password, double rating, String status, String account_type) {
         Rider rider = new Rider(firstname, lastname, email, password, rating, status);

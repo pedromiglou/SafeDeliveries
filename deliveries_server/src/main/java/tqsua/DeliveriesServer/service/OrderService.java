@@ -176,4 +176,8 @@ public class OrderService {
     public ArrayList<Order> getFinishedOrdersByRiderId(long rider_id) {
         return this.orderRepository.findFinishedByRiderId(rider_id);
     }
+
+    public ArrayList<Order> getOrdersByRiderId(long rider_id) {
+        return this.orderRepository.getOrdersByRiderId(rider_id);
+    }
 }
