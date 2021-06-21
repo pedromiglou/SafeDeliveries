@@ -34,6 +34,15 @@ function Chart(props){
                         y: {
                             beginAtZero: true
                         }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: props.title,
+                            font: {
+                                size: 35
+                            }
+                        }
                     }
                     
                 }}
@@ -55,9 +64,20 @@ function Chart(props){
                     }]
                 }}
                 options= {{
+                    responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         y: {
                             beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: props.title,
+                            font: {
+                                size: 35
+                            }
                         }
                     }
                 }}

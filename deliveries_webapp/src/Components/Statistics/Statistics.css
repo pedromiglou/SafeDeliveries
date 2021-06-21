@@ -4,18 +4,19 @@
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
+    gap: 5%;
 }
 
 .admin-statistics > * {
-    flex: 1 1 50%;
+    flex: 1 1 47.5%;
 }
 
 .admin-statistics > :first-child{
-    flex: 1 1 70%;
+    flex: 1 1 60%;
 }
 
 .admin-statistics > :nth-child(2){
-    flex: 1 1 30%;
+    flex: 1 1 35%;
 }
 
 .admin-orders{
@@ -48,5 +49,7 @@
     width: 70%;
     min-width: 300px;
     max-width: 715px;
+    min-height: 300px;
     height: auto;
+    margin: 2em 0;
 }
