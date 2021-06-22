@@ -32,6 +32,41 @@ class OrderService {
         return res.json();
     }
 
+    async getOrdersByUser(user_id) {
+        try {
+            var res = await fetch('http://localhost:8080/api/private/rider/' + user_id + '/orders/', {
+                method:'GET',
+                headers:{'Content-type':'application/json',
+                    'Authorization': 'Bearer ' + JSON.parse(sessionStorage.getItem("user"))["token"]}
+            })
+        } catch {
+            return {error: true, message: "An error occured during the request."};
+        }
+        var json = await res.json();
+        if (res.status !== 200) {
+            return {error: true, message: json.message};
+        }
+        return json
+    }
+
+    async getOrderById(order_id) {
+        try {
+            var res = await fetch('http://localhost:8080/api/private/orders/' + order_id, {
+                method:'GET',
+                headers:{'Content-type':'application/json',
+                    'Authorization': 'Bearer ' + JSON.parse(sessionStorage.getItem("user"))["token"]}
+            })
+        } catch {
+            return {error: true, message: "An error occured during the request."};
+        }
+        var json = await res.json();
+        if (res.status !== 200) {
+            return {error: true, message: json.message};
+        }
+        return json
+    }
+
+
 }
 
 export default new OrderService();

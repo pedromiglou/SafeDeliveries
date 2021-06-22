@@ -337,6 +337,99 @@ class OrderControllerTest {
         reset(notification_service);
     } 
 
+    @Test
+    void whenConfirmDeliveryOrder_thenReturnOk() throws Exception {
+        String body = "{\"order_id\": 3, \"rating\": 5}";
+        Order order = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order.setOrder_id(3);
+        order.setStatus("Delivering");
+
+        ArrayList<Order> orders = new ArrayList<>();
+        Order order1 = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order1.setRating(5);
+        Order order2 = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order2.setRating(5);
+        orders.add(order1);
+        orders.add(order2);
+        
+        given(service.getOrderById(3)).willReturn(order);
+        
+        given(service.getFinishedOrdersByRiderId(1)).willReturn(orders);
+        order.setStatus("Finished");
+        given(service.updateStatus(3)).willReturn(order);
+        order.setRating(5);
+        given(service.updateRating(3, 5)).willReturn(order);
+
+        mvc.perform(post("/api/order/confirm").contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.rating", is(5)));
+        verify(service, VerificationModeFactory.times(1)).getOrderById(3);
+        verify(service, VerificationModeFactory.times(1)).getFinishedOrdersByRiderId(1);
+        verify(service, VerificationModeFactory.times(1)).updateStatus(3);
+        verify(service, VerificationModeFactory.times(1)).updateRating(3, 5);
+        reset(service);
+    }
+    
+    @Test
+    void whenConfirmDeliveryOrderWithInvalidRating_thenReturnBadRequest() throws Exception {
+        String body = "{\"order_id\": 3, \"rating\": -5}";
+
+        mvc.perform(post("/api/order/confirm").contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is("Invalid rating value.")));
+        reset(service);
+    }
+
+    @Test
+    void whenConfirmDeliveryNotExistentOrder_thenReturnNotFound() throws Exception {
+        String body = "{\"order_id\": 3, \"rating\": 5}";
+
+        given(service.getOrderById(3)).willReturn(null);
+
+        mvc.perform(post("/api/order/confirm").contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", is("Not found")));
+        reset(service);
+    }
+
+    @Test
+    void whenGetOrdersByRiderId_thenReturnOk() throws Exception {
+        ArrayList<Order> orders = new ArrayList<>();
+        Order order1 = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        Order order2 = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        orders.add(order1);
+        orders.add(order2);
+
+        given(service.getOrdersByRiderId(1)).willReturn(orders);
+
+        mvc.perform(get("/api/private/rider/1/orders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].pick_up_lat", is(order1.getPick_up_lat())))
+                .andExpect(jsonPath("$[0].pick_up_lng", is(order1.getPick_up_lng())))
+                .andExpect(jsonPath("$[0].deliver_lat", is(order1.getDeliver_lat())))
+                .andExpect(jsonPath("$[0].deliver_lng", is(order1.getDeliver_lng())))
+                .andExpect(jsonPath("$[0].status", is(order1.getStatus())))
+                .andExpect(jsonPath("$[1].pick_up_lat", is(order2.getPick_up_lat())))
+                .andExpect(jsonPath("$[1].pick_up_lng", is(order2.getPick_up_lng())))
+                .andExpect(jsonPath("$[1].deliver_lat", is(order2.getDeliver_lat())))
+                .andExpect(jsonPath("$[1].deliver_lng", is(order2.getDeliver_lng())))
+                .andExpect(jsonPath("$[1].status", is(order2.getStatus())));
+        verify(service, VerificationModeFactory.times(1)).getOrdersByRiderId(1);
+        reset(service);
+    }
+
+    @Test
+    void whenGetOrdersByRiderIdWithInvalidToken_thenReturnUnauthorized() throws Exception {
+        mvc.perform(get("/api/private/rider/3/orders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+        verify(service, VerificationModeFactory.times(0)).getOrdersByRiderId(3);
+        reset(service);
+    }
+
     public Rider createRider(String firstname, String lastname, String email, String password, double rating, String status, String account_type) {
         Rider rider = new Rider(firstname, lastname, email, password, rating, status);
         rider.setAccountType(account_type);

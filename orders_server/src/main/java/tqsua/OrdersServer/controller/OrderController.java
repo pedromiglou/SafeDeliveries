@@ -116,4 +116,50 @@ public class OrderController {
         return new ResponseEntity<>(order_found, HttpStatus.OK);
     }
 
+    @GetMapping("/private/user/{id}/orders")
+    public ResponseEntity<Object> getOrdersByUserId(Authentication authentication, @PathVariable(value="id") Long id){
+        String user_id = authentication.getName();
+        if (!user_id.equals(String.valueOf(id))) {
+            HashMap<String, String> response = new HashMap<>();
+            response.put(MESSAGE, UNAUTHORIZED);
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
+        ArrayList<Order> orders = orderService.getOrdersByUserId(id);
+
+        return new ResponseEntity<>(orders, HttpStatus.OK);
+    }
+
+    @PostMapping("/private/order/confirm")
+    public ResponseEntity<Object> confirmDelivery(Authentication authentication, @RequestBody String info) throws IOException, InterruptedException, URISyntaxException{
+        String user_id = authentication.getName();
+        var order_json = new JSONObject(info);
+        var order = orderService.getOrderByDeliverId(order_json.getLong("order_id"));
+        HashMap<String, String> response = new HashMap<>();
+        if (order == null){
+            response.put(MESSAGE, "Order not found.");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        if (!user_id.equals(String.valueOf(order.getUser_id()))) {
+            response.put(MESSAGE, UNAUTHORIZED);
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
+        int rating = (int) order_json.getLong("rating");
+        if (rating < 1 || rating > 5) {
+            response.put(MESSAGE, "Invalid rating value.");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        var res = orderService.confirm(order.getDeliver_id(), rating, new RestTemplate());
+        if (res == null) {
+            response.put(MESSAGE, "Some error occured while connecting to SafeDeliveries.");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        order.setStatus("FINISHED");
+        order.setRating(rating);
+        return new ResponseEntity<>(orderService.saveOrder(order), HttpStatus.OK);
+    }
+
 }

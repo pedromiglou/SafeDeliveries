@@ -160,4 +160,24 @@ public class OrderService {
     public Order getDeliveringOrderByRiderId(long rider_id) {
         return this.orderRepository.findDeliveringOrderByRiderId(rider_id);
     }
+
+    public Order updateStatus(long order_id) {
+        Order order = this.orderRepository.findByPk(order_id);
+        order.setStatus("Finished");
+        return this.orderRepository.save(order);
+    }
+
+    public Order updateRating(long order_id, int rating) {
+        Order order = this.orderRepository.findByPk(order_id);
+        order.setRating(rating);
+        return this.orderRepository.save(order);
+    }
+
+    public ArrayList<Order> getFinishedOrdersByRiderId(long rider_id) {
+        return this.orderRepository.findFinishedByRiderId(rider_id);
+    }
+
+    public ArrayList<Order> getOrdersByRiderId(long rider_id) {
+        return this.orderRepository.getOrdersByRiderId(rider_id);
+    }
 }

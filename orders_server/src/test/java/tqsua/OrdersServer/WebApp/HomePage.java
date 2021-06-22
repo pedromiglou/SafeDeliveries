@@ -91,6 +91,10 @@ public class HomePage {
         this.login.click();
     }
 
+    public void clickHistoryTab(){
+        this.history_tab.click();
+    }
+
     public Boolean check_home_page() {
         {
             WebDriverWait wait = new WebDriverWait(driver, 30);

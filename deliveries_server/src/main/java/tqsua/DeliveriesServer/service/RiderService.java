@@ -67,4 +67,5 @@ public class RiderService {
         }
         return this.riderRepository.countByState(state);
     }
+
 }

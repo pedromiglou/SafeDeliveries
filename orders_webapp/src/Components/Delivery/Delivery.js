@@ -4,6 +4,7 @@ import './Delivery.css';
 /* react */
 import { useEffect, useState, useCallback } from 'react';
 import { useLocation } from 'react-router';
+import { Modal } from "react-bootstrap";
 
 import * as MdIcons from 'react-icons/md';
 // import * as BiIcons from 'react-icons/bi';
@@ -14,6 +15,7 @@ import * as GiIcons from 'react-icons/gi';
 import Geocode from "react-geocode";
 
 import Map from '../map/Map.js'
+import DirectionsMap from '../directionsMap/Map.js'
 import { withScriptjs } from "react-google-maps";
 
 import OrdersService from '../../Services/orders.service';
@@ -26,22 +28,22 @@ function Delivery() {
     const [state, setState] = useState("Requesting");
 
     const [items, setItems] = useState([]);
-
-    
     
     const [itemEditable, setItemEditable] = useState({key: -2, name: "", editable: false})
 
-
-
     const [newItem, setNewItem] = useState(false);
 
-
-
+    // Error/Sucess handling creating Order
     const [errorOrder, setErrorOrder] = useState(false);
     const [sucessOrder, setSucessOrder] = useState(false);
 
-    const [pick_up_lat, setPickUpLat] = useState(40.756795);    
-    const [pick_up_lng, setPickUpLng] = useState(-73.954298);
+    // Error/Sucess handling confirm delivery
+    const [errorConfirmDelivery, setErrorConfirmDelivery] = useState(false);
+    const [sucessConfirmDelivery, setSucessConfirmDelivery] = useState(false);
+    
+    // Coordinates
+    const [pick_up_lat, setPickUpLat] = useState(40.6405);    
+    const [pick_up_lng, setPickUpLng] = useState(-8.6538);
     const [deliver_lat, setDeliverLat] = useState(41.5322699);
     const [deliver_lng, setDeliverLng] = useState(-8.737535200000002);
 
@@ -49,6 +51,9 @@ function Delivery() {
     const [orderId, setOrderId] = useState();
     const [pickUpAddress, setPickUpAddress] = useState();
     const [deliveryAddress, setDeliveryAddress] = useState();
+
+    // for Modal
+    const [modalConfirmDeliveryShow, setConfirmDeliveryModalShow] = useState(false);
 
     const current_user = AuthService.getCurrentUser();
 
@@ -149,9 +154,28 @@ function Delivery() {
     const location = useLocation();
 
     const MapLoader = withScriptjs(Map);
+    const DirectionsMapLoader = withScriptjs(DirectionsMap);
 
     useEffect(() => {
-        if (location.state === undefined) {
+        async function getOrderInfo(order_id) {
+            let orderInformation = await OrdersService.getOrderInfo(order_id);
+            if (!orderInformation["error"]) {
+                setOrderInfo(orderInformation)
+                setOrderId(orderInformation.deliver_id)
+                if (orderInformation.status === "PREPROCESSING") {
+                    setState("waiting_rider");
+                } else {
+                    setState("confirmed")
+                }
+            }
+        }
+
+        const url = new URLSearchParams(window.location.search);
+	    let order_id = url.get("id");
+
+        if (order_id !== undefined && order_id !== null) {
+            getOrderInfo(order_id);
+        } else if (location.state === undefined) {
             setState("Requesting");
         } else if (location.state.is_History){
             setState("confirmed");
@@ -299,6 +323,51 @@ function Delivery() {
             setNewItem(true)
     }
 
+    async function confirmDelivery(){
+        let rating = document.getElementById("rating").value;
+        var res = await OrdersService.confirmDelivery(orderId, parseInt(rating))
+        if (!res.error) {
+            setErrorConfirmDelivery(false);
+            setSucessConfirmDelivery(true);
+        } else {
+            setErrorConfirmDelivery(true);
+            setSucessConfirmDelivery(false);
+        }
+    }
+
+    function ConfirmDeliveryModal(props) {
+        return (
+            <Modal
+            {...props}
+            size="lg"
+            aria-labelledby="contained-modal-title-vcenter"
+            centered
+            >
+            <Modal.Header>
+                <Modal.Title id="contained-modal-title-vcenter" >
+                    Confirm Order Delivery.
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <p>Please, evaluate the order delivering process.</p>
+                <label for="rating">Rating: </label>
+			  	<select id="rating" className="form-select" aria-label="Default select example">
+				  <option value="1">1</option>
+				  <option value="2">2</option>
+				  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option selected value="5">5</option>
+				</select>
+            </Modal.Body>
+            <Modal.Footer>
+                <button id="confirm_order_delivery_button" onClick={async () => {await confirmDelivery(); props.onHide(); window.location.reload();}} className="btn">Confirm</button>
+                <button id="cancel_order_delivery_button" onClick={() => {props.onHide();}} className="btn">Cancel</button>
+            </Modal.Footer>
+            </Modal>
+        );
+    }
+    
+
     function checkMap(){
         //PickUp
         let paddress = document.getElementById("paddress").value;
@@ -339,8 +408,16 @@ function Delivery() {
         });
     }
 
+    console.log("------")
+    console.log(state);
+    
+    console.log(orderInfo);
     return (
       <>
+        <ConfirmDeliveryModal
+            show={modalConfirmDeliveryShow}
+            onHide={() => setConfirmDeliveryModalShow(false)}
+        />
 
         {sucessOrder === true 
           ? <><div className="alert alert-success" id="order-success" role="alert" style={{margin:"10px auto", width: "90%", textAlign:"center", fontSize:"22px"}}>
@@ -352,6 +429,16 @@ function Delivery() {
         {errorOrder !== false 
           ? <div className="alert alert-alert" id="order-error" role="alert" style={{margin:"10px auto", width: "90%", textAlign:"center", fontSize:"22px"}}>
           {errorOrder}
+          </div> : null}
+
+        {errorConfirmDelivery !== false 
+          ? <div className="alert alert-alert" id="order-error" role="alert" style={{margin:"10px auto", width: "90%", textAlign:"center", fontSize:"22px"}}>
+            An error occurred while confirming the order delivery.
+          </div> : null}
+
+        {sucessConfirmDelivery === true 
+          ?<div className="alert alert-success" id="order-success" role="alert" style={{margin:"10px auto", width: "90%", textAlign:"center", fontSize:"22px"}}>
+          Order Delivery was confirmed.
           </div> : null}
 
         {state === "Requesting" && 
@@ -516,11 +603,20 @@ function Delivery() {
         {state === "confirmed" && 
             <div className="DeliveriesSection conf">
                 <div className="current_image">
-                    {<MapLoader 
+                    {/*<MapLoader 
                     googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco"
                     loadingElement={<div style={{ height: "100%"}}/>}
                     state={ {pick_up_lat:orderInfo.pick_up_lat, pick_up_lng: orderInfo.pick_up_lng, del_lat: orderInfo.deliver_lat, del_lng: orderInfo.deliver_lng}}
                     />
+                    */}
+                    {<DirectionsMapLoader 
+                        googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco"
+                        loadingElement={<div style={{ height: "100%"}}/>}
+                        pick_up_lat={orderInfo.pick_up_lat}
+                        pick_up_lng={orderInfo.pick_up_lng}
+                        deliver_lat={orderInfo.deliver_lat}
+                        deliver_lng={orderInfo.deliver_lng}
+                        />
                     }
                 </div>
                 <h1 id="order_details">Order details</h1>
@@ -532,7 +628,7 @@ function Delivery() {
                         </h3>
                     </div>
                     <div>
-                        <h2>Destin Address</h2>
+                        <h2>Destiny Address</h2>
                         <h3 id="delivery_address">
                             { deliveryAddress }
                         </h3>
@@ -570,6 +666,13 @@ function Delivery() {
                     </ul>
                     </div>        
                 </div>
+                { orderInfo.status !== "FINISHED" &&  
+                    <button id="confirm_delivery" onClick={() => {setConfirmDeliveryModalShow(true)}} className="btn">Confirm Delivery</button>
+                }
+                { orderInfo.status === "FINISHED" &&  
+                    <p id="status_delivered">Status: Delivered</p>
+                }
+                
             </div>
         }
         

@@ -9,12 +9,15 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import tqsua.DeliveriesServer.WebApp.DeliveryPage;
+import tqsua.DeliveriesServer.WebApp.HistoryPage;
 import tqsua.DeliveriesServer.WebApp.HomePage;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -38,7 +41,13 @@ public class OrdersSteps {
 
     private HomePage home;
 
+    private HistoryPage historyPage;
+
+    private DeliveryPage deliveryPage;
+
     private String token;
+
+    private String deliver_id;
 
     // Background
     @Given("I access the url {string}")
@@ -52,7 +61,7 @@ public class OrdersSteps {
         token = home.login();
     }
 
-    @And("I have a car")
+    @Given("I have a car")
     public void i_have_a_car() throws JSONException, ClientProtocolException, IOException, InterruptedException, URISyntaxException{
         token = home.login();
         Map<String, Object> data = new HashMap<>();
@@ -95,8 +104,9 @@ public class OrdersSteps {
         String baseUrl = "http://localhost:8080/api/orders";
         URI uri = new URI(baseUrl);
         
-        new RestTemplate().postForEntity(uri, data, String.class);
-
+        ResponseEntity<String> response = new RestTemplate().postForEntity(uri, data, String.class);
+        var json = new JSONObject(response.getBody());
+        this.deliver_id = json.getString("deliver_id");
         {
             WebDriverWait wait = new WebDriverWait(driver, 30);
             wait.until(ExpectedConditions.presenceOfElementLocated(By.id("accept_order_button")));
@@ -108,10 +118,11 @@ public class OrdersSteps {
         home.clickAccept();
     }
 
-    @Then("My status changed to Delivering")
-    public void status_delivering() {
-        assertThat(home.checkStatus("Delivering"), is(true));
-        driver.close();
+    @Then("My status changed to {string}")
+    public void status_delivering(String status) {
+        assertThat(home.checkStatus(status), is(true));
+        if (status.equals("Online"))
+            driver.quit();
     }
 
 
@@ -137,6 +148,11 @@ public class OrdersSteps {
         home.changeStatusToOnlineWhenDelivering();
     }
 
+    @And("Click close modal")
+    public void close_error_modal() {
+        home.closeErrorModal();
+    }
+
     @Then("Should appear a modal with a error message")
     public void modal_error_message() {
         {
@@ -144,7 +160,44 @@ public class OrdersSteps {
             wait.until(ExpectedConditions.presenceOfElementLocated(By.id("error_status_message")));
         }
         assertThat(home.getErrorStatus(), is("You are currently delivering a order."));
-        driver.close();
     }
 
+
+    // Client confirms delivery
+    @When("The Client confirms the delivery")
+    public void client_confirms() throws URISyntaxException, JSONException {
+        Map<String, Object> data = new HashMap<>();
+        data.put("order_id", Long.parseLong(deliver_id));
+        data.put("rating", 4);
+
+        String baseUrl = "http://localhost:8080/api/order/confirm";
+        URI uri = new URI(baseUrl);
+        
+        var res = new RestTemplate().postForEntity(uri, data, String.class);
+        System.out.println(res);
+    }
+
+    @When("I click on Deliveries History")
+    public void clickDeliveriesHistory() throws URISyntaxException, JSONException {
+        home.clickHistory();
+        historyPage = new HistoryPage(driver);
+    }
+
+    @Then("It should appear a order")
+    public void should_appear_order() {
+        assertThat(historyPage.checkOrderExists(), is(true));
+    }
+
+    @When("I click in the order")
+    public void clickOrder() throws URISyntaxException, JSONException {
+        historyPage.clickOrder();
+        deliveryPage = new DeliveryPage(driver);
+    }
+
+    @When("It sould appear the same information")
+    public void checkInfo() throws URISyntaxException, JSONException {
+        assertThat(deliveryPage.getRatingText(), is("4"));
+        assertThat(deliveryPage.getTotalWeightText(), is("12 kg"));
+        driver.quit();
+    }
 }

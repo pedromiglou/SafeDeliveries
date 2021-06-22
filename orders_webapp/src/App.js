@@ -101,7 +101,7 @@ function App() {
       <div className="content">
           <Switch>
               <Route exact path='/' component={withRouter(Home)} />
-              <Route exact path='/delivery' component={withRouter(Delivery)} />
+              <Route path='/delivery' component={withRouter(Delivery)} />
               <Route exact path='/history' component={withRouter(History)} />
               {/* <Route exact path='/aboutus' component={withRouter(AboutUs)} /> */}
               <Route exact path='/login' component={withRouter(Login)} />

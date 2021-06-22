@@ -71,4 +71,25 @@ public class OrderService {
     public Order getOrderByDeliverId(long order_id){
         return orderRepository.getOrderByDeliverId(order_id);
     }
+
+    public Integer confirm(long deliver_id, int rating, RestTemplate restClient) throws IOException, InterruptedException, URISyntaxException {
+        Map<Object, Object> data = new HashMap<>();
+        data.put("order_id", deliver_id);
+        data.put("rating", rating);
+
+        final String baseUrl = DELIVERIES_URL + "order/confirm";
+        URI uri = new URI(baseUrl);
+        
+        ResponseEntity<String> result = restClient.postForEntity(uri, data, String.class);
+        var json = new JSONObject(result.getBody());
+        
+        if (result.getStatusCode().value() != 200) {
+            return null;
+        }
+        return (int) json.getLong("rating");
+    }
+
+    public ArrayList<Order> getOrdersByUserId(long user_id){
+        return orderRepository.getOrdersByUserId(user_id);
+    }
 }

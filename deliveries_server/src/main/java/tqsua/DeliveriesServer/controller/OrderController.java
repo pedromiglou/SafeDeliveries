@@ -8,11 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.json.JSONObject;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,6 +31,7 @@ import tqsua.DeliveriesServer.model.Notification;
 import tqsua.DeliveriesServer.model.Order;
 import tqsua.DeliveriesServer.model.OrderDTO;
 import tqsua.DeliveriesServer.model.Rider;
+import tqsua.DeliveriesServer.model.RiderDTO;
 import tqsua.DeliveriesServer.service.NotificationService;
 import tqsua.DeliveriesServer.service.OrderService;
 import tqsua.DeliveriesServer.service.RiderService;
@@ -142,6 +145,72 @@ public class OrderController {
         orderService.notificate(APP_NAMES.get(order.getApp_name()), order_id, new RestTemplate()) ;
         riderService.changeStatus(rider_id, "Delivering");
         return new ResponseEntity<>(order, HttpStatus.OK);
+    }
+
+    @PostMapping(path="/order/confirm")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<Object> confirmDeliveryOrder(@RequestBody String info) throws IOException, InterruptedException, URISyntaxException {
+        HashMap<String, Object> response = new HashMap<>();
+        var json = new JSONObject(info);
+        long order_id = json.getLong("order_id");
+        int rating = (int) json.getLong("rating");
+        if (rating < 1 || rating > 5) {
+            response.put(MESSAGE, "Invalid rating value.");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        Order order = orderService.getOrderById(order_id);
+
+        if (order == null) {
+            response.put(MESSAGE, "Not found");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        // get rider_id
+        long rider_id = order.getRider_id();
+        
+        // get all orders finished made by this rider
+        ArrayList<Order> orders = orderService.getFinishedOrdersByRiderId(rider_id);
+        int countOrders = orders.size() + 1;
+        double sumRating = orders.stream().mapToDouble(Order::getRating).sum() + rating;
+        // update Rider status to Online and update Rider Rating
+        riderService.updateRider(rider_id, new RiderDTO(null, null, null, null, sumRating/countOrders, "Online"));
+        
+        // update order status to Finished and rating
+        orderService.updateStatus(order_id);
+        Order updatedOrder = orderService.updateRating(order_id, rating);
+
+        response.put("rating", updatedOrder.getRating());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/private/orders/{id}")
+    public ResponseEntity<Object> getOrderById(Authentication authentication, @PathVariable(value="id") Long id) throws IOException, InterruptedException{
+        String rider_id = authentication.getName();
+        Order order = orderService.getOrderById(id);
+        HashMap<String, String> response = new HashMap<>();
+
+        if (order == null) {
+            response.put(MESSAGE, "Not found.");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        if (!rider_id.equals(String.valueOf(order.getRider_id()))) {
+            response.put(MESSAGE, UNAUTHORIZED);
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(order, HttpStatus.OK);
+    }
+
+    @GetMapping("/private/rider/{id}/orders")
+    public ResponseEntity<Object> getOrdersByUserId(Authentication authentication, @PathVariable(value="id") Long id){
+        String rider_id = authentication.getName();
+        if (!rider_id.equals(String.valueOf(id))) {
+            HashMap<String, String> response = new HashMap<>();
+            response.put(MESSAGE, UNAUTHORIZED);
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
+        ArrayList<Order> orders = orderService.getOrdersByRiderId(id);
+
+        return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
     @PostMapping(path="/private/declineorder")
