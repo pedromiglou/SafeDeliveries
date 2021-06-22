@@ -14,7 +14,9 @@ function Statistics() {
     const [totalOrders, setTotalOrders] = useState(0);
     const [pendingOrders, setPendingOrders] = useState(0);
     const [deliveringOrders, setDeliveringOrders] = useState(0);
+    const [completedOrders, setCompletedOrders] = useState(0);
     const [ordersWeight, setOrdersWeight] = useState([]);
+    
 
     const [totalRiders, setTotalRiders] = useState(0);
     const [onlineRiders, setOnlineRiders] = useState(0);
@@ -32,6 +34,7 @@ function Statistics() {
                 setPendingOrders(response.pending_orders);
                 setOrdersWeight(response.orders_by_weight);
                 setDeliveringOrders(response.delivering_orders);
+                setCompletedOrders(response.completed_orders);
             }
         }
 
@@ -74,9 +77,13 @@ function Statistics() {
                     <h5 id="waiting_orders">Waiting Orders</h5>
                     <h6>{pendingOrders}</h6>
                 </div>
+                <div className="collumn-item">
+                    <h5 id="waiting_orders">Completed Orders</h5>
+                    <h6>{completedOrders}</h6>
+                </div>
             </div>
             <div className="graph">
-                <Bar chart="Line" label={["6 days ago", "5 days ago", "4 days ago", "3 days ago", "2 days ago", "yesterday", "today"]} data={ordersLast7Days}/>
+                <Bar chart="Line" label={["6 days ago", "5 days ago", "4 days ago", "3 days ago", "2 days ago", "yesterday", "today"]} data={ordersLast7Days} title="Number of Orders last 7 days" />
             </div>
             
             
@@ -89,27 +96,28 @@ function Statistics() {
                     <h4 id="total_riders">Total Number of Riders</h4>
                     <h5>{totalRiders}</h5>
                 </div>
-                <div className="riders-subsection">
-                    <div className="subsection-item">
-                        <h4 id="online_riders">Riders Online</h4>
-                        <h5>{onlineRiders}</h5>
-                    </div>
-                    <div className="subsection-item">
-                        <h4 id="offline_riders">Riders Offline</h4>
-                        <h5>{offlineRiders}</h5>
-                    </div>
-                    <div className="subsection-item">
-                        <h4 id="delivering_riders">Riders delivering</h4>
-                        <h5>{deliveringRiders}</h5>
-                    </div>
+                
+                <div className="collumn-item">
+                    <h4 id="online_riders">Riders Online</h4>
+                    <h5>{onlineRiders}</h5>
                 </div>
+                <div className="collumn-item">
+                    <h4 id="offline_riders">Riders Offline</h4>
+                    <h5>{offlineRiders}</h5>
+                </div>
+                <div className="collumn-item">
+                    <h4 id="delivering_riders">Riders delivering</h4>
+                    <h5>{deliveringRiders}</h5>
+                </div>
+                
             </div>
         </div>
-        <div className="admin-vehicles">
-            <Bar chart="Bar" label={["up to 5 kg", "5 kg - 15 kg", "15 kg - 30 kg", "30 kg - 100 kg", "100 kg and up"]} data={vehiclesCapacity}/>
+
+        <div className="graph">
+            <Bar chart="Bar" label={["up to 5 kg", "5 kg - 15 kg", "15 kg - 30 kg", "30 kg - 100 kg", "100 kg and up"]} data={vehiclesCapacity} title="Distribution of vehicles capacities"/>
         </div>
-        <div className="admin-capacity">
-            <Bar chart="Bar" label={["up to 5 kg", "5 kg - 15 kg", "15 kg - 30 kg", "30 kg and up"]} data={ordersWeight}/>
+        <div className="graph">
+            <Bar chart="Bar" label={["up to 5 kg", "5 kg - 15 kg", "15 kg - 30 kg", "30 kg and up"]} data={ordersWeight} title="Distribution of orders weights"/>
         </div>
       </div>
       </>
