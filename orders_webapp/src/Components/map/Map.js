@@ -59,7 +59,7 @@ class Map extends Component {
       <GoogleMap
         // defaultCenter={{ lat: this.props.state.pick_up_lat, lng: this.props.state.pick_up_lng }}
         center={{ lat: this.props.state.pick_up_lat, lng: this.props.state.pick_up_lng }}
-        defaultZoom={1}
+        defaultZoom={8}
       >
         
         {this.state.markers.map((marker, index) => (

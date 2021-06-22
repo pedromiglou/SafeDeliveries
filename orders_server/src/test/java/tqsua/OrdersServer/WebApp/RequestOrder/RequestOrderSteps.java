@@ -6,10 +6,14 @@ import org.json.JSONException;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+
+import tqsua.OrdersServer.WebApp.DeliveryPage;
+import tqsua.OrdersServer.WebApp.HistoryPage;
 import tqsua.OrdersServer.WebApp.HomePage;
 import tqsua.OrdersServer.WebApp.RequestOrderPage;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -21,6 +25,9 @@ public class RequestOrderSteps {
 
     private HomePage home;
     private RequestOrderPage requestPage;
+    private HistoryPage historyPage;
+    private DeliveryPage deliveryPage;
+
 
     //Background
     @Given("I go to {string}")
@@ -130,6 +137,40 @@ public class RequestOrderSteps {
     @Then("I get the warning {string}")
     public void iGetTheWarning(String error_msg) {
         assertThat(requestPage.getErrorMsg(), is(error_msg));
+        driver.quit();
+    }
+
+    @And("I click on History Tab")
+    public void iClickOnHistoryTab() {
+        home.clickHistoryTab();
+        historyPage = new HistoryPage(driver);
+    }
+
+    @Then("It should appear a order")
+    public void should_appear_order() {
+        assertThat(historyPage.checkOrderExists(), is(true));
+    }
+
+    @When("I click in the order")
+    public void clickOrder() throws URISyntaxException, JSONException {
+        historyPage.clickOrder();
+        deliveryPage = new DeliveryPage(driver);
+    }
+
+    @When("It sould appear the same information")
+    public void checkInfo() throws URISyntaxException, JSONException {
+        assertThat(deliveryPage.getPickUpText(), is("R. Circular 3, 3140 Pereira, Portugal"));
+        assertThat(deliveryPage.getDestinyText(), is("Rua De Pedride 223, 4635-616 São Lourenço, Portugal"));
+    }
+
+    @When("I accept Order")
+    public void acceptOrder() throws URISyntaxException, JSONException {
+        deliveryPage.acceptOrder();
+    }
+
+    @Then("It should appear status Delivered")
+    public void checkMessage() throws URISyntaxException, JSONException {
+        assertThat(deliveryPage.getDeliveredMessage() , is("Status: Delivered") );
         driver.quit();
     }
 }

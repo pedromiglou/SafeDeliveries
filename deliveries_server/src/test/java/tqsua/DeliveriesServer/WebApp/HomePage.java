@@ -35,9 +35,6 @@ public class HomePage {
     @FindBy(id = "home-tab")
     private WebElement home_tab;
 
-    @FindBy(id = "search-tab")
-    private WebElement search_tab;
-
     @FindBy(id = "history-tab")
     private WebElement history_tab;
 
@@ -68,6 +65,9 @@ public class HomePage {
     @FindBy(id = "error_status_message")
     private WebElement error_status_message;
 
+    @FindBy(id = "modal_error_ok_button")
+    private WebElement modal_error_ok_button;
+
     @FindBy(id = "logout")
     private WebElement logout;
     private final HttpClient httpClient = HttpClient.newBuilder()
@@ -87,11 +87,7 @@ public class HomePage {
     public boolean pageLoaded() {
         return driver.getTitle().equals("tqs");
     }
-
-    public String getSearchDeliveryTab(){
-        return this.search_tab.getText();
-    }
-
+    
     public String getAdminText(){
         return this.admin_text.getText();
     }
@@ -125,6 +121,10 @@ public class HomePage {
         this.login.click();
     }
 
+    public void clickHistory(){
+        this.history_tab.click();
+    }
+
     public void clickAccept(){
         this.accept_order_button.click();
     }
@@ -139,6 +139,10 @@ public class HomePage {
 
     public void  clickProfile(){
         this.profile.click();
+    }
+
+    public void closeErrorModal() {
+        this.modal_error_ok_button.click();
     }
 
     public String login() throws IOException, InterruptedException, JSONException {

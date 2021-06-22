@@ -11,17 +11,18 @@ import OrdersService from "../../Services/order.service";
 /* Geocode */
 import Geocode from "react-geocode";
 
+import * as BsIcons from 'react-icons/bs';
+
 function History() {
     Geocode.setApiKey("AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco");
     Geocode.setLanguage("en");
 
     const history = useHistory();
-    const current_user = AuthService.getCurrentUser();
     const [riderOrders, setRiderOrders] = useState([]);
 
-    const routeChange = () =>{ 
-        let path = '/deliveries'; 
-        history.push(path, {is_History:true});
+    const routeChange = (order_id) =>{ 
+        let path = '/deliveries?id=' + order_id; 
+        history.push(path, {is_History:false});
     }
 
     async function getAddressCoord(lat,long){
@@ -30,14 +31,19 @@ function History() {
         let address_components = response.results[0].formatted_address.split(",");
         
         let address = address_components[0];
-        let zip = address_components[1].split(" ")[1]
-        let city = address_components[1].split(" ")[2]
+        let zip;
+        let city;
+        if (address_components[1] !== undefined) {
+            zip = address_components[1].split(" ")[1]
+            city = address_components[1].split(" ")[2]
+        }
         let country = address_components[2];
 
         return [address, zip, city, country];
     }
 
     useEffect(() => {
+        var current_user = AuthService.getCurrentUser();
         async function getOrdersByUser() {
           let res = await OrdersService.getOrdersByUser(current_user.id);
           if (!res.error) {
@@ -55,13 +61,13 @@ function History() {
           }
         }
         getOrdersByUser();
-      }, [current_user]);
+      }, []);
 
     return (
       <>
         <div className="HistorySection">
             <div className="historyTable">
-                <h1> Last Deliveries</h1>
+                <h1 id="title"> Last Deliveries</h1>
                 <ul className="list-group">
                     <li className="list-item">
                         <div>
@@ -69,7 +75,7 @@ function History() {
                         </div>
 
                         <div>
-                            Item
+                            Weight
                         </div>
                         
                         <div>
@@ -83,12 +89,18 @@ function History() {
                         <div>
                             Time
                         </div>
+                        <div>
+                            Status
+                        </div>
+                        <div>
+                            Rating
+                        </div>
                     </li>
                     {riderOrders.map(function(order, index) {
                         var date = order.creation_date.split("T")[0];
                         var time = order.creation_date.split("T")[1].split(".")[0];
                         return (
-                            <li className="list-item" onClick={() => routeChange()}>
+                            <li id={"order-" + index} className="list-item" onClick={() => routeChange(order.order_id)}>
                                 <div>
                                     {date}
                                 </div>
@@ -106,6 +118,10 @@ function History() {
                                 </div>
                                 <div>
                                     {order.status}
+                                </div>
+                                <div>
+                                    {order.rating}
+                                    <BsIcons.BsStarFill className="user-rating historic-star"/>
                                 </div>
                             </li>
                         )

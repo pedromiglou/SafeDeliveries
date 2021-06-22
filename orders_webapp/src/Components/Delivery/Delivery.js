@@ -15,6 +15,7 @@ import * as GiIcons from 'react-icons/gi';
 import Geocode from "react-geocode";
 
 import Map from '../map/Map.js'
+import DirectionsMap from '../directionsMap/Map.js'
 import { withScriptjs } from "react-google-maps";
 
 import OrdersService from '../../Services/orders.service';
@@ -39,10 +40,10 @@ function Delivery() {
     // Error/Sucess handling confirm delivery
     const [errorConfirmDelivery, setErrorConfirmDelivery] = useState(false);
     const [sucessConfirmDelivery, setSucessConfirmDelivery] = useState(false);
-
+    
     // Coordinates
-    const [pick_up_lat, setPickUpLat] = useState(40.756795);    
-    const [pick_up_lng, setPickUpLng] = useState(-73.954298);
+    const [pick_up_lat, setPickUpLat] = useState(40.6405);    
+    const [pick_up_lng, setPickUpLng] = useState(-8.6538);
     const [deliver_lat, setDeliverLat] = useState(41.5322699);
     const [deliver_lng, setDeliverLng] = useState(-8.737535200000002);
 
@@ -153,9 +154,28 @@ function Delivery() {
     const location = useLocation();
 
     const MapLoader = withScriptjs(Map);
+    const DirectionsMapLoader = withScriptjs(DirectionsMap);
 
     useEffect(() => {
-        if (location.state === undefined) {
+        async function getOrderInfo(order_id) {
+            let orderInformation = await OrdersService.getOrderInfo(order_id);
+            if (!orderInformation["error"]) {
+                setOrderInfo(orderInformation)
+                setOrderId(orderInformation.deliver_id)
+                if (orderInformation.status === "PREPROCESSING") {
+                    setState("waiting_rider");
+                } else {
+                    setState("confirmed")
+                }
+            }
+        }
+
+        const url = new URLSearchParams(window.location.search);
+	    let order_id = url.get("id");
+
+        if (order_id !== undefined && order_id !== null) {
+            getOrderInfo(order_id);
+        } else if (location.state === undefined) {
             setState("Requesting");
         } else if (location.state.is_History){
             setState("confirmed");
@@ -340,7 +360,7 @@ function Delivery() {
 				</select>
             </Modal.Body>
             <Modal.Footer>
-                <button id="confirm_order_delivery_button" onClick={() => {confirmDelivery(); props.onHide();}} className="btn">Confirm</button>
+                <button id="confirm_order_delivery_button" onClick={async () => {await confirmDelivery(); props.onHide(); window.location.reload();}} className="btn">Confirm</button>
                 <button id="cancel_order_delivery_button" onClick={() => {props.onHide();}} className="btn">Cancel</button>
             </Modal.Footer>
             </Modal>
@@ -388,6 +408,10 @@ function Delivery() {
         });
     }
 
+    console.log("------")
+    console.log(state);
+    
+    console.log(orderInfo);
     return (
       <>
         <ConfirmDeliveryModal
@@ -579,11 +603,20 @@ function Delivery() {
         {state === "confirmed" && 
             <div className="DeliveriesSection conf">
                 <div className="current_image">
-                    {<MapLoader 
+                    {/*<MapLoader 
                     googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco"
                     loadingElement={<div style={{ height: "100%"}}/>}
                     state={ {pick_up_lat:orderInfo.pick_up_lat, pick_up_lng: orderInfo.pick_up_lng, del_lat: orderInfo.deliver_lat, del_lng: orderInfo.deliver_lng}}
                     />
+                    */}
+                    {<DirectionsMapLoader 
+                        googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrtpEJj-sxKhggyLM3ms_tdEdh7XJNEco"
+                        loadingElement={<div style={{ height: "100%"}}/>}
+                        pick_up_lat={orderInfo.pick_up_lat}
+                        pick_up_lng={orderInfo.pick_up_lng}
+                        deliver_lat={orderInfo.deliver_lat}
+                        deliver_lng={orderInfo.deliver_lng}
+                        />
                     }
                 </div>
                 <h1 id="order_details">Order details</h1>
@@ -595,7 +628,7 @@ function Delivery() {
                         </h3>
                     </div>
                     <div>
-                        <h2>Destin Address</h2>
+                        <h2>Destiny Address</h2>
                         <h3 id="delivery_address">
                             { deliveryAddress }
                         </h3>
@@ -633,7 +666,13 @@ function Delivery() {
                     </ul>
                     </div>        
                 </div>
-                <button onClick={() => {setConfirmDeliveryModalShow(true)}} className="btn">Confirm Delivery</button>
+                { orderInfo.status !== "FINISHED" &&  
+                    <button id="confirm_delivery" onClick={() => {setConfirmDeliveryModalShow(true)}} className="btn">Confirm Delivery</button>
+                }
+                { orderInfo.status === "FINISHED" &&  
+                    <p id="status_delivered">Status: Delivered</p>
+                }
+                
             </div>
         }
         

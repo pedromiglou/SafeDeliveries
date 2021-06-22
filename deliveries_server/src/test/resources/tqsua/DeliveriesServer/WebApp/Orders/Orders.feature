@@ -5,17 +5,24 @@ Feature: Orders functionalities
     And I am logged into normal account
 
   Scenario: Accept Notification
-    And I have a car
+    Given I have a car
     When I receive a notification of a order
     And I click Accept
-    Then My status changed to Delivering
-
-  Scenario: Change status
-    And I have status Delivering
+    Then My status changed to "Delivering"
     When I change my status to Online
     Then Should appear a modal with a error message
+    And Click close modal
+    When The Client confirms the delivery
+    When I change my status to Online
+    Then My status changed to "Online"
 
-  #Scenario: Decline Notification
-  #  When I receive a notification of a order
-  #  And I click Decline
-  #  Then My status stays Online
+  Scenario: Decline Notification
+    When I receive a notification of a order
+    And I click Decline
+    Then My status stays Online
+
+  Scenario: View Orders History
+    When I click on Deliveries History
+    Then It should appear a order
+    When I click in the order
+    Then It sould appear the same information

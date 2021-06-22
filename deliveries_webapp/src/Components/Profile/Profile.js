@@ -194,7 +194,7 @@ function Profile() {
                     <div className="below-pic"> 
                         <div className="rating-section">
                             <BsIcons.BsStarFill className="user-rating"/>
-                            <span>{current_user.rating.toFixed(2)}/5.0</span>
+                            <span>{ parseFloat( current_user.rating ).toFixed(2)}/5.0</span>
                         </div>
                         
                         {/* <BiIcons.BiImageAdd className="user-change-pic"/> */}

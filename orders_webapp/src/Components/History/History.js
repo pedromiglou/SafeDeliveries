@@ -8,6 +8,8 @@ import React, { useState, useEffect } from 'react';
 import AuthService from "../../Services/auth.service";
 import OrdersService from "../../Services/orders.service";
 
+import * as BsIcons from 'react-icons/bs';
+
 /* Geocode */
 import Geocode from "react-geocode";
 
@@ -16,12 +18,11 @@ function History() {
     Geocode.setLanguage("en");
 
     const history = useHistory();
-    const current_user = AuthService.getCurrentUser();
     const [userOrders, setUserOrders] = useState([]);
 
-    const routeChange = () =>{ 
-        let path = '/delivery'; 
-        history.push(path, {is_History:true});
+    const routeChange = (order_id) =>{ 
+        let path = '/delivery?id=' + order_id; 
+        history.push(path, {is_History:false});
     }
 
     async function getAddressCoord(lat,long){
@@ -30,14 +31,19 @@ function History() {
         let address_components = response.results[0].formatted_address.split(",");
         
         let address = address_components[0];
-        let zip = address_components[1].split(" ")[1]
-        let city = address_components[1].split(" ")[2]
+        let zip;
+        let city;
+        if (address_components[1] !== undefined) {
+            zip = address_components[1].split(" ")[1]
+            city = address_components[1].split(" ")[2]
+        }
         let country = address_components[2];
 
         return [address, zip, city, country];
     }
 
     useEffect(() => {
+        var current_user = AuthService.getCurrentUser();
         async function getOrdersByUser() {
           let res = await OrdersService.getOrdersByUser(current_user.id);
           if (!res.error) {
@@ -55,14 +61,14 @@ function History() {
           }
         }
         getOrdersByUser();
-      }, [current_user]);
+      }, []);
 
 
     return (
       <>
         <div className="HistorySection">
             <div className="historyTable">
-                <h1> Last Deliveries</h1>
+                <h1 id="title"> Last Deliveries</h1>
                 <ul className="list-group">
                     <li className="list-item">
                         <div>
@@ -83,6 +89,9 @@ function History() {
                         <div>
                             Status
                         </div>
+                        <div>
+                            Rating
+                        </div>
                     </li>
 
                     {userOrders.map(function(order, index) {
@@ -93,7 +102,7 @@ function History() {
                             sumweight = sumweight + order.items[i].weight;
                         }
                         return (
-                            <li className="list-item" onClick={() => routeChange()}>
+                            <li id={"order-" + index} className="list-item" onClick={() => routeChange(order.deliver_id)}>
                                 <div>
                                     {date}
                                 </div>
@@ -111,6 +120,10 @@ function History() {
                                 </div>
                                 <div>
                                     {order.status}
+                                </div>
+                                <div>
+                                    {order.rating}
+                                    <BsIcons.BsStarFill className="user-rating historic-star"/>
                                 </div>
                             </li>
 

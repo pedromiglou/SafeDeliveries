@@ -150,22 +150,26 @@ public class OrderController {
     @PostMapping(path="/order/confirm")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> confirmDeliveryOrder(@RequestBody String info) throws IOException, InterruptedException, URISyntaxException {
+        System.out.println("hey");
         HashMap<String, Object> response = new HashMap<>();
         var json = new JSONObject(info);
         long order_id = json.getLong("order_id");
         int rating = (int) json.getLong("rating");
+        System.out.println(order_id);
+        System.out.println(rating);
         if (rating < 1 || rating > 5) {
             response.put(MESSAGE, "Invalid rating value.");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         Order order = orderService.getOrderById(order_id);
+        System.out.println(order);
         if (order == null) {
             response.put(MESSAGE, "Not found");
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
         // get rider_id
         long rider_id = order.getRider_id();
-
+        
         // get all orders finished made by this rider
         ArrayList<Order> orders = orderService.getFinishedOrdersByRiderId(rider_id);
         int countOrders = orders.size() + 1;
@@ -179,6 +183,23 @@ public class OrderController {
 
         response.put("rating", updatedOrder.getRating());
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/private/orders/{id}")
+    public ResponseEntity<Object> getOrderById(Authentication authentication, @PathVariable(value="id") Long id) throws IOException, InterruptedException{
+        String rider_id = authentication.getName();
+        Order order = orderService.getOrderById(id);
+        HashMap<String, String> response = new HashMap<>();
+
+        if (order == null) {
+            response.put(MESSAGE, "Not found.");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        if (!rider_id.equals(String.valueOf(order.getRider_id()))) {
+            response.put(MESSAGE, UNAUTHORIZED);
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(order, HttpStatus.OK);
     }
 
     @GetMapping("/private/rider/{id}/orders")

@@ -63,6 +63,7 @@ function App() {
     await OrderService.acceptOrder(order_id, current_user.id);
     current_user.status = "Delivering"
     sessionStorage.setItem("user", JSON.stringify(current_user));
+    history.push("/deliveries?id=" + order_id);
     window.location.reload();
   }
 
@@ -128,7 +129,7 @@ function App() {
               <p id="error_status_message">You are currently delivering a order.</p>
             </Modal.Body>
             <Modal.Footer>
-              <button onClick={props.onHide} className="btn">Ok</button>
+              <button id="modal_error_ok_button" onClick={props.onHide} className="btn">Ok</button>
             </Modal.Footer>
           </Modal>
         );
@@ -229,7 +230,7 @@ function App() {
               </>
               :
               <>
-              <FiIcons.FiPackage/><span>SafeDeliveries</span>
+              <FiIcons.FiPackage/><span>SafeDeliveries - Riders</span>
               </>
               }
             </Link>
@@ -251,11 +252,6 @@ function App() {
 
           {current_user !== null && 
           <>
-            <li className="nav-item">
-              <Link to="/deliveries" id="search-tab">
-                Search Delivery
-              </Link>
-            </li>
             <li className="nav-item">
               <Link to="/history" id="history-tab">
                 Deliveries History
@@ -332,7 +328,7 @@ function App() {
     <div className="content">
         <Switch>
             <Route exact path='/' component={withRouter(Home)} />
-            <Route exact path='/deliveries' component={withRouter(Deliveries)} />
+            <Route path='/deliveries' component={withRouter(Deliveries)} />
             <Route exact path='/history' component={withRouter(History)} />
             {/* <Route exact path='/aboutus' component={withRouter(AboutUs)} /> */}
             <Route exact path='/login' component={withRouter(Login)} />

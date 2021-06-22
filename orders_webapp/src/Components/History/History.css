@@ -23,7 +23,7 @@
 }
 
 .list-item > *{
-    flex: 1 1 15%;
+    flex: 1 1 12%;
 }
 
 .list-item > :nth-child(3) {
@@ -42,4 +42,21 @@
 .list-item:first-child:hover{
     background-color: white;
     cursor: default;
+}
+
+.historic-star {
+    margin-top: 0 !important;
+    width: 30px !important;
+    margin-left: 7px;
+    margin-bottom: 2px;
+}
+
+.user-rating{
+    width: 60px;
+    height: auto;
+    color: rgb(255, 175, 2);
+    background-color: rgb(245, 245, 245);
+    border-radius: 50%;
+    padding: 0.3em;
+    margin-top: 1em;
 }
