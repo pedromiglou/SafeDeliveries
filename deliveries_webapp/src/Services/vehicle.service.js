@@ -74,7 +74,7 @@ class VehicleService {
     }
 
     async getVehiclesStatistics() {
-        var url = 'http://localhost:8080/api/private/vehicles/statistics';
+        var url = urlAPI + 'api/private/vehicles/statistics';
         var res = await fetch(url, {
             method:'GET',
             headers:{'Content-type':'application/json',

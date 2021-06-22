@@ -24,13 +24,16 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     private String webURL;
+    private String deliveriesURL;
 
     public WebSecurity( BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         if (System.getenv("environment")!=null && System.getenv("environment").equals("prod")) {
             this.webURL = "http://192.168.160.233:81";
+            this.deliveriesURL = "http://192.168.160.233:8080";
         } else {
             this.webURL = "http://localhost:3001";
+            this.deliveriesURL = "http://localhost:8080";
         }
     }
 
@@ -39,7 +42,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         http.csrf().disable();
         http.cors().configurationSource(request -> {
             var cors = new CorsConfiguration();
-            cors.setAllowedOrigins(List.of(this.webURL));
+            cors.setAllowedOrigins(List.of(this.webURL, this.deliveriesURL));
             cors.setAllowedMethods(List.of("GET","POST", "PUT", "DELETE", "OPTIONS"));
             cors.setAllowedHeaders(List.of("*")); return cors;
         }).and().authorizeRequests()

@@ -14,7 +14,7 @@ class RiderService {
 
 
         async changeStatus(id, newStatus) {
-            var url =  'http://localhost:8080/api/private/rider/' +id;
+            var url =  urlAPI + 'api/private/rider/' +id;
     
             let rider = {
                 status: newStatus
@@ -62,7 +62,7 @@ class RiderService {
         }
 
         async getRiderStatistics() {
-            var url = 'http://localhost:8080/api/private/riders/statistics';
+            var url = urlAPI + 'api/private/riders/statistics';
             var res = await fetch(url, {
                 method:'GET',
                 headers:{'Content-type':'application/json',
