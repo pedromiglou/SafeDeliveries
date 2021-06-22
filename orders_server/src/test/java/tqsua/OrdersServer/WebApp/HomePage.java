@@ -91,6 +91,10 @@ public class HomePage {
         this.login.click();
     }
 
+    public void clickHistoryTab(){
+        this.history_tab.click();
+    }
+
     public Boolean check_home_page() {
         {
             WebDriverWait wait = new WebDriverWait(driver, 30);
@@ -128,5 +132,9 @@ public class HomePage {
         js.executeScript(String.format(
         "window.sessionStorage.setItem('%s','%s');", "user_orders", json));
         driver.navigate().refresh();
+    }
+
+    public void clickRequest(){
+        this.request_tab.click();
     }
 }

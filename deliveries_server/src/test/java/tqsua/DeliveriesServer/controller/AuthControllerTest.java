@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -48,7 +47,7 @@ class AuthControllerTest {
         .content(JsonUtil.toJson(rider)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.message", is("Rider was registed with sucess!")));
-        verify(riderService, VerificationModeFactory.times(1)).existsRiderByEmail(anyString());
+        verify(riderService, VerificationModeFactory.times(1)).existsRiderByEmail("diogo@gmail.com");
         reset(riderService);
     }
 

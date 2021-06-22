@@ -3,6 +3,7 @@ package tqsua.DeliveriesServer.service;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,61 @@ class OrderServiceTest {
         reset(repository);
     }
 
+    @Test
+    void whenGetTotalOrders_thenReturnCorrectResults() throws Exception {
+        when(repository.countAll()).thenReturn(2);
+        assertThat(service.getTotalOrders()).isEqualTo(2);
+        reset(repository);
+    }
+
+    @Test
+    void whenGetOrdersLast7Days_thenReturnCorrectResults() throws Exception {
+        ArrayList<Order> response = new ArrayList<>();
+        Order order1 = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order1.setCreation_date(LocalDateTime.now());
+        Order order2 = new Order(0, 41.3, 32.4, 41.2, 32.3, 12.6, "SafeDeliveries");
+        order2.setCreation_date(LocalDateTime.now().minusDays(1));
+        Order order3 = new Order(0, 41.3, 32.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order3.setCreation_date(LocalDateTime.now().minusDays(2));
+        response.add(order1);
+        response.add(order2);
+        response.add(order3);
+
+        ArrayList<Integer> orders7Days = new ArrayList<>();
+        orders7Days.add(0);
+        orders7Days.add(0);
+        orders7Days.add(0);
+        orders7Days.add(0);
+        orders7Days.add(1);
+        orders7Days.add(1);
+        orders7Days.add(1);
+
+        when(repository.findAll()).thenReturn(response);
+        assertThat(service.getOrdersLast7Days()).isEqualTo(orders7Days);
+        reset(repository);
+    }
+
+    @Test
+    void whenGetOrdersByWeight_thenReturnCorrectResults() throws Exception {
+        ArrayList<Order> response = new ArrayList<>();
+        Order order1 = new Order(0, 40.3, 30.4, 41.2, 31.3, 1.3, "SafeDeliveries");
+        Order order2 = new Order(0, 41.3, 32.4, 41.2, 32.3, 15.6, "SafeDeliveries");
+        Order order3 = new Order(0, 41.3, 32.4, 41.2, 31.3, 8.0, "SafeDeliveries");
+        response.add(order1);
+        response.add(order2);
+        response.add(order3);
+
+        ArrayList<Integer> ordersWeight = new ArrayList<>();
+        ordersWeight.add(1);
+        ordersWeight.add(1);
+        ordersWeight.add(1);
+        ordersWeight.add(0);
+
+        when(repository.findAll()).thenReturn(response);
+        assertThat(service.getOrdersByWeight()).isEqualTo(ordersWeight);
+        reset(repository);
+    }
+
 
     @Test
     void whenGetPendingOrders_thenReturnCorrectResults() throws Exception {
@@ -47,8 +103,8 @@ class OrderServiceTest {
         response.add(order1);
         response.add(order2);
 
-        when(repository.findPendingOrders()).thenReturn(response);
-        assertThat(service.getPendingOrders()).isEqualTo(response);
+        when(repository.findPendingOrders(10000)).thenReturn(response);
+        assertThat(service.getPendingOrders(10000)).isEqualTo(response);
         reset(repository);
     }
 
@@ -132,6 +188,59 @@ class OrderServiceTest {
         when(repository.save(order1)).thenReturn(order1);
 
         assertThat(service.updateRider(1, 2)).isEqualTo(order1);
+        reset(repository);
+    }
+
+    @Test
+    void whenUpdateRating_updateRating() {
+        Order order1 = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+
+        when(repository.findByPk(1)).thenReturn(order1);
+        order1.setRating(5);
+        when(repository.save(order1)).thenReturn(order1);
+
+        assertThat(service.updateRating(1, 5)).isEqualTo(order1);
+        reset(repository);
+    }
+    
+
+    @Test
+    void whenGetDeliveringOrderByRiderId_ThenReturnResult() {
+        Order order1 = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order1.setStatus("Delivering");
+
+        when(repository.findDeliveringOrderByRiderId(1)).thenReturn(order1);
+        assertThat(service.getDeliveringOrderByRiderId(1)).isEqualTo(order1);
+        reset(repository);
+    }
+
+    @Test
+    void whenGetFinishedOrderByRiderId_ThenReturnResult() {
+        Order order1 = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order1.setStatus("Finished");
+        Order order2 = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order2.setStatus("Finished");
+
+        ArrayList<Order> response = new ArrayList<>();
+        response.add(order1);
+        response.add(order2); 
+
+        when(repository.findFinishedByRiderId(1)).thenReturn(response);
+        assertThat(service.getFinishedOrdersByRiderId(1)).isEqualTo(response);
+        reset(repository);
+    }
+
+    @Test
+    void whenGetOrdersByRiderId_ThenReturnResult() {
+        Order order1 = new Order(12, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        Order order2 = new Order(12, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+
+        ArrayList<Order> response = new ArrayList<>();
+        response.add(order1);
+        response.add(order2); 
+
+        when(repository.getOrdersByRiderId(12)).thenReturn(response);
+        assertThat(service.getOrdersByRiderId(12)).isEqualTo(response);
         reset(repository);
     }
     

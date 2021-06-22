@@ -6,7 +6,6 @@ import org.mockito.Mockito;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -15,9 +14,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import tqsua.DeliveriesServer.service.NotificationService;
 import tqsua.DeliveriesServer.service.OrderService;
 import tqsua.DeliveriesServer.service.RiderService;
+import tqsua.DeliveriesServer.service.VehicleService;
 import tqsua.DeliveriesServer.model.Order;
 import tqsua.DeliveriesServer.model.Rider;
 import tqsua.DeliveriesServer.model.RiderDTO;
+import tqsua.DeliveriesServer.model.Vehicle;
+import tqsua.DeliveriesServer.security.SecurityConstants;
 import tqsua.DeliveriesServer.JsonUtil;
 
 import static org.hamcrest.Matchers.*;
@@ -30,6 +32,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Date;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 
 //@WebMvcTest(RiderController.class)
 @AutoConfigureMockMvc
@@ -48,6 +54,13 @@ class RiderControllerTest {
     @MockBean
     private NotificationService notification_service;
 
+    @MockBean
+    private VehicleService vehicle_service;
+
+    String token = this.getToken("1");
+
+    String invalidtoken = this.getToken("5");
+
     @AfterEach
     void tearDown() {
         reset(service);
@@ -56,91 +69,159 @@ class RiderControllerTest {
     @Test
     void whenGetAllRiders_thenReturnResult() throws Exception {
         ArrayList<Rider> response = new ArrayList<>();
-        Rider rider1 = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        Rider rider2 = new Rider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline");
-        rider1.setLat(12.0);
-        rider1.setLng(93.0);
-        rider2.setLat(12.0);
-        rider2.setLng(93.0);
+        Rider rider1 = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "Admin");
+        Rider rider2 = createRider("Diogo", "Carvalho", "diogo@gmail.com", "password1234", 3.9, "Offline", "User");
         response.add(rider1);
         response.add(rider2);
+        given(service.getRiderById(1)).willReturn(rider1);
         given(service.getAllRiders()).willReturn(response);
 
-        mvc.perform(get("/api/riders").contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(get("/api/private/riders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token )
         .content(JsonUtil.toJson(response)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[*].id").isNotEmpty());
         verify(service, VerificationModeFactory.times(1)).getAllRiders();
+        verify(service, VerificationModeFactory.times(1)).getRiderById(1);
+    }
+
+    @Test
+    void whenGetAllRidersWithoutPermission_thenReturnUnauthorized() throws Exception {
+        Rider rider1 = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
+        given(service.getRiderById(1)).willReturn(rider1);
+
+        mvc.perform(get("/api/private/riders").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+        verify(service, VerificationModeFactory.times(0)).getAllRiders();
+        verify(service, VerificationModeFactory.times(1)).getRiderById(1);
+    }
+
+    @Test
+    void whenGetRidersStatistics_thenReturnResult() throws Exception {
+        Rider rider = createRider("Rafael", "Baptista", "rafael@ua.pt", "1234", 5.0, "Online", "Admin");
+
+        given(service.getRiderById(1)).willReturn(rider);
+        given(service.getRidersByState("Online")).willReturn(4);
+        given(service.getRidersByState("Offline")).willReturn(3);
+        given(service.getRidersByState("Delivering")).willReturn(5);
+
+        mvc.perform(get("/api/private/riders/statistics").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total_riders", is(12)))
+                .andExpect(jsonPath("$.online_riders", is(4)))
+                .andExpect(jsonPath("$.offline_riders", is(3)))
+                .andExpect(jsonPath("$.delivering_riders", is(5)));
+        verify(service, VerificationModeFactory.times(1)).getRiderById(1);        
+        verify(service, VerificationModeFactory.times(1)).getRidersByState("Online");
+        verify(service, VerificationModeFactory.times(1)).getRidersByState("Offline");
+        verify(service, VerificationModeFactory.times(1)).getRidersByState("Delivering");
+    }
+
+    @Test
+    void whenGetRidersStatisticsWithoutPermissions_thenReturnUnauthorized() throws Exception {
+        Rider rider = createRider("Rafael", "Baptista", "rafael@ua.pt", "1234", 5.0, "Online", "User");
+
+        given(service.getRiderById(1)).willReturn(rider);
+
+        mvc.perform(get("/api/private/riders/statistics").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
     }
 
     @Test
     void whenGetRiderById_thenReturnRider() throws Exception {
-        Rider response = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        response.setLat(12.0);
-        response.setLng(93.0);
-        given(service.getRiderById(response.getId())).willReturn(response);
+        Rider response = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
+        response.setId(1);
+        given(service.getRiderById(1)).willReturn(response);
 
-        mvc.perform(get("/api/rider?id="+String.valueOf(response.getId())).contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(get("/api/private/rider?id="+1).contentType(MediaType.APPLICATION_JSON).header("Authorization", token )
                 .content(JsonUtil.toJson(response)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is((int) response.getId())));
-        verify(service, VerificationModeFactory.times(1)).getRiderById(response.getId());
+                .andExpect(jsonPath("$.id", is(1)));
+        verify(service, VerificationModeFactory.times(1)).getRiderById(1);
+    }
+
+    @Test
+    void whenGetRiderByIdWithDifferentToken_thenReturnUnauthorized() throws Exception {
+        Rider response = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
+        response.setId(1);
+        given(service.getRiderById(1)).willReturn(response);
+
+        mvc.perform(get("/api/private/rider?id="+1).contentType(MediaType.APPLICATION_JSON).header("Authorization", invalidtoken )
+                .content(JsonUtil.toJson(response)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+        verify(service, VerificationModeFactory.times(0)).getRiderById(1);
     }
 
     @Test
     void whenGetRiderByInvalidId_thenReturnRider() throws Exception {
-        given(service.getRiderById(-1L)).willReturn(null);
+        given(service.getRiderById(1)).willReturn(null);
 
-        mvc.perform(get("/api/rider?id=-1").contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/api/private/rider?id=1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
                 .andExpect(status().isNotFound());
-        verify(service, VerificationModeFactory.times(1)).getRiderById(-1);
+        verify(service, VerificationModeFactory.times(1)).getRiderById(1);
     }
 
     @Test
     void whenUpdateRider_thenReturnOk() throws Exception {
-        RiderDTO newDetails = new RiderDTO("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
-        newDetails.setLat(12.0);
-        newDetails.setLng(93.0);
-        Rider rider = new Rider("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
-        rider.setLat(12.0);
-        rider.setLng(93.0);
-        given(service.updateRider(0L, newDetails)).willReturn(rider);
+        RiderDTO newDetails = createRiderDTO("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
+        Rider rider = createRider("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline", "User");
+        given(service.updateRider(1, newDetails)).willReturn(rider);
         //with all arguments
-        mvc.perform(put("/api/rider/0").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
+        mvc.perform(put("/api/private/rider/1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ).content(JsonUtil.toJson(newDetails)))
                 .andExpect(status().isOk());
-        verify(service, VerificationModeFactory.times(1)).updateRider(0, newDetails);
+        verify(service, VerificationModeFactory.times(1)).updateRider(1, newDetails);
 
         //with less arguments
-        newDetails = new RiderDTO(null, "B", "a@b.c", null, 5.0, "Offline");
-        newDetails.setLat(12.0);
-        newDetails.setLng(93.0);
-        given(service.updateRider(0L, newDetails)).willReturn(rider);
-        mvc.perform(put("/api/rider/0").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
+        newDetails = createRiderDTO(null, "B", "a@b.c", null, 5.0, "Offline");
+        given(service.updateRider(1, newDetails)).willReturn(rider);
+        mvc.perform(put("/api/private/rider/1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ).content(JsonUtil.toJson(newDetails)))
                 .andExpect(status().isOk());
-        verify(service, VerificationModeFactory.times(1)).updateRider(0, newDetails);
+        verify(service, VerificationModeFactory.times(1)).updateRider(1, newDetails);
+    }
+
+    @Test
+    void whenUpdateRiderWithDifferentToken_thenReturnUnauthorized() throws Exception {
+        RiderDTO newDetails = createRiderDTO("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
+        Rider rider = createRider("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline", "User");
+        given(service.updateRider(1, newDetails)).willReturn(rider);
+        //with all arguments
+        mvc.perform(put("/api/private/rider/1").contentType(MediaType.APPLICATION_JSON).header("Authorization", invalidtoken ).content(JsonUtil.toJson(newDetails)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+        verify(service, VerificationModeFactory.times(0)).updateRider(1, newDetails);
+
+        //with less arguments
+        newDetails = createRiderDTO(null, "B", "a@b.c", null, 5.0, "Offline");
+        given(service.updateRider(1, newDetails)).willReturn(rider);
+        mvc.perform(put("/api/private/rider/1").contentType(MediaType.APPLICATION_JSON).header("Authorization", invalidtoken ).content(JsonUtil.toJson(newDetails)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is("Unauthorized")));
+        verify(service, VerificationModeFactory.times(0)).updateRider(1, newDetails);
     }
 
     @Test
     void whenUpdateNotExistentRider_thenReturnNotFound() throws Exception {
-        RiderDTO newDetails = new RiderDTO("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
-        newDetails.setLat(12.0);
-        newDetails.setLng(93.0);
-        given(service.updateRider(0L, newDetails)).willReturn(null);
+        RiderDTO newDetails = createRiderDTO("A", "B", "a@b.c", "abcdefgh", 5.0, "Offline");
+        given(service.updateRider(1, newDetails)).willReturn(null);
 
-        mvc.perform(put("/api/rider/0").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
+        mvc.perform(put("/api/private/rider/1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ).content(JsonUtil.toJson(newDetails)))
                 .andExpect(status().isNotFound());
-        verify(service, VerificationModeFactory.times(1)).updateRider(0, newDetails);
+        verify(service, VerificationModeFactory.times(1)).updateRider(1, newDetails);
     }
 
     @Test
     void whenUpdateRiderStateToOnline_thenSearchForOrder_AndReturnOk() throws Exception {
-        RiderDTO newDetails = new RiderDTO("A", "B", "a@b.c", "abcdefgh", 5.0, "Online");
-        newDetails.setLat(12.0);
-        newDetails.setLng(93.0);
-        Rider rider = new Rider("A", "B", "a@b.c", "abcdefgh", 5.0, "Online");
-        rider.setLat(12.0);
-        rider.setLng(93.0);
+        RiderDTO newDetails = createRiderDTO("A", "B", "a@b.c", "abcdefgh", 5.0, "Online");
+        Rider rider = createRider("A", "B", "a@b.c", "abcdefgh", 5.0, "Online", "User");
+        rider.setId(1);
+
+        ArrayList<Vehicle> vehicles =new ArrayList<>();
+        Vehicle v1 = new Vehicle("Mercedes", "A45", "Carro", 320.2, "AA-23-DS");
+        v1.setRider(rider);
+        vehicles.add(v1);
 
         ArrayList<Order> response = new ArrayList<>();
         Order order1 = new Order(0, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
@@ -150,18 +231,55 @@ class RiderControllerTest {
         response.add(order2);
         response.add(order3);
 
-        given(service.updateRider(1L, newDetails)).willReturn(rider);
+        ArrayList<Order> refused_orders = new ArrayList<>();
+        refused_orders.add(order1);
 
-        given(order_service.getPendingOrders()).willReturn(response);
-        response.remove(0);
-        given(order_service.getRefusedOrders(1)).willReturn(response);
+        given(service.updateRider(1L, newDetails)).willReturn(rider);
+        given(vehicle_service.getVehiclesByRiderId(1)).willReturn(vehicles);
+        given(order_service.getPendingOrders(320.2)).willReturn(response);
+        given(order_service.getRefusedOrders(1)).willReturn(refused_orders);
         
         //with all arguments
-        mvc.perform(put("/api/rider/1").contentType(MediaType.APPLICATION_JSON).content(JsonUtil.toJson(newDetails)))
+        mvc.perform(put("/api/private/rider/1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ).content(JsonUtil.toJson(newDetails)))
                 .andExpect(status().isOk());
         verify(service, VerificationModeFactory.times(1)).updateRider(1, newDetails);
         verify(notification_service, VerificationModeFactory.times(1)).save(Mockito.any());
 
     }
 
+    @Test
+    void whenUpdateRiderStatusWhenHeIsDeliveringAOrder_thenReturnBadRequest() throws Exception {
+        RiderDTO newDetails = createRiderDTO(null, null, null, null, null, "Online");
+        Order order = new Order(1, 40.3, 30.4, 41.2, 31.3, 36.3, "SafeDeliveries");
+        order.setStatus("Delivering");
+
+        given(order_service.getDeliveringOrderByRiderId(1)).willReturn(order);
+        //with all arguments
+        mvc.perform(put("/api/private/rider/1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ).content(JsonUtil.toJson(newDetails)))
+                .andExpect(status().isBadRequest());
+        verify(order_service, VerificationModeFactory.times(1)).getDeliveringOrderByRiderId(1);
+    }
+
+    public Rider createRider(String firstname, String lastname, String email, String password, double rating, String status, String account_type) {
+        Rider rider = new Rider(firstname, lastname, email, password, rating, status);
+        rider.setAccountType(account_type);
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        return rider;
+    }
+
+    public RiderDTO createRiderDTO(String firstname, String lastname, String email, String password, Double rating, String status) {
+        RiderDTO rider = new RiderDTO(firstname, lastname, email, password, rating, status);
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        return rider;
+    }
+
+    public String getToken(String id) {
+        String token = "Bearer " + JWT.create()
+            .withSubject( id )
+            .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+            .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+        return token;
+    }
 }

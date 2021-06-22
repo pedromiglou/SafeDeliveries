@@ -35,9 +35,6 @@ public class HomePage {
     @FindBy(id = "home-tab")
     private WebElement home_tab;
 
-    @FindBy(id = "search-tab")
-    private WebElement search_tab;
-
     @FindBy(id = "history-tab")
     private WebElement history_tab;
 
@@ -52,6 +49,24 @@ public class HomePage {
 
     @FindBy(id = "profile-div")
     private WebElement profile;
+
+    @FindBy(id = "admin_text")
+    private WebElement admin_text;
+
+    @FindBy(id = "statistics-tab")
+    private WebElement statistics;
+
+    @FindBy(id = "accept_order_button")
+    private WebElement accept_order_button;
+
+    @FindBy(id = "decline_order_button")
+    private WebElement decline_order_button;
+
+    @FindBy(id = "error_status_message")
+    private WebElement error_status_message;
+
+    @FindBy(id = "modal_error_ok_button")
+    private WebElement modal_error_ok_button;
 
     @FindBy(id = "logout")
     private WebElement logout;
@@ -72,9 +87,13 @@ public class HomePage {
     public boolean pageLoaded() {
         return driver.getTitle().equals("tqs");
     }
+    
+    public String getAdminText(){
+        return this.admin_text.getText();
+    }
 
-    public String getSearchDeliveryTab(){
-        return this.search_tab.getText();
+    public String getErrorStatus(){
+        return this.error_status_message.getText();
     }
 
     public String getHistoryTab(){
@@ -102,15 +121,61 @@ public class HomePage {
         this.login.click();
     }
 
+    public void clickHistory(){
+        this.history_tab.click();
+    }
+
+    public void clickAccept(){
+        this.accept_order_button.click();
+    }
+
+    public void clickDecline(){
+        this.decline_order_button.click();
+    }
+
+    public void clickStatistics(){
+        this.statistics.click();
+    }
+
     public void  clickProfile(){
         this.profile.click();
     }
 
-    public void login() throws IOException, InterruptedException, JSONException {
+    public void closeErrorModal() {
+        this.modal_error_ok_button.click();
+    }
+
+    public String login() throws IOException, InterruptedException, JSONException {
         // form parameters
         Map<Object, Object> data = new HashMap<>();
         data.put("email", "rafael2@gmail.com");
         data.put("password", "rafael123");
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestBody = objectMapper
+            .writerWithDefaultPrettyPrinter()
+            .writeValueAsString(data);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .POST(BodyPublishers.ofString(requestBody))
+                .uri(URI.create("http://localhost:8080/api/login"))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        JSONObject json = new JSONObject(response.body());
+
+        js.executeScript(String.format(
+        "window.sessionStorage.setItem('%s','%s');", "user", json));
+        driver.navigate().refresh();
+        return "Bearer " + json.getString("token");
+    }
+
+    public void loginWithAdmin() throws IOException, InterruptedException, JSONException {
+        // form parameters
+        Map<Object, Object> data = new HashMap<>();
+        data.put("email", "admin@gmail.com");
+        data.put("password", "admin123");
         ObjectMapper objectMapper = new ObjectMapper();
         String requestBody = objectMapper
             .writerWithDefaultPrettyPrinter()
@@ -169,5 +234,9 @@ public class HomePage {
                 break;
         }
         driver.findElement(By.id("perfil-dropdown")).click();
+    }
+
+    public void changeStatusToOnlineWhenDelivering() {
+        driver.findElement(By.id("state-online")).click();
     }
 }

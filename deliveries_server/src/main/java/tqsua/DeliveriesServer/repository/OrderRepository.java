@@ -16,10 +16,24 @@ public interface OrderRepository extends JpaRepository<Order, Long>{
 	@Query(value = "Select * from orders where order_id = :id", nativeQuery = true)
 	Order findByPk(long id);
 
-	@Query(value = "Select * from orders left join notifications on orders.order_id = notifications.order_id where orders.rider_id = 0 and notifications.rider_id is NULL order by creation_date", nativeQuery = true)
-	ArrayList<Order> findPendingOrders();
+	@Query(value = "Select * from orders left join notifications on orders.order_id = notifications.order_id where orders.rider_id = 0 and notifications.rider_id is NULL and weight <= :max_capacity order by creation_date", nativeQuery = true)
+	ArrayList<Order> findPendingOrders(double max_capacity);
 
 	@Query(value = "SELECT orders.* FROM order_refused_riders JOIN orders on order_refused_riders.order_order_id = orders.order_id where refused_riders = :id", nativeQuery = true)
 	ArrayList<Order> findRefusedOrders(long id);
 
+	@Query(value = "SELECT count(*) FROM orders", nativeQuery = true)
+	int countAll();
+
+	@Query(value = "SELECT count(*) FROM orders WHERE status = :status", nativeQuery = true)
+	int countOrders(String status);
+
+	@Query(value = "SELECT * FROM orders WHERE status = 'Delivering' AND rider_id = :id", nativeQuery = true)
+	Order findDeliveringOrderByRiderId(long id);
+
+	@Query(value = "SELECT * FROM orders WHERE status = 'Finished' AND rider_id = :rider_id", nativeQuery = true)
+	ArrayList<Order> findFinishedByRiderId(long rider_id);
+
+	@Query(value = "SELECT * FROM orders WHERE rider_id = :rider_id ORDER BY creation_date desc", nativeQuery = true)
+	ArrayList<Order> getOrdersByRiderId(long rider_id);
 }

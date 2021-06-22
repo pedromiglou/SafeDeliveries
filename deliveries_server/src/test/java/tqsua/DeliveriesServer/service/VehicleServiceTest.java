@@ -60,10 +60,21 @@ class VehicleServiceTest {
     }
 
     @Test
+    void whenGetVehiclesByRiderId_thenReturnVehicles() {
+        ArrayList<Vehicle> response = new ArrayList<>();
+        Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
+        Vehicle v2 = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
+        response.add(v1);
+        response.add(v2);
+
+        when(repository.findByRider(1L)).thenReturn(response);
+        assertThat(service.getVehiclesByRiderId(1)).isEqualTo(response);
+    }
+
+
+    @Test
     void whenCreateVehicle_thenSaveIt() {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        rider.setLat(12.0);
-        rider.setLng(93.0);
+        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
         when(riderService.getRiderById(0L)).thenReturn(rider);
 
         VehicleDTO vehicle = new VehicleDTO(null, "Audi", "A5", "Carro", 365.0, 0L, "AAAAAA");
@@ -74,9 +85,7 @@ class VehicleServiceTest {
 
     @Test
     void whenCreateVehicleWithoutTheNeededParameters_thenDoNotSaveIt() {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        rider.setLat(12.0);
-        rider.setLng(93.0);
+        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
         when(riderService.getRiderById(0L)).thenReturn(rider);
 
         VehicleDTO vehicle = new VehicleDTO(null, null, "A5", "Carro", 365.0, 0L, "BBBBBB");
@@ -87,9 +96,7 @@ class VehicleServiceTest {
 
     @Test
     void whenUpdateVehicle_onlyUpdateNotNullParameters() {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        rider.setLat(12.0);
-        rider.setLng(93.0);
+        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
         when(riderService.getRiderById(0L)).thenReturn(rider);
         Vehicle response = new Vehicle("Audi", "A5", "Carro", 365.0, "AAAAAA");
 
@@ -113,9 +120,7 @@ class VehicleServiceTest {
 
     @Test
     void whenUpdateNotExistentVehicle_returnNull() {
-        Rider rider = new Rider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline");
-        rider.setLat(12.0);
-        rider.setLng(93.0);
+        Rider rider = createRider("Ricardo", "Cruz", "ricardo@gmail.com", "password1234", 4.0, "Offline", "User");
         when(riderService.getRiderById(0L)).thenReturn(rider);
 
         VehicleDTO newDetails = new VehicleDTO(null, "BMW", "M4", "Carro", 320.0, 0L,"CCCCCC");
@@ -136,5 +141,36 @@ class VehicleServiceTest {
 
         assertThat(this.service.deleteVehicle(-1L)).isNull();
         Mockito.verify(repository, VerificationModeFactory.times(0)).deleteById(-1L);
+    }
+
+    @Test
+    void whenGetVehiclesByCapacity_returnResult() {
+        ArrayList<Vehicle> response = new ArrayList<>();
+        Vehicle v1 = new Vehicle("Audi", "A5", "Carro", 14.0, "AAAAAA");
+        Vehicle v2 = new Vehicle("BMW", "M4", "Carro", 75.0, "BBBBBB");
+        Vehicle v3 = new Vehicle("BMW", "M4", "Carro", 101.0, "BBBBBB");
+        response.add(v1);
+        response.add(v2);
+        response.add(v3);
+
+        when(repository.findAll()).thenReturn(response);
+        
+        ArrayList<Integer> vehiclesCapacity = new ArrayList<>();
+        vehiclesCapacity.add(0);
+        vehiclesCapacity.add(1);
+        vehiclesCapacity.add(0);
+        vehiclesCapacity.add(1);
+        vehiclesCapacity.add(1);
+        
+        assertThat(this.service.getVehiclesByCapacity()).isEqualTo(vehiclesCapacity);
+        Mockito.verify(repository, VerificationModeFactory.times(1)).findAll();
+    }
+
+    public Rider createRider(String firstname, String lastname, String email, String password, double rating, String status, String account_type) {
+        Rider rider = new Rider(firstname, lastname, email, password, rating, status);
+        rider.setAccountType(account_type);
+        rider.setLat(12.0);
+        rider.setLng(93.0);
+        return rider;
     }
 }

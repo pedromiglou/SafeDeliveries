@@ -1,9 +1,11 @@
 package tqsua.DeliveriesServer.security;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -13,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import tqsua.DeliveriesServer.controller.OrderController;
 
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
@@ -22,14 +25,17 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    private String webURL;
+    private ArrayList<String> origins = new ArrayList<>();
 
     public WebSecurity( BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        for (String url: OrderController.APP_NAMES.values()) {
+            origins.add(url);
+        }
         if (System.getenv("environment")!=null && System.getenv("environment").equals("prod")) {
-            this.webURL = "http://192.168.160.233";
+            origins.add("http://192.168.160.233");
         } else {
-            this.webURL = "http://localhost:3000";
+            origins.add("http://localhost:3000");
         }
     }
 
@@ -38,13 +44,13 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         http.csrf().disable();
         http.cors().configurationSource(request -> {
             var cors = new CorsConfiguration();
-            cors.setAllowedOrigins(List.of(this.webURL, "http://localhost:3001"));
+            cors.setAllowedOrigins(this.origins);
             cors.setAllowedMethods(List.of("GET","POST", "PUT", "DELETE", "OPTIONS"));
             cors.setAllowedHeaders(List.of("*")); return cors;
         }).and().authorizeRequests()
-                //.antMatchers(HttpMethod.GET, SecurityConstants.PRIVATE_URL+"/**").authenticated()
-                //.antMatchers(HttpMethod.POST, SecurityConstants.PRIVATE_URL+"/**").authenticated()
-                //.antMatchers(HttpMethod.PUT, SecurityConstants.PRIVATE_URL+"/**").authenticated()
+                .antMatchers(HttpMethod.GET, SecurityConstants.PRIVATE_URL+"/**").authenticated()
+                .antMatchers(HttpMethod.POST, SecurityConstants.PRIVATE_URL+"/**").authenticated()
+                .antMatchers(HttpMethod.PUT, SecurityConstants.PRIVATE_URL+"/**").authenticated()
                 //.antMatchers(HttpMethod.DELETE, SecurityConstants.PRIVATE_URL+"/**").authenticated()
                 .anyRequest().permitAll()
                 .and()

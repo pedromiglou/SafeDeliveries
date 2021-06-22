@@ -24,3 +24,12 @@ https://pedromiglou.atlassian.net/jira/software/projects/TQSPROJ/boards/4
     Deliveries WebApp   - http://192.168.160.233
     Orders Server       - http://192.168.160.233:8081
     Orders WebApp       - http://192.168.160.233:81
+
+
+## Account credentials
+
+Email | admin@gmail.com | rider@gmail.com | client@gmail.com 
+--- | --- | --- | ---
+Password | admin123 | rider123 | client123 
+Role | Admin | Normal | Normal 
+App | DeliveriesApp | DeliveriesApp | OrdersApp
