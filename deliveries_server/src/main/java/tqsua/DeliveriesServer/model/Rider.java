@@ -51,11 +51,6 @@ public class Rider implements UserDetails {
     @Column(name = "lng", nullable = false)
     private Double lng;
 
-
-/*    // tem varios vehicles
-    @OneToMany
-    private Set<Vehicle> vehicles = new HashSet<>();*/
-
     public Rider() {
     }
 
@@ -132,23 +127,6 @@ public class Rider implements UserDetails {
     public void setAccountType(String accountType){
         this.accountType = accountType;
     }
-    /*
-    public Set<Vehicle> getVehicles() {
-        return vehicles;
-    }
-
-    public void setVehicles(Set<Vehicle> vehicles) {
-        this.vehicles = vehicles;
-    }
-
-    public void addVehicle(Vehicle vehicle) {
-        this.vehicles.add(vehicle);
-    }
-
-    public void removeVehicle(Vehicle vehicle) {
-        this.vehicles.remove(vehicle);
-    }
-*/
 
     public Double getLat() {
         return this.lat;
