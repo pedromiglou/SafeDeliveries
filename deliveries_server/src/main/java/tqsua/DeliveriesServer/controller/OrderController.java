@@ -150,19 +150,16 @@ public class OrderController {
     @PostMapping(path="/order/confirm")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> confirmDeliveryOrder(@RequestBody String info) throws IOException, InterruptedException, URISyntaxException {
-        System.out.println("hey");
         HashMap<String, Object> response = new HashMap<>();
         var json = new JSONObject(info);
         long order_id = json.getLong("order_id");
         int rating = (int) json.getLong("rating");
-        System.out.println(order_id);
-        System.out.println(rating);
         if (rating < 1 || rating > 5) {
             response.put(MESSAGE, "Invalid rating value.");
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         Order order = orderService.getOrderById(order_id);
-        System.out.println(order);
+
         if (order == null) {
             response.put(MESSAGE, "Not found");
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
@@ -178,8 +175,8 @@ public class OrderController {
         riderService.updateRider(rider_id, new RiderDTO(null, null, null, null, sumRating/countOrders, "Online"));
         
         // update order status to Finished and rating
-        Order updatedOrder = orderService.updateStatus(order_id);
-        updatedOrder = orderService.updateRating(order_id, rating);
+        orderService.updateStatus(order_id);
+        Order updatedOrder = orderService.updateRating(order_id, rating);
 
         response.put("rating", updatedOrder.getRating());
         return new ResponseEntity<>(response, HttpStatus.OK);
