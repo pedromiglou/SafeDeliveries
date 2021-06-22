@@ -1,5 +1,7 @@
 package tqsua.DeliveriesServer.WebApp;
 
+import java.util.concurrent.TimeUnit;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -27,7 +29,8 @@ public class HistoryPage {
         return this.title.getText();
     }
 
-    public Boolean checkOrderExists(){
+    public Boolean checkOrderExists() throws InterruptedException{
+        TimeUnit.SECONDS.sleep(2);
         return !driver.findElements(By.id("order-0")).isEmpty();
     }
 

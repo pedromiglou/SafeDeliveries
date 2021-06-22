@@ -1,5 +1,7 @@
 package tqsua.DeliveriesServer.WebApp;
 
+import java.util.concurrent.TimeUnit;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -119,7 +121,8 @@ public class ProfilePage {
         return driver.findElement(By.name("registration_" + this.registration)).getAttribute("placeholder");
     }
 
-    public String checkEdited(String id){
+    public String checkEdited(String id) throws InterruptedException{
+        TimeUnit.SECONDS.sleep(2);
         String value;
         switch (id) {
             case "registration":

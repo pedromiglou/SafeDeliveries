@@ -28,6 +28,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.JSONException;
@@ -184,7 +185,7 @@ public class OrdersSteps {
     }
 
     @Then("It should appear a order")
-    public void should_appear_order() {
+    public void should_appear_order() throws InterruptedException {
         assertThat(historyPage.checkOrderExists(), is(true));
     }
 
@@ -195,7 +196,8 @@ public class OrdersSteps {
     }
 
     @When("It sould appear the same information")
-    public void checkInfo() throws URISyntaxException, JSONException {
+    public void checkInfo() throws URISyntaxException, JSONException, InterruptedException {
+        TimeUnit.SECONDS.sleep(2);
         assertThat(deliveryPage.getRatingText(), is("4"));
         assertThat(deliveryPage.getTotalWeightText(), is("12 kg"));
         driver.quit();

@@ -15,6 +15,7 @@ import tqsua.OrdersServer.WebApp.RequestOrderPage;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -147,7 +148,8 @@ public class RequestOrderSteps {
     }
 
     @Then("It should appear a order")
-    public void should_appear_order() {
+    public void should_appear_order() throws InterruptedException {
+        TimeUnit.SECONDS.sleep(2);
         assertThat(historyPage.checkOrderExists(), is(true));
     }
 

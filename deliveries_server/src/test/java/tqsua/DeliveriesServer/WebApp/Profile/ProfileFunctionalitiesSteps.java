@@ -84,7 +84,7 @@ public class ProfileFunctionalitiesSteps {
     }
 
     @And("Check that the vehicle was edited, and now has in the field {string} the value {string}kg")
-    public void check_vehicle_edited(String id, String value){
+    public void check_vehicle_edited(String id, String value) throws InterruptedException{
         assertThat(profile.checkEdited(id), is(value));
         driver.quit();
     }
