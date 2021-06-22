@@ -1,7 +1,9 @@
+import {urlAPI} from './../data/data';
+
 class NotificationService {
 
     async getNotificationByUserId(riderId) {
-        var url = 'http://localhost:8080/api/private/notifications?id=' + riderId;
+        var url = urlAPI + 'api/private/notifications?id=' + riderId;
         var res = await fetch(url, {
             method:'GET',
             headers:{'Content-type':'application/json',

@@ -52,8 +52,8 @@ public class OrderController {
     private static final String MESSAGE = "message";
     private static final String UNAUTHORIZED = "Unauthorized";
 
-    private static final Map<String, String> APP_NAMES = Stream.of(new String[][] {
-        { "SafeDeliveries", "http://localhost:8081" }, 
+    public static final Map<String, String> APP_NAMES = Stream.of(new String[][] {
+        { "SafeDeliveries", (System.getenv("environment")!=null && System.getenv("environment").equals("prod")) ? "http://192.168.160.233:8081" : "http://localhost:8081" }, 
       }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
 
     //@CrossOrigin(origins = "http://localhost:4200")
