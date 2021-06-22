@@ -107,7 +107,7 @@ publish-WEB-DELIVERIES:
     - docker push $TAG_COMMIT_WEB_DELIVERIES
     - docker push $TAG_LATEST_WEB_DELIVERIES
   only:
-    - develop
+    - master
 
 publish-API-DELIVERIES:
   image: docker:18.09
@@ -121,7 +121,7 @@ publish-API-DELIVERIES:
     - docker push $TAG_COMMIT_API_DELIVERIES
     - docker push $TAG_LATEST_API_DELIVERIES
   only:
-    - develop
+    - master
 
 publish-WEB-ORDERS:
   image: docker:18.09
@@ -135,7 +135,7 @@ publish-WEB-ORDERS:
     - docker push $TAG_COMMIT_WEB_ORDERS
     - docker push $TAG_LATEST_WEB_ORDERS
   only:
-    - develop
+    - master
 
 publish-API-ORDERS:
   image: docker:18.09
@@ -149,7 +149,7 @@ publish-API-ORDERS:
     - docker push $TAG_COMMIT_API_ORDERS
     - docker push $TAG_LATEST_API_ORDERS
   only:
-    - develop
+    - master
 
 #######################################################################################################
 deploy-DB-DELIVERIES:
@@ -161,13 +161,12 @@ deploy-DB-DELIVERIES:
     - chmod og= $ID_RSA
     - apk update && apk add openssh-client
     - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker container rm -f mysql_deliveries || true"
-    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run --name mysql_deliveries -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=demo -e MYSQL_USER=demo -e MYSQL_PASSWORD=password -p 3306:3306 -d mysql/mysql-server:5.7"
-    - sleep 30
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run --name mysql_deliveries -v /var/lib/docker/volumes/tqs/deliveries:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=demo -e MYSQL_USER=demo -e MYSQL_PASSWORD=password -p 3306:3306 -d --restart always mysql/mysql-server:5.7"
   environment:
     name: production
     url: http://$SERVER_IP
   only:
-    - develop
+    - master
 
 deploy-DB-ORDERS:
   image: alpine:latest
@@ -178,13 +177,12 @@ deploy-DB-ORDERS:
     - chmod og= $ID_RSA
     - apk update && apk add openssh-client
     - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker container rm -f mysql_orders || true"
-    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run --name mysql_orders -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=demo -e MYSQL_USER=demo -e MYSQL_PASSWORD=password -p 3307:3306 -d mysql/mysql-server:5.7"
-    - sleep 30
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run --name mysql_orders -v /var/lib/docker/volumes/tqs/orders:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=demo -e MYSQL_USER=demo -e MYSQL_PASSWORD=password -p 3307:3306 -d --restart always mysql/mysql-server:5.7"
   environment:
     name: production
     url: http://$SERVER_IP
   only:
-    - develop
+    - master
 
 deploy-WEB-DELIVERIES:
   image: alpine:latest
@@ -197,12 +195,12 @@ deploy-WEB-DELIVERIES:
     - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY"
     - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker pull $TAG_COMMIT_WEB_DELIVERIES"
     - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker container rm -f deliveries_webapp || true"
-    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run -d -p 80:80 --name deliveries_webapp $TAG_COMMIT_WEB_DELIVERIES"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run -d --restart always -p 80:80 --name deliveries_webapp $TAG_COMMIT_WEB_DELIVERIES"
   environment:
     name: production
     url: http://$SERVER_IP
   only:
-    - develop
+    - master
 
 deploy-WEB-ORDERS:
   image: alpine:latest
@@ -215,12 +213,12 @@ deploy-WEB-ORDERS:
     - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY"
     - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker pull $TAG_COMMIT_WEB_ORDERS"
     - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker container rm -f orders_webapp || true"
-    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run -d -p 81:80 --name orders_webapp $TAG_COMMIT_WEB_ORDERS"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run -d --restart always -p 81:80 --name orders_webapp $TAG_COMMIT_WEB_ORDERS"
   environment:
     name: production
     url: http://$SERVER_IP
   only:
-    - develop
+    - master
 
 deploy-API-DELIVERIES:
   image: alpine:latest
@@ -233,12 +231,12 @@ deploy-API-DELIVERIES:
     - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY"
     - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker pull $TAG_COMMIT_API_DELIVERIES"
     - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker container rm -f deliveries_api || true"
-    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run --network host -d -p 8080:8080 -e environment=prod --name deliveries_api $TAG_COMMIT_API_DELIVERIES"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run --network host -d --restart always -p 8080:8080 -e environment=prod --name deliveries_api $TAG_COMMIT_API_DELIVERIES"
   environment:
     name: production
     url: http://$SERVER_IP
   only:
-    - develop
+    - master
 
 deploy-API-ORDERS:
   image: alpine:latest
@@ -251,9 +249,9 @@ deploy-API-ORDERS:
     - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY"
     - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker pull $TAG_COMMIT_API_ORDERS"
     - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker container rm -f orders_api || true"
-    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run --network host -d -p 8081:8081 -e environment=prod --name orders_api $TAG_COMMIT_API_ORDERS"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run --network host -d --restart always -p 8081:8081 -e environment=prod --name orders_api $TAG_COMMIT_API_ORDERS"
   environment:
     name: production
     url: http://$SERVER_IP
   only:
-    - develop
+    - master
