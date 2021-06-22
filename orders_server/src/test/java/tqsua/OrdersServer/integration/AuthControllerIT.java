@@ -30,12 +30,6 @@ class AuthControllerIT {
     private UserService userService;
 
 
-    @BeforeEach 
-    public void setUp() {
-        User user = new User("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", "U");
-        userService.saveUser(user);
-    }
-
     @Test
     void whenRegistWithValidData_thenRegistWithSucess() throws Exception {
 
@@ -52,8 +46,8 @@ class AuthControllerIT {
 
     @Test
     void whenRegistWithInvalidEmail_thenReturnErrorMessage() throws Exception {
-
         User user = new User("Diogo", "Carvalho", "diogo@gmail.com", "diogo123", "U");
+        userService.saveUser(user);
 
         mvc.perform(post("/api/register").contentType(MediaType.APPLICATION_JSON)
         .content(JsonUtil.toJson(user)))

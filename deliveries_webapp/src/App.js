@@ -17,6 +17,7 @@ import Deliveries from './Components/Deliveries/Deliveries';
 import History from './Components/History/History';
 import Login from './Components/Login/Login';
 import Profile from './Components/Profile/Profile';
+import Statistics from './Components/Statistics/Statistics';
 
 /* React */
 import { useEffect, useState } from 'react';
@@ -54,12 +55,15 @@ function App() {
                                                                     
   const [notificationInfo, setNotificationInfo] = useState(null);
 
+  const [modalErrorStatusShow, setModalErrorStatusShow] = useState(false);
+
   const MapLoader = withScriptjs(Map);
 
   async function acceptOrder(order_id) {
     await OrderService.acceptOrder(order_id, current_user.id);
     current_user.status = "Delivering"
     sessionStorage.setItem("user", JSON.stringify(current_user));
+    history.push("/deliveries?id=" + order_id);
     window.location.reload();
   }
 
@@ -101,12 +105,36 @@ function App() {
               }
             </Modal.Body>
             <Modal.Footer>
-              <button onClick={() => {acceptOrder(props.order_id); props.onHide();}} className="btn">Accept</button>
-              <button onClick={() => {declineOrder(props.order_id); props.onHide();}} className="btn">Decline</button>
+              <button id="accept_order_button" onClick={() => {acceptOrder(props.order_id); props.onHide();}} className="btn">Accept</button>
+              <button id="decline_order_button" onClick={() => {declineOrder(props.order_id); props.onHide();}} className="btn">Decline</button>
             </Modal.Footer>
           </Modal>
         );
       }
+
+      function ErrorStatusModal(props) {
+        return (
+          <Modal
+            {...props}
+            size="lg"
+            aria-labelledby="contained-modal-title-vcenter"
+            centered
+          >
+            <Modal.Header>
+              <Modal.Title id="contained-modal-title-vcenter" >
+                Cannot change status!
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <p id="error_status_message">You are currently delivering a order.</p>
+            </Modal.Body>
+            <Modal.Footer>
+              <button id="modal_error_ok_button" onClick={props.onHide} className="btn">Ok</button>
+            </Modal.Footer>
+          </Modal>
+        );
+      }
+    
 
   useEffect(() => {
 
@@ -158,9 +186,14 @@ function App() {
   }
 
   async function changeStatus(id, status) {
-    await RiderService.changeStatus(id, status);
-    current_user.status = status
-    sessionStorage.setItem("user", JSON.stringify(current_user));
+    var res = await RiderService.changeStatus(id, status);
+    if (!res.error) {
+      current_user.status = status
+      sessionStorage.setItem("user", JSON.stringify(current_user));
+      setState(status);
+    } else {
+      setModalErrorStatusShow(true);
+    }
   }
 
   async function logout(){
@@ -183,12 +216,25 @@ function App() {
         order_id={notificationInfo.order_id}
       />
     }
+    <ErrorStatusModal
+      show={modalErrorStatusShow}
+      onHide={() => setModalErrorStatusShow(false)}
+    />
     <navbar>
         <ul className="nav-list">
           <li className="nav-item">
             <Link to="/" id="logo">
-              <FiIcons.FiPackage/><span>SafeDeliveries</span>
+              {current_user !== null && current_user["accountType"] === "Admin" ? 
+              <>
+              <FiIcons.FiPackage/><span id="admin_text">SafeDeliveries - Admin</span>
+              </>
+              :
+              <>
+              <FiIcons.FiPackage/><span>SafeDeliveries - Riders</span>
+              </>
+              }
             </Link>
+            
           </li>
           <li className="nav-item">
             <Link to="/" id="home-tab">
@@ -196,13 +242,16 @@ function App() {
             </Link>
           </li>
 
-          {current_user !== null && 
-          <>
+          {current_user !== null && current_user["accountType"] === "Admin" && 
             <li className="nav-item">
-              <Link to="/deliveries" id="search-tab">
-                Search Delivery
+              <Link to="/statistics" id="statistics-tab">
+                Statistics
               </Link>
             </li>
+          }
+
+          {current_user !== null && 
+          <>
             <li className="nav-item">
               <Link to="/history" id="history-tab">
                 Deliveries History
@@ -232,17 +281,17 @@ function App() {
                   <h5>Status</h5>
                   <hr></hr>
                   <div className="Status">
-                    <div id="state-online" className="Status-item" onClick={() => {changeStatus(current_user.id, "Online"); setState("Online")}}>
+                    <div id="state-online" className="Status-item" onClick={() => {changeStatus(current_user.id, "Online");}}>
                       <BsIcons.BsCircleFill className="state-icon online"/>
                       <span>Online</span>
                       
                     </div>
-                    <div id="state-delivering" className="Status-item" onClick={() => {changeStatus(current_user.id, "Delivering"); setState("Delivering")}}>
+                    <div id="state-delivering" className="Status-item" onClick={() => {changeStatus(current_user.id, "Delivering");}}>
                       <BsIcons.BsCircleFill className="state-icon delivering"/>
                       <span>Delivering</span>
                       
                     </div>
-                    <div id="state-off" className="Status-item" onClick={() => {changeStatus(current_user.id, "Offline"); setState("Offline")}}>
+                    <div id="state-off" className="Status-item" onClick={() => {changeStatus(current_user.id, "Offline");}}>
                       <BsIcons.BsCircle className="state-icon off"/>
                       <span>Offline</span>
                       
@@ -279,11 +328,12 @@ function App() {
     <div className="content">
         <Switch>
             <Route exact path='/' component={withRouter(Home)} />
-            <Route exact path='/deliveries' component={withRouter(Deliveries)} />
+            <Route path='/deliveries' component={withRouter(Deliveries)} />
             <Route exact path='/history' component={withRouter(History)} />
             {/* <Route exact path='/aboutus' component={withRouter(AboutUs)} /> */}
             <Route exact path='/login' component={withRouter(Login)} />
             <Route exact path='/profile' component={withRouter(Profile)} />
+            <Route exact path='/statistics' component={withRouter(Statistics)} />
         </Switch>
     </div>
 

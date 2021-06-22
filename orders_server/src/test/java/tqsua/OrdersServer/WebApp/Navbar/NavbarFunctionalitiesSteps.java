@@ -1,4 +1,4 @@
-package tqsua.OrdersServer.WebApp;
+package tqsua.OrdersServer.WebApp.Navbar;
 
 import io.cucumber.java.en.But;
 import io.cucumber.java.en.Given;
@@ -15,6 +15,7 @@ import static org.hamcrest.core.Is.is;
 import java.io.IOException;
 
 import org.json.JSONException;
+import tqsua.OrdersServer.WebApp.HomePage;
 
 @ExtendWith(SeleniumJupiter.class)
 public class NavbarFunctionalitiesSteps {

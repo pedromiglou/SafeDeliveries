@@ -43,6 +43,12 @@ public class Order implements Serializable{
     @Column(name = "app_name", nullable = false)
     private String app_name;
 
+    @Column(name = "status", nullable = false)
+    private String status;
+
+    @Column(name = "rating")
+    private int rating;
+
     @CreationTimestamp
     @Column(name="creation_date", updatable = false)
     private LocalDateTime creation_date;
@@ -80,6 +86,15 @@ public class Order implements Serializable{
 
     public void setRider_id(long rider_id) {
         this.rider_id = rider_id;
+    }
+
+
+    public int getRating() {
+        return this.rating;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
     }
 
 
@@ -123,6 +138,16 @@ public class Order implements Serializable{
         this.weight = weight;
     }
 
+
+    public String getStatus() {
+        return this.status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+
     public String getApp_name() {
         return this.app_name;
     }
@@ -159,6 +184,8 @@ public class Order implements Serializable{
             ", deliver_lng='" + getDeliver_lng() + "'" +
             ", weight='" + getWeight() + "'" +
             ", app_name='" + getApp_name() + "'" +
+            ", status='" + getStatus() + "'" +
+            ", rating='" + getRating() + "'" +
             "}";
     }
 

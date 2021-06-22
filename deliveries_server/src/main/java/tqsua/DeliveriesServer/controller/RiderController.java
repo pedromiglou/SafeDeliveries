@@ -2,10 +2,12 @@ package tqsua.DeliveriesServer.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.server.ResponseStatusException;
@@ -14,9 +16,11 @@ import tqsua.DeliveriesServer.model.Notification;
 import tqsua.DeliveriesServer.model.Order;
 import tqsua.DeliveriesServer.model.Rider;
 import tqsua.DeliveriesServer.model.RiderDTO;
+import tqsua.DeliveriesServer.model.Vehicle;
 import tqsua.DeliveriesServer.service.NotificationService;
 import tqsua.DeliveriesServer.service.OrderService;
 import tqsua.DeliveriesServer.service.RiderService;
+import tqsua.DeliveriesServer.service.VehicleService;
 
 import javax.validation.Valid;
 
@@ -30,35 +34,96 @@ public class RiderController {
     private OrderService orderService;
 
     @Autowired
+    private VehicleService vehicleService;
+
+    @Autowired
     private NotificationService notificationService;
 
+    private static final String MESSAGE = "message";
+    private static final String UNAUTHORIZED = "Unauthorized";
+    private static final String ONLINE = "Online";
+
     //@CrossOrigin(origins = "http://localhost:4200")
-    @GetMapping(path="/riders")
-    public ArrayList<Rider> getAllRiders() throws IOException, InterruptedException {
-        return riderService.getAllRiders();
+    @GetMapping(path="/private/riders")
+    public ResponseEntity<Object> getAllRiders(Authentication authentication) throws IOException, InterruptedException {
+        HashMap<String, Object> response = new HashMap<>();
+        Rider rider = riderService.getRiderById(Long.parseLong(authentication.getName()));
+        if (!rider.getAccountType().equals("Admin")) {
+            response.put(MESSAGE, UNAUTHORIZED);
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(riderService.getAllRiders(), HttpStatus.OK);
     }
 
-    @GetMapping(path="/rider")
-    public Rider getRiderById(@RequestParam(name="id") long id) {
+    @GetMapping(path="/private/riders/statistics")
+    public ResponseEntity<Object> getRidersStatistics(Authentication authentication) throws IOException, InterruptedException {
+        HashMap<String, Object> response = new HashMap<>();
+        
+        Rider rider = riderService.getRiderById(Long.parseLong(authentication.getName()));
+        if (!rider.getAccountType().equals("Admin")) {
+            response.put(MESSAGE, UNAUTHORIZED);
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
+        int onlineRiders = riderService.getRidersByState(ONLINE);
+        int offlineRiders = riderService.getRidersByState("Offline");
+        int deliveringRiders = riderService.getRidersByState("Delivering");
+        int totalRiders = onlineRiders + offlineRiders + deliveringRiders;
+        
+        response.put("total_riders", totalRiders);
+        response.put("online_riders", onlineRiders);
+        response.put("offline_riders", offlineRiders);
+        response.put("delivering_riders", deliveringRiders);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping(path="/private/rider")
+    public ResponseEntity<Object> getRiderById(Authentication authentication ,@RequestParam(name="id") long id) {
+        String rider_id = authentication.getName();
+
+        if (!rider_id.equals(String.valueOf(id))) {
+            HashMap<String, String> response = new HashMap<>();
+            response.put(MESSAGE, UNAUTHORIZED);
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
         Rider r = riderService.getRiderById(id);
         if (r==null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        return r;
+        return new ResponseEntity<>(r, HttpStatus.OK);
     }
 
-    @PutMapping(path="/rider/{id}")
-    public ResponseEntity<Object> updateRider(@PathVariable(value="id") Long id, @Valid @RequestBody RiderDTO rider) throws IOException, InterruptedException {
+    @PutMapping(path="/private/rider/{id}")
+    public ResponseEntity<Object> updateRider(Authentication authentication ,@PathVariable(value="id") Long id, @Valid @RequestBody RiderDTO rider) throws IOException, InterruptedException {
+        String rider_id = authentication.getName();
+        HashMap<String, String> response = new HashMap<>();
+
+        if (!rider_id.equals(String.valueOf(id))) {
+            response.put(MESSAGE, UNAUTHORIZED);
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
+        Order order = orderService.getDeliveringOrderByRiderId(id);
+
+        if ( ((rider.getStatus() != null) && (rider.getStatus().equals(ONLINE) || rider.getStatus().equals("Offline")) && order != null)) {
+            response.put(MESSAGE, "Cannot update status. Rider is delivering a order.");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
         Rider r = riderService.updateRider(id, rider);
         if (r == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         
         // When Rider turns Online, then search for pending orders
-        if (rider.getStatus() != null && rider.getStatus().equals("Online")) {
-            ArrayList<Order> orders = orderService.getPendingOrders();
-            ArrayList<Order> refused_orders = orderService.getRefusedOrders(r.getId());
-            orders.removeAll(refused_orders);
-            if (orders.size() != 0) {
-                Order final_order = getBestOrder(orders, r);
-                Notification notification_for_rider = new Notification(r.getId(), final_order.getOrder_id());
-                this.notificationService.save(notification_for_rider);
+        if (rider.getStatus() != null && rider.getStatus().equals(ONLINE)) {
+            double max_capacity = getMaxCapacity(r.getId());
+            if (max_capacity != -1) {
+                ArrayList<Order> orders = orderService.getPendingOrders(max_capacity);
+                ArrayList<Order> refused_orders = orderService.getRefusedOrders(r.getId());
+                orders.removeAll(refused_orders);
+                if (orders.size() != 0) {
+                    Order final_order = getBestOrder(orders, r);
+                    Notification notification_for_rider = new Notification(r.getId(), final_order.getOrder_id());
+                    this.notificationService.save(notification_for_rider);
+                }
             }
         }
         
@@ -82,5 +147,15 @@ public class RiderController {
             }
         }
         return final_order;
+    }
+
+    public double getMaxCapacity(long rider_id) {
+        ArrayList<Vehicle> vehicles = vehicleService.getVehiclesByRiderId(rider_id);
+        double max_capacity = -1;
+        for (Vehicle v: vehicles) {
+            if (v.getCapacity() > max_capacity)
+                max_capacity = v.getCapacity();
+        }
+        return max_capacity;
     }
 }

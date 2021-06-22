@@ -5,12 +5,12 @@ Feature: Riders navbar
 
   Scenario: Navbar without Account
     When I am not logged in my account
-    Then It should not have the functionalities "Search Delivery" and "Deliveries History"
+    Then It should not have the functionalities "Deliveries History"
     But It should have the functionality "Login"
 
   Scenario: Navbar with Account
     When I am logged in my account
-    Then It should have the functionalities "Search Delivery" and "Deliveries History"
+    Then It should have the functionalities "Deliveries History"
 
   Scenario: Status change
     When I am logged in my account

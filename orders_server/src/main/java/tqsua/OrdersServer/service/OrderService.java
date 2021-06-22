@@ -1,15 +1,14 @@
 package tqsua.OrdersServer.service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
 import org.json.JSONObject;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import tqsua.OrdersServer.model.Item;
 import tqsua.OrdersServer.model.Order;
@@ -17,10 +16,7 @@ import tqsua.OrdersServer.repository.ItemRepository;
 import tqsua.OrdersServer.repository.OrderRepository;
 
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpRequest.BodyPublishers;
+import java.net.URISyntaxException;
 
 
 @Service
@@ -38,10 +34,7 @@ public class OrderService {
         return this.orderRepository.findAll();
     }
 
-    public String deliveryRequest(Order order) throws IOException, InterruptedException {
-        if (order.getDeliver_lat() == null || order.getDeliver_lng() == null || order.getPick_up_lat()==null || order.getPick_up_lng()==null ||
-             order.getStatus()==null || order.getItems().isEmpty() || order.getUser_id()==0) return null;
-
+    public String deliveryRequest(Order order, RestTemplate restClient) throws IOException, InterruptedException, URISyntaxException {
         Map<Object, Object> data = new HashMap<>();
         data.put("pick_up_lat", order.getPick_up_lat());
         data.put("pick_up_lng", order.getPick_up_lng());
@@ -49,22 +42,14 @@ public class OrderService {
         data.put("deliver_lng", order.getDeliver_lng());
         data.put("weight", order.getItems().stream().mapToDouble(Item::getWeight).sum());
         data.put("app_name", "SafeDeliveries");
-        var objectMapper = new ObjectMapper();
-        var requestBody = objectMapper
-            .writerWithDefaultPrettyPrinter()
-            .writeValueAsString(data);
-        
-        HttpRequest request = HttpRequest.newBuilder()
-            .POST(BodyPublishers.ofString(requestBody))
-            .uri(URI.create(DELIVERIES_URL + "orders"))
-            .header("Content-type", "application/json")
-            .build();
 
-        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println(response);
-        var json = new JSONObject(response.body());
+        final String baseUrl = DELIVERIES_URL + "orders";
+        URI uri = new URI(baseUrl);
         
-        if (response.statusCode() != 201) {
+        ResponseEntity<String> result = restClient.postForEntity(uri, data, String.class);
+        var json = new JSONObject(result.getBody());
+        
+        if (result.getStatusCode().value() != 201) {
             return null;
         }
         return json.getString("deliver_id");
@@ -83,4 +68,28 @@ public class OrderService {
         return order;
     }
 
+    public Order getOrderByDeliverId(long order_id){
+        return orderRepository.getOrderByDeliverId(order_id);
+    }
+
+    public Integer confirm(long deliver_id, int rating, RestTemplate restClient) throws IOException, InterruptedException, URISyntaxException {
+        Map<Object, Object> data = new HashMap<>();
+        data.put("order_id", deliver_id);
+        data.put("rating", rating);
+
+        final String baseUrl = DELIVERIES_URL + "order/confirm";
+        URI uri = new URI(baseUrl);
+        
+        ResponseEntity<String> result = restClient.postForEntity(uri, data, String.class);
+        var json = new JSONObject(result.getBody());
+        
+        if (result.getStatusCode().value() != 200) {
+            return null;
+        }
+        return (int) json.getLong("rating");
+    }
+
+    public ArrayList<Order> getOrdersByUserId(long user_id){
+        return orderRepository.getOrdersByUserId(user_id);
+    }
 }

@@ -13,8 +13,8 @@ import tqsua.DeliveriesServer.model.Rider;
 public interface RiderRepository extends JpaRepository<Rider, Long>{
 
 	ArrayList<Rider> findAll();
-
-	@Query(value = "Select DISTINCT riders.* from riders JOIN vehicles ON vehicles.rider_id = riders.id where status = \"Online\" and capacity > :weight", nativeQuery = true)
+	
+	@Query(value = "Select DISTINCT riders.* from riders JOIN vehicles ON vehicles.rider_id = riders.id where status = \"Online\" and capacity > :weight and riders.id NOT IN (Select rider_id from notifications)", nativeQuery = true)
 	ArrayList<Rider> findAvailableRiders(@Param("weight") Double weight);
 
 	Rider findById(long id);
@@ -22,4 +22,7 @@ public interface RiderRepository extends JpaRepository<Rider, Long>{
 	Rider findByEmail(String email);
 
 	boolean existsRiderByEmail(String email);
+
+	@Query(value = "SELECT count(*) FROM riders where status = :state", nativeQuery = true)
+	int countByState(@Param("state") String state);
 }

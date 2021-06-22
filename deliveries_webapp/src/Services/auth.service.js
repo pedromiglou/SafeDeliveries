@@ -25,7 +25,6 @@ class AuthService {
         var json = await res.json()
         
         if(json.token) {
-            json.status = "Online"
             sessionStorage.setItem("user", JSON.stringify(json));
         } 
         return json

@@ -1,7 +1,6 @@
 package tqsua.OrdersServer.model;
 
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -20,7 +19,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name = "Users")
-public class User implements Serializable, UserDetails{
+public class User implements UserDetails{
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -32,7 +31,7 @@ public class User implements Serializable, UserDetails{
     @Column(name = "lastname", nullable = false)
     private String lastname;
 
-    @Column(name = "email", nullable = false)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "password", nullable = false)

@@ -32,9 +32,8 @@ public class NavbarFunctionalitiesSteps {
 
     }
 
-    @Then("It should not have the functionalities {string} and {string}")
-    public void it_should_not_have_the_functionalities_and(String functionality1, String functionality2) {
-        assertThat(home.searchTabExists(), is(false));
+    @Then("It should not have the functionalities {string}")
+    public void it_should_not_have_the_functionalities_and(String functionality2) {
         assertThat(home.historyTabExists(), is(false));
     }
 
@@ -49,9 +48,8 @@ public class NavbarFunctionalitiesSteps {
         home.login();
     }
 
-    @Then("It should have the functionalities {string} and {string}")
-    public void it_should_have_the_functionality(String functionality1, String functionality2) {
-        assertThat(home.getSearchDeliveryTab(), is(functionality1));
+    @Then("It should have the functionalities {string}")
+    public void it_should_have_the_functionality(String functionality2) {
         assertThat(home.getHistoryTab(), is(functionality2));
         driver.quit();
     }
