@@ -71,7 +71,7 @@ public class NotificationControllerIT {
         token = getToken("-1");
 
         mvc.perform(get("/api/private/notifications?id=-1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -79,7 +79,7 @@ public class NotificationControllerIT {
         Notification notification1 = new Notification(1, -1);
         notificationRepository.save(notification1);
         mvc.perform(get("/api/private/notifications?id=1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNoContent());
     }
 
     public String getToken(String id) {

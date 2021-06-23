@@ -107,7 +107,7 @@ publish-WEB-DELIVERIES:
     - docker push $TAG_COMMIT_WEB_DELIVERIES
     - docker push $TAG_LATEST_WEB_DELIVERIES
   only:
-    - master
+    - new/performance_testing
 
 publish-API-DELIVERIES:
   image: docker:18.09
@@ -121,7 +121,7 @@ publish-API-DELIVERIES:
     - docker push $TAG_COMMIT_API_DELIVERIES
     - docker push $TAG_LATEST_API_DELIVERIES
   only:
-    - master
+    - new/performance_testing
 
 publish-WEB-ORDERS:
   image: docker:18.09
@@ -135,7 +135,7 @@ publish-WEB-ORDERS:
     - docker push $TAG_COMMIT_WEB_ORDERS
     - docker push $TAG_LATEST_WEB_ORDERS
   only:
-    - master
+    - new/performance_testing
 
 publish-API-ORDERS:
   image: docker:18.09
@@ -149,7 +149,7 @@ publish-API-ORDERS:
     - docker push $TAG_COMMIT_API_ORDERS
     - docker push $TAG_LATEST_API_ORDERS
   only:
-    - master
+    - new/performance_testing
 
 #######################################################################################################
 deploy-DB-DELIVERIES:
@@ -166,7 +166,7 @@ deploy-DB-DELIVERIES:
     name: production
     url: http://$SERVER_IP
   only:
-    - master
+    - new/performance_testing
 
 deploy-DB-ORDERS:
   image: alpine:latest
@@ -182,7 +182,7 @@ deploy-DB-ORDERS:
     name: production
     url: http://$SERVER_IP
   only:
-    - master
+    - new/performance_testing
 
 deploy-WEB-DELIVERIES:
   image: alpine:latest
@@ -200,7 +200,7 @@ deploy-WEB-DELIVERIES:
     name: production
     url: http://$SERVER_IP
   only:
-    - master
+    - new/performance_testing
 
 deploy-WEB-ORDERS:
   image: alpine:latest
@@ -218,7 +218,7 @@ deploy-WEB-ORDERS:
     name: production
     url: http://$SERVER_IP
   only:
-    - master
+    - new/performance_testing
 
 deploy-API-DELIVERIES:
   image: alpine:latest
@@ -236,7 +236,7 @@ deploy-API-DELIVERIES:
     name: production
     url: http://$SERVER_IP
   only:
-    - master
+    - new/performance_testing
 
 deploy-API-ORDERS:
   image: alpine:latest
@@ -254,4 +254,4 @@ deploy-API-ORDERS:
     name: production
     url: http://$SERVER_IP
   only:
-    - master
+    - new/performance_testing

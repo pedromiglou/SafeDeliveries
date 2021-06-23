@@ -286,7 +286,7 @@ class OrderControllerTest {
         given(service.getOrderByDeliverId(34)).willReturn(null);
 
         mvc.perform(get("/api/orders/34").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
-                .andExpect(status().isNotFound())
+                .andExpect(status().isNoContent())
                 .andExpect(jsonPath("$.message", is("Not found")));
         verify(service, VerificationModeFactory.times(1)).getOrderByDeliverId(34);
         reset(service);
