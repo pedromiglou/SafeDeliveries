@@ -104,7 +104,7 @@ public class OrderController {
         if (order_found == null) {
             HashMap<String, String> response = new HashMap<>();
             response.put(MESSAGE, "Not found");
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
         }
 
         if (!user_id.equals(String.valueOf(order_found.getUser_id()))) {

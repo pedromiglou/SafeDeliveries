@@ -36,9 +36,9 @@ public class NotificationController {
         }
         
         Notification r = notificationService.getNotificationByRider(id);
-        if (r==null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        if (r==null) throw new ResponseStatusException(HttpStatus.NO_CONTENT);
         Order order = orderService.getOrderById(r.getOrder_id());
-        if (order==null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        if (order==null) throw new ResponseStatusException(HttpStatus.NO_CONTENT);
         HashMap<String, Object> response = new HashMap<>();
         response.put("rider_id", r.getRider_id());
         response.put("order_id", r.getOrder_id());
