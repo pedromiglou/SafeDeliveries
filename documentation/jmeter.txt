@@ -1,0 +1,7 @@
+GET http://192.168.160.233:8080/api/private/notifications?id=2
+Latency: 31.015083333333333
+Elapsed: 40.3935
+
+GET http://192.168.160.233:8081/api/orders/42
+Latency: 29.629375
+Elapsed: 36.8085
