@@ -87,7 +87,7 @@ class NotificationControllerTest {
         given(order_service.getOrderById(2)).willReturn(order);
 
         mvc.perform(get("/api/private/notifications?id=1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNoContent());
         verify(service, VerificationModeFactory.times(1)).getNotificationByRider(1);
         reset(service);
     }
@@ -99,7 +99,7 @@ class NotificationControllerTest {
         given(order_service.getOrderById(2)).willReturn(null);
 
         mvc.perform(get("/api/private/notifications?id=1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNoContent());
         verify(service, VerificationModeFactory.times(1)).getNotificationByRider(1);
         reset(service);
     }

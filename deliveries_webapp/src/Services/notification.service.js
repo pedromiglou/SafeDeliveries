@@ -9,7 +9,7 @@ class NotificationService {
             headers:{'Content-type':'application/json',
                     'Authorization': 'Bearer ' + JSON.parse(sessionStorage.getItem("user"))["token"]}
         });
-        if (res.status === 404) {
+        if (res.status === 204) {
             return []
         }
         if (res.status !== 200) {

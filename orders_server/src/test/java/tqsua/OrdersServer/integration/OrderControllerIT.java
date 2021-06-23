@@ -187,7 +187,7 @@ public class OrderControllerIT {
     void whenGetOrderByDeliverIdNotExistent_thenReturnNotFound() throws Exception {
 
         mvc.perform(get("/api/orders/-1").contentType(MediaType.APPLICATION_JSON).header("Authorization", token ))
-                .andExpect(status().isNotFound())
+                .andExpect(status().isNoContent())
                 .andExpect(jsonPath("$.message", is("Not found")));
     }
 
